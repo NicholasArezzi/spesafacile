@@ -55,6 +55,14 @@ body{
   box-shadow:0 60px 160px rgba(0,0,0,.7),0 0 0 10px #0D2218,0 0 0 11px rgba(255,255,255,.05);
   position:relative;display:flex;flex-direction:column;
 }
+@media (max-width:430px){
+  html,body{height:100%;overflow:hidden;background:var(--bg);}
+  body{display:block;align-items:unset;justify-content:unset;min-height:100%;}
+  .phone-frame{
+    width:100% !important;height:100dvh !important;border-radius:0 !important;
+    box-shadow:none !important;position:fixed;top:0;left:0;right:0;bottom:0;
+  }
+}
 .screen{display:none;flex:1;flex-direction:column;overflow:hidden;}
 .screen.active{display:flex;}
 .scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;}
@@ -1453,9 +1461,17 @@ function rilevaCitta(){
         .then(function(r){ return r.json(); })
         .then(function(d){
           var city = d.address.city || d.address.town || d.address.village || '';
-          if(city){ userData.citta = city; aggiornaProfiloUI(); }
+          if(city){
+            userData.citta = city;
+            aggiornaProfiloUI();
+            aggiornaHome();
+            var el = document.getElementById('home-city-title');
+            if(el) el.textContent = city;
+          }
         }).catch(function(){});
-    }, function(){}, {timeout:5000});
+    }, function(err){
+      // fallback silenzioso
+    }, {timeout:8000, enableHighAccuracy:false});
   }
 }
 
