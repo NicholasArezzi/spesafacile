@@ -1,0 +1,2672 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SpesaFacile – Risparmia ogni giorno</title>
+
+<!-- PWA + iPhone install -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SpesaFacile">
+<meta name="theme-color" content="#071A0C">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<!-- SEO + Social sharing (OG tags) -->
+<meta name="description" content="Scopri dove conviene fare la spesa oggi vicino a te. Confronta prezzi di Lidl, Esselunga, Conad e altri in tempo reale.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SpesaFacile – Risparmia ogni giorno">
+<meta property="og:description" content="Scopri dove conviene fare la spesa oggi vicino a te. Confronta prezzi, ricette e offerte dei supermercati.">
+<meta property="og:image" content="og-image.png">
+<meta property="og:url" content="https://spesafacile.vercel.app">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SpesaFacile – Risparmia ogni giorno">
+<meta name="twitter:description" content="Confronta prezzi dei supermercati vicino a te.">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Fallback font se Google Fonts non carica */
+body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.logo, .stitle, .sv, .splash-logo { font-family: 'Syne', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-weight: 800; }
+</style>
+<style>
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1A8C4E;--green2:#22A85F;--green-bg:#E8F5EE;
+  --bg:#F0F4F0;--surface:#fff;--surface2:#F4F7F4;--border:#E2EAE2;
+  --text:#0F1A0F;--text2:#5A7060;--text3:#96AE9A;
+  --amber:#D97706;--amber-bg:#FEF3C7;
+  --blue:#1B4FD8;--blue-bg:#EEF2FF;
+  --red:#E8354A;--red-bg:#FEF0F2;
+  --purple:#7C3AED;--purple-bg:#F5F3FF;
+  --shadow:0 2px 16px rgba(0,0,0,.08);
+  --r:18px;--r-sm:12px;
+}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:linear-gradient(135deg,#071A0C 0%,#0D2E18 50%,#071A0C 100%);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:40px 20px;
+}
+.phone-frame{
+  width:390px;height:844px;background:var(--bg);border-radius:54px;overflow:hidden;
+  box-shadow:0 60px 160px rgba(0,0,0,.7),0 0 0 10px #0D2218,0 0 0 11px rgba(255,255,255,.05);
+  position:relative;display:flex;flex-direction:column;
+}
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.screen.active{display:flex;}
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;}
+.scroll-area::-webkit-scrollbar{width:0}
+.status{padding:16px 24px 0;display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--text2);flex-shrink:0;}
+.navbar{background:rgba(240,244,240,.97);backdrop-filter:blur(20px);padding:10px 20px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text);}
+.logo span{color:var(--green2);}
+.bnav{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:10px 0 28px;flex-shrink:0;}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--text3);cursor:pointer;transition:color .15s;border:none;background:none;font-family:'DM Sans',sans-serif;padding:4px 0;}
+.nb.on{color:var(--green);}
+.nb-cam{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;font-size:10px;font-weight:700;color:var(--green);border:none;background:transparent;cursor:pointer;position:relative;padding:0;}
+.nb-cam-ico{width:46px;height:46px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;top:-10px;box-shadow:0 4px 18px rgba(26,140,78,.45);}
+.nb svg{width:22px;height:22px;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;}
+.cg{background:var(--green-bg);color:var(--green);}
+.ca{background:var(--amber-bg);color:var(--amber);}
+.cb{background:var(--blue-bg);color:var(--blue);}
+.cr{background:var(--red-bg);color:var(--red);}
+.cp{background:var(--purple-bg);color:var(--purple);}
+.cx{background:var(--surface2);color:var(--text2);}
+.page{padding:18px 16px 0;}
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px;}
+.ch{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.cb2{padding:16px 18px;}
+.stitle{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:3px;letter-spacing:-.5px;}
+.ssub{font-size:13px;color:var(--text2);margin-bottom:14px;}
+.sp{height:16px;}
+.sbar{width:100%;height:5px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:4px;}
+.sfill{height:100%;border-radius:99px;}
+.btn-g{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border-radius:100px;padding:15px 24px;font-size:15px;font-weight:700;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(26,140,78,.3);margin-top:4px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:transform .12s;}
+.btn-g:hover{transform:translateY(-1px);}
+.btn-maps{background:linear-gradient(135deg,#1A73E8,#4285F4);color:#fff;border-radius:100px;padding:14px 24px;font-size:14px;font-weight:700;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(26,115,232,.3);cursor:pointer;border:none;font-family:'DM Sans',sans-serif;margin-top:8px;}
+.btn-outline{background:transparent;color:var(--green);border:2px solid var(--green);border-radius:100px;padding:13px 24px;font-size:14px;font-weight:700;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;}
+.hero{background:linear-gradient(135deg,#0D2E18,#1A5C35);border-radius:var(--r);padding:22px 20px;color:#fff;margin-bottom:14px;position:relative;overflow:hidden;}
+.hero::after{content:'🛒';position:absolute;right:10px;bottom:-12px;font-size:80px;opacity:.08;}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.scard{background:var(--surface);border-radius:var(--r-sm);padding:14px;box-shadow:var(--shadow);}
+.sv{font-family:'Syne',sans-serif;font-size:23px;font-weight:800;line-height:1;}
+.sl{font-size:11px;color:var(--text2);margin-top:4px;}
+.si{font-size:22px;margin-bottom:6px;}
+.sc{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:10px;border:2.5px solid transparent;position:relative;overflow:hidden;cursor:pointer;transition:transform .15s;}
+.sc:hover{transform:translateY(-1px);}
+.sc.win{border-color:var(--green);box-shadow:0 4px 28px rgba(26,140,78,.18);}
+.wb{background:linear-gradient(90deg,var(--green),var(--green2));color:#fff;font-size:10px;font-weight:800;text-align:center;padding:5px;font-family:'Syne',sans-serif;position:absolute;top:0;left:0;right:0;letter-spacing:.5px;}
+.srow{display:flex;align-items:center;gap:14px;}
+.sico{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-family:'Syne',sans-serif;flex-shrink:0;color:#fff;font-size:11px;text-align:center;line-height:1.2;}
+.sbanner{background:linear-gradient(135deg,#0D2E18,#1A5C35);border-radius:var(--r);padding:18px 20px;color:#fff;margin-bottom:14px;position:relative;overflow:hidden;}
+.sbanner::after{content:'💰';position:absolute;right:12px;bottom:-8px;font-size:64px;opacity:.1;}
+.notepad{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px;}
+.notepad-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.notepad-body{padding:0 18px;background:#FAFCFA;position:relative;min-height:220px;}
+.notepad-lines{position:absolute;top:0;left:0;right:0;bottom:0;background-image:repeating-linear-gradient(transparent,transparent 35px,#E4EBE4 35px,#E4EBE4 36px);background-position:0 18px;pointer-events:none;}
+.notepad-input{position:relative;z-index:1;width:100%;min-height:220px;background:transparent;border:none;outline:none;resize:none;font-family:'DM Sans',sans-serif;font-size:16px;line-height:36px;color:var(--text);padding:18px 0;caret-color:var(--green);}
+.notepad-input::placeholder{color:var(--text3);}
+.notepad-foot{padding:10px 18px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.prod-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);}
+.prod-row:last-child{border-bottom:none;}
+.prod-img{width:52px;height:52px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;}
+.prod-info{flex:1;min-width:0;}
+.prod-name{font-weight:600;font-size:14px;}
+.prod-cat{font-size:11px;color:var(--text2);margin-top:1px;}
+.prod-best{font-size:12px;color:var(--green);font-weight:600;margin-top:2px;}
+.tabs{display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:14px;}
+.tab{flex:1;padding:8px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text2);background:transparent;transition:all .2s;}
+.tab.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow);}
+.pava{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--green),#4ADE80);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 12px;box-shadow:0 8px 24px rgba(26,140,78,.25);}
+.pstats{display:flex;justify-content:center;margin-top:16px;}
+.ps{flex:1;text-align:center;padding:0 10px;}
+.ps+.ps{border-left:1px solid var(--border);}
+.psv{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;}
+.psl{font-size:11px;color:var(--text2);margin-top:2px;}
+.badge-wrap{display:flex;gap:14px;flex-wrap:wrap;}
+.badge-i{text-align:center;width:60px;}
+.badge-ico{font-size:30px;background:var(--green-bg);border-radius:14px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;}
+.badge-lbl{font-size:10px;color:var(--text2);font-weight:600;}
+.goal{margin-bottom:14px;}
+.goal-top{display:flex;justify-content:space-between;margin-bottom:5px;}
+.food-patate{background:linear-gradient(135deg,#F5D78E,#E8B84B);}
+.food-latte{background:linear-gradient(135deg,#EEF6FF,#BFDBFE);}
+.food-pasta{background:linear-gradient(135deg,#FEF3C7,#F59E0B);}
+.food-pollo{background:linear-gradient(135deg,#FEE2E2,#FECACA);}
+.food-carta{background:linear-gradient(135deg,#F0FDF4,#BBF7D0);}
+.food-piselli{background:linear-gradient(135deg,#D1FAE5,#6EE7B7);}
+.food-fagioli{background:linear-gradient(135deg,#FEF3C7,#D97706);}
+.food-olio{background:linear-gradient(135deg,#ECFCCB,#A3E635);}
+.food-pomodori{background:linear-gradient(135deg,#FEE2E2,#EF4444);}
+.food-formaggio{background:linear-gradient(135deg,#FFFBEB,#F59E0B);}
+.splash{flex:1;background:linear-gradient(160deg,#071A0C,#0F3D20 50%,#071A0C);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 24px;position:relative;overflow:hidden;}
+.orb1{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(34,168,95,.2),transparent 70%);top:-80px;right:-60px;}
+.orb2{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(26,140,78,.15),transparent 70%);bottom:60px;left:-40px;}
+.splash-logo{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-align:center;position:relative;z-index:1;width:100%;display:block;}
+.splash-logo em{color:#4ADE80;font-style:normal;}
+.feats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
+.feat{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:6px 12px;font-size:12px;color:rgba(255,255,255,.7);font-weight:500;}
+.acard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:20px;padding:22px;width:100%;position:relative;z-index:1;}
+.atitle{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:14px;text-align:center;}
+.ainput{width:100%;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:13px 16px;font-size:15px;font-family:'DM Sans',sans-serif;color:#fff;margin-bottom:10px;}
+.ainput::placeholder{color:rgba(255,255,255,.3);}
+.abtn{width:100%;background:linear-gradient(135deg,#1A8C4E,#22A85F);color:#fff;border-radius:100px;padding:14px;font-size:15px;font-weight:700;font-family:'Syne',sans-serif;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(26,140,78,.4);}
+.atog{font-size:13px;color:rgba(255,255,255,.45);text-align:center;margin-top:12px;cursor:pointer;}
+.atog em{color:#4ADE80;font-weight:600;font-style:normal;}
+.receipt-zone{border:2px dashed var(--border);border-radius:var(--r);padding:36px 20px;text-align:center;background:var(--surface2);cursor:pointer;transition:all .2s;}
+.receipt-zone:hover{border-color:var(--green);background:var(--green-bg);}
+
+/* ── MAPPA ── */
+.map-preview{
+  width:100%;height:160px;border-radius:var(--r);overflow:hidden;
+  position:relative;margin-bottom:10px;cursor:pointer;
+}
+.map-bg{
+  width:100%;height:100%;
+  background:
+    linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.08)),
+    repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(255,255,255,.15) 40px,rgba(255,255,255,.15) 41px),
+    repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(255,255,255,.15) 40px,rgba(255,255,255,.15) 41px),
+    linear-gradient(135deg,#A8D5A2,#7EC8A0,#5BA880);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.map-road-h{position:absolute;left:0;right:0;top:50%;height:18px;background:rgba(255,255,255,.85);transform:translateY(-50%);}
+.map-road-v{position:absolute;top:0;bottom:0;left:40%;width:14px;background:rgba(255,255,255,.7);}
+.map-road-v2{position:absolute;top:0;bottom:0;left:70%;width:10px;background:rgba(255,255,255,.6);}
+.map-pin-you{position:absolute;bottom:28px;left:30%;transform:translateX(-50%);font-size:28px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));}
+.map-pin-store{position:absolute;top:20px;right:22%;transform:translateX(50%);font-size:32px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));}
+.map-route{position:absolute;bottom:28px;left:30%;width:45%;height:3px;background:linear-gradient(90deg,#1A73E8,#4285F4);border-radius:3px;transform:rotate(-25deg);transform-origin:left center;}
+.map-distance{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:700;white-space:nowrap;}
+.map-tap{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.92);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--blue);box-shadow:var(--shadow);}
+
+/* ── RICETTE ── */
+.ricette-section{margin-bottom:14px;}
+.ricette-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.ricetta-card{
+  border-radius:16px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);cursor:pointer;
+  background:var(--surface);transition:transform .15s;
+  border:2px solid transparent;
+}
+.ricetta-card:hover{transform:translateY(-2px);}
+.ricetta-card.selected{border-color:var(--green);}
+.r-img{height:100px;display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;}
+.r-badge{position:absolute;top:7px;right:7px;font-size:9px;font-weight:800;padding:3px 8px;
+  border-radius:99px;letter-spacing:.3px;}
+.diff-easy{background:#D1FAE5;color:#065F46;}
+.diff-med{background:#FEF3C7;color:#92400E;}
+.diff-hard{background:#FEE2E2;color:#991B1B;}
+.r-body{padding:10px 12px 12px;}
+.r-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;line-height:1.25;margin-bottom:4px;}
+.r-meta{font-size:11px;color:var(--text2);}
+
+/* ISPIRAMI HERO */
+.ispi-hero{
+  background:linear-gradient(135deg,#0D2E18,#1A5C35);
+  border-radius:var(--r);padding:18px 18px 20px;
+  color:#fff;margin-bottom:14px;position:relative;overflow:hidden;cursor:pointer;
+}
+.ispi-hero::after{content:"";position:absolute;right:-10px;bottom:-10px;
+  width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.05);}
+.ispi-hero-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.5);margin-bottom:6px;}
+.ispi-hero-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px;}
+.ispi-hero-meta{font-size:12px;color:rgba(255,255,255,.6);}
+.ispi-hero-emoji{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:52px;opacity:.9;}
+
+/* FILTRI DIFFICOLTA */
+.diff-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.diff-btn{padding:7px 14px;border-radius:99px;font-size:12px;font-weight:700;border:2px solid transparent;
+  cursor:pointer;background:var(--surface2);color:var(--text2);transition:all .15s;}
+.diff-btn.on.easy{background:#D1FAE5;color:#065F46;border-color:#6EE7B7;}
+.diff-btn.on.med{background:#FEF3C7;color:#92400E;border-color:#FDE68A;}
+.diff-btn.on.hard{background:#FEE2E2;color:#991B1B;border-color:#FCA5A5;}
+.diff-btn.on.all{background:var(--green-bg);color:var(--green);border-color:var(--green);}
+
+/* SEARCH */
+.search-wrap{display:flex;align-items:center;background:var(--surface);border-radius:12px;
+  border:1.5px solid var(--border);padding:10px 14px;gap:8px;margin-bottom:12px;}
+.search-icon{font-size:15px;}
+.search-input{flex:1;border:none;outline:none;font-size:14px;background:transparent;color:var(--text);}
+
+/* CAT scroll */
+.cat-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:none;}
+.cat-scroll::-webkit-scrollbar{display:none;}
+.cat-chip{flex-shrink:0;padding:6px 14px;border-radius:99px;font-size:12px;font-weight:700;
+  background:var(--surface);color:var(--text2);border:1.5px solid var(--border);cursor:pointer;}
+.cat-chip.on{background:var(--green);color:#fff;border-color:var(--green);}
+
+.no-results{text-align:center;padding:40px 20px;color:var(--text2);}
+
+/* RIGA INFO */
+.ispi-info-row{display:flex;gap:8px;margin-bottom:16px;}
+.ispi-stat{flex:1;background:var(--surface);border-radius:12px;padding:12px;text-align:center;box-shadow:var(--shadow);}
+.ispi-stat-v{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--green);}
+.ispi-stat-l{font-size:10px;color:var(--text2);margin-top:2px;}
+
+
+
+/* MODAL RICETTA */
+.modal-overlay{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.5);z-index:200;
+  display:none;align-items:flex-end;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--bg);border-radius:28px 28px 0 0;
+  width:100%;max-height:85%;overflow-y:auto;
+  padding:0 0 30px;
+}
+.modal::-webkit-scrollbar{width:0}
+.modal-top{position:sticky;top:0;z-index:1;background:var(--bg);}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:12px auto 0;}
+.modal-header{padding:12px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-close{width:30px;height:30px;border-radius:50%;background:var(--surface2);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.modal-scroll{padding:0;}
+.modal-hero{height:140px;display:flex;align-items:center;justify-content:center;font-size:70px;}
+.persone-box{display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:12px;padding:12px 16px;margin:14px 0;}
+.p-btn{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);background:var(--surface);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.modal-tabs{display:flex;gap:8px;margin:14px 0 10px;}
+.modal-tab{flex:1;padding:9px;border-radius:10px;border:2px solid var(--border);background:var(--surface2);font-size:13px;font-weight:700;cursor:pointer;color:var(--text2);}
+.modal-tab.on{background:var(--green);color:#fff;border-color:var(--green);}
+.ingr-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.ingr-row:last-child{border-bottom:none;}
+.ingr-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;transition:all .15s;}
+.ingr-check.checked{background:var(--green);border-color:var(--green);}
+
+/* TOAST */
+.toast{position:absolute;bottom:110px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:12px 20px;border-radius:100px;font-size:14px;font-weight:500;z-index:999;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.2);animation:toastIn .3s forwards;pointer-events:none;}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+
+/* ── RICETTE ── */
+.search-w{position:relative;margin-bottom:14px;}
+.search-i{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 16px 12px 42px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;}
+.search-i::placeholder{color:var(--text3);}
+.search-ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;}
+.cat-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none;}
+.cat-row::-webkit-scrollbar{display:none;}
+.cat-c{display:flex;align-items:center;gap:5px;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);flex-shrink:0;transition:all .15s;}
+.cat-c.on{background:var(--green);color:#fff;border-color:var(--green);}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.rcard{background:var(--surface);border-radius:var(--r-sm);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .15s;}
+.rcard:hover{transform:translateY(-2px);}
+.rimg{height:90px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;}
+.rbody{padding:9px 11px 12px;}
+.rname{font-size:13px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:3px;}
+.rmeta{font-size:10px;color:var(--text2);}
+.rbadge{position:absolute;top:7px;right:7px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;}
+.de{background:var(--green-bg);color:var(--green);}
+.dm{background:var(--amber-bg);color:var(--amber);}
+.dh{background:var(--red-bg);color:var(--red);}
+.pbox{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:var(--r-sm);padding:11px 14px;margin:12px 0;}
+.pbtn{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:none;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.mtabs{display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin:12px 0;}
+.mtab{flex:1;padding:8px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text2);background:transparent;transition:all .2s;}
+.mtab.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow);}
+.ingr{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.ingr:last-child{border-bottom:none;}
+.ichk{width:24px;height:24px;border-radius:7px;border:2px solid var(--green);background:var(--green-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;}
+.ichk.on{background:var(--green);}
+.step-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.step-row:last-child{border-bottom:none;}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-text{font-size:13px;color:var(--text);line-height:1.5;}
+.nores{text-align:center;padding:40px 20px;color:var(--text2);}
+.npad{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px;}
+.nph{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.npb{padding:0 18px;background:#FAFCFA;position:relative;min-height:200px;}
+.nplines{position:absolute;top:0;left:0;right:0;bottom:0;background-image:repeating-linear-gradient(transparent,transparent 35px,#E4EBE4 35px,#E4EBE4 36px);background-position:0 18px;pointer-events:none;}
+.npt{position:relative;z-index:1;width:100%;min-height:200px;background:transparent;border:none;outline:none;resize:none;font-family:'DM Sans',sans-serif;font-size:15px;line-height:36px;color:var(--text);padding:18px 0;caret-color:var(--green);}
+.npt::placeholder{color:var(--text3);}
+.npf{padding:10px 18px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.moverlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:200;display:none;align-items:flex-end;}
+.moverlay.open{display:flex;}
+.modal{background:var(--bg);border-radius:28px 28px 0 0;width:100%;max-height:92%;display:flex;flex-direction:column;}
+.mscr{overflow-y:auto;flex:1;}
+.mscr::-webkit-scrollbar{width:0}
+.mtop{position:sticky;top:0;background:var(--bg);z-index:10;border-radius:28px 28px 0 0;}
+.mhandle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:12px auto 0;}
+.mhead{padding:10px 18px 12px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border);}
+.mclose{width:32px;height:32px;border-radius:50%;background:var(--surface2);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.mhero{font-size:80px;height:130px;display:flex;align-items:center;justify-content:center;}
+
+
+.r-img{height:88px;display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;}
+.r-badge{position:absolute;top:7px;right:7px;font-size:9px;font-weight:800;padding:3px 8px;border-radius:100px;}
+.diff-easy{background:#D1FAE5;color:#065F46;}
+.diff-med{background:#FEF3C7;color:#92400E;}
+.diff-hard{background:#FEE2E2;color:#991B1B;}
+.r-body{padding:9px 11px 12px;}
+.r-name{font-size:13px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:3px;}
+.r-meta{font-size:10px;color:var(--text2);}
+.isp-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.isp-scroll::-webkit-scrollbar{display:none;}
+.isp-pill{flex-shrink:0;display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:100px;padding:8px 14px 8px 10px;box-shadow:var(--shadow);cursor:pointer;border:1.5px solid var(--border);transition:transform .15s;}
+.isp-pill:active{transform:scale(.96);}
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+<body>
+<div class="phone-frame" id="app">
+
+<!-- ══ SPLASH AVVIO ══ -->
+<div id="app-splash" style="position:absolute;inset:0;background:linear-gradient(160deg,#071A0C 0%,#0F3D20 50%,#071A0C 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:inherit;transition:opacity .5s ease;">
+  <div style="font-size:68px;">🌿</div>
+  <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#fff;letter-spacing:-1px;">Spesa<em style="color:#4ADE80;font-style:normal;">Facile</em></div>
+  <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:3px;text-transform:uppercase;">risparmia ogni giorno</div>
+  <div style="margin-top:20px;width:120px;height:3px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;">
+    <div id="splash-bar" style="height:100%;width:0%;background:#4ADE80;border-radius:2px;transition:width 1.2s ease;"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL RICETTA ══ -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-top">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;line-height:1.2;" id="m-title">—</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:3px;" id="m-meta">—</div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+    </div>
+    <div class="modal-scroll">
+      <div class="modal-hero" id="m-emoji" style="background:linear-gradient(135deg,#F0FDF4,#D1FAE5);">🍝</div>
+      <div style="padding:0 16px 20px;">
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:4px;" id="m-desc">—</div>
+
+        <!-- PERSONE -->
+        <div class="persone-box">
+          <span style="font-size:13px;font-weight:600;flex:1;">👥 Per quante persone?</span>
+          <button class="p-btn" onclick="changeP(-1)">−</button>
+          <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;min-width:28px;text-align:center;" id="m-persone">2</span>
+          <button class="p-btn" onclick="changeP(1)">+</button>
+        </div>
+
+        <!-- TABS -->
+        <div class="modal-tabs">
+          <button class="modal-tab on" onclick="switchModalTab(this,'tab-ing')">🛒 Ingredienti</button>
+          <button class="modal-tab" onclick="switchModalTab(this,'tab-prep')">👨‍🍳 Preparazione</button>
+        </div>
+
+        <!-- INGREDIENTI -->
+        <div id="tab-ing">
+          <div id="m-ingredienti"></div>
+          <div style="margin-top:14px;">
+            <button class="btn-g" onclick="aggiungiLista()">✅ Aggiungi alla lista della spesa</button>
+            <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:7px;">Solo gli ingredienti selezionati verranno aggiunti</div>
+          </div>
+        </div>
+
+        <!-- PREPARAZIONE -->
+        <div id="tab-prep" style="display:none;">
+          <div id="m-preparazione"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: ISPIRAMI ══ -->
+
+<!-- ══ LOGIN ══ -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-top">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;line-height:1.2;" id="m-title">—</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:3px;" id="m-meta">—</div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+    </div>
+    <div class="modal-scroll">
+      <div class="modal-hero" id="m-emoji" style="background:linear-gradient(135deg,#F0FDF4,#D1FAE5);">🍝</div>
+      <div style="padding:0 16px 20px;">
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:4px;" id="m-desc">—</div>
+
+        <!-- PERSONE -->
+        <div class="persone-box">
+          <span style="font-size:13px;font-weight:600;flex:1;">👥 Per quante persone?</span>
+          <button class="p-btn" onclick="changeP(-1)">−</button>
+          <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;min-width:28px;text-align:center;" id="m-persone">2</span>
+          <button class="p-btn" onclick="changeP(1)">+</button>
+        </div>
+
+        <!-- TABS -->
+        <div class="modal-tabs">
+          <button class="modal-tab on" onclick="switchModalTab(this,'tab-ing')">🛒 Ingredienti</button>
+          <button class="modal-tab" onclick="switchModalTab(this,'tab-prep')">👨‍🍳 Preparazione</button>
+        </div>
+
+        <!-- INGREDIENTI -->
+        <div id="tab-ing">
+          <div id="m-ingredienti"></div>
+          <div style="margin-top:14px;">
+            <button class="btn-g" onclick="aggiungiLista()">✅ Aggiungi alla lista della spesa</button>
+            <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:7px;">Solo gli ingredienti selezionati verranno aggiunti</div>
+          </div>
+        </div>
+
+        <!-- PREPARAZIONE -->
+        <div id="tab-prep" style="display:none;">
+          <div id="m-preparazione"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: ISPIRAMI ══ -->
+
+<!-- ══ LOGIN ══ -->
+
+<div class="screen" id="s-register">
+  <div class="splash">
+    <div class="orb1"></div><div class="orb2"></div>
+    <div style="font-size:50px;position:relative;z-index:1;">🌿</div>
+    <div class="splash-logo">Spesa<em>Facile</em></div>
+    <div style="font-size:13px;color:rgba(255,255,255,.6);text-align:center;margin-bottom:4px;position:relative;z-index:1;">Crea il tuo account gratuito</div>
+    <div class="acard">
+      <div class="atitle">Registrati gratis</div>
+      <input class="ainput" id="reg-nome" type="text" placeholder="Il tuo nome">
+      <input class="ainput" id="reg-email" type="email" placeholder="La tua email">
+      <input class="ainput" id="reg-pass" type="password" placeholder="Scegli una password">
+      <input class="ainput" id="reg-pass2" type="password" placeholder="Ripeti la password">
+      <button class="abtn" onclick="registrati()">Crea account</button>
+      <div class="atog">Hai gia un account? <em onclick="go('login')" style="cursor:pointer;text-decoration:underline;">Accedi</em></div>
+    </div>
+  </div>
+</div>
+
+<div class="screen active" id="s-login">
+  <div class="splash">
+    <div class="orb1"></div><div class="orb2"></div>
+    <div style="font-size:60px;position:relative;z-index:1;">🌿</div>
+    <div class="splash-logo">Spesa<em>Facile</em></div>
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:3px;text-align:center;text-transform:uppercase;position:relative;z-index:1;">risparmia ogni giorno</div>
+    <div style="font-size:15px;color:rgba(255,255,255,.6);text-align:center;line-height:1.6;max-width:260px;position:relative;z-index:1;">Scopri dove conviene fare la spesa oggi vicino a te.</div>
+    <div class="feats">
+      <div class="feat">📍 Vicino a te</div>
+      <div class="feat">💶 Prezzi reali</div>
+      <div class="feat">🏆 Classifica</div>
+      <div class="feat">👨‍🍳 Ricette</div>
+    </div>
+    <div class="acard">
+      <div class="atitle">Accedi al tuo account</div>
+      <input class="ainput" id="login-email" type="email" placeholder="La tua email" autocomplete="email">
+      <input class="ainput" id="login-pass" type="password" placeholder="Password" autocomplete="current-password">
+      <button class="abtn" onclick="tentaLogin()">Entra &rarr;</button>
+      <button class="abtn" onclick="entraComeOspite()" style="background:transparent;border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);margin-top:6px;">Prova senza registrarti</button>
+      <div class="atog">Non hai un account? <em onclick="go('register')" style="cursor:pointer;">Registrati gratis</em></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOME ══ -->
+
+<!-- ══ HOME ══ -->
+<div class="screen" id="s-home">
+  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar">
+    <div class="logo">🌿 Spesa<em>Facile</em></div>
+    <div class="chip ca" id="prof-chip">⭐ 0 pt</div>
+  </div>
+  <div class="scroll-area">
+    <div class="page">
+
+      <!-- HERO -->
+      <div class="hero">
+        <div style="position:relative;z-index:1;">
+          <div style="font-size:12px;color:rgba(255,255,255,.55);margin-bottom:4px;">Buongiorno 👋</div>
+          <div id="home-nome" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:10px;">Ciao!</div>
+          <div style="display:flex;align-items:baseline;gap:8px;">
+            <div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#4ADE80;" id="stat-risparmio">€0,00</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.55);">risparmiati questo mese</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="sgrid">
+        <div class="scard"><div class="si">⭐</div><div class="sv" style="color:var(--amber);" id="stat-punti">0</div><div class="sl">Punti reward</div></div>
+        <div class="scard" style="cursor:pointer;" onclick="go('scontrino')"><div class="si">🧾</div><div class="sv" style="color:var(--blue);" id="stat-scontrini">0</div><div class="sl">Scontrini caricati</div></div>
+        <div class="scard"><div class="si">🛒</div><div class="sv" id="stat-liste">0</div><div class="sl">Liste create</div></div>
+        <div class="scard"><div class="si">🏅</div><div class="sv" style="color:var(--green);">2°</div><div class="sl">In classifica città</div></div>
+      </div>
+
+      <!-- CONVENIENZA -->
+      <div class="card">
+        <div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;" id="home-city-title">📍 Convenienza oggi — Milano</span></div>
+        <div class="cb2" style="padding-top:12px;padding-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;cursor:pointer;" onclick="go('confronta')">
+            <div style="width:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;text-align:center;color:#FFD700;">1°</div>
+            <div style="width:28px;height:28px;border-radius:8px;background:#0050AA;display:flex;align-items:center;justify-content:center;"><span style="font-size:8px;font-weight:900;color:#FFD700;font-family:'Syne',sans-serif;">lidl</span></div>
+            <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">Lidl</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--green);">92/100</span></div><div class="sbar"><div class="sfill" style="width:92%;background:var(--green);"></div></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;cursor:pointer;" onclick="go('confronta')">
+            <div style="width:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;text-align:center;color:#C0C0C0;">2°</div>
+            <div style="width:28px;height:28px;border-radius:8px;background:#E8002D;display:flex;align-items:center;justify-content:center;"><span style="font-size:7px;font-weight:900;color:#fff;font-family:'Syne',sans-serif;">EURO</span></div>
+            <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">Eurospin</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--green);">88/100</span></div><div class="sbar"><div class="sfill" style="width:88%;background:var(--green);"></div></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;cursor:pointer;" onclick="go('confronta')">
+            <div style="width:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;text-align:center;color:#CD7F32;">3°</div>
+            <div style="width:28px;height:28px;border-radius:8px;background:#E31E25;display:flex;align-items:center;justify-content:center;"><span style="font-size:7px;font-weight:900;color:#fff;font-family:'Syne',sans-serif;">CON</span></div>
+            <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">Conad</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--amber);">71/100</span></div><div class="sbar"><div class="sfill" style="width:71%;background:var(--amber);"></div></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;cursor:pointer;" onclick="go('confronta')">
+            <div style="width:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;text-align:center;color:var(--text3);">4°</div>
+            <div style="width:28px;height:28px;border-radius:8px;background:#009246;display:flex;align-items:center;justify-content:center;"><span style="font-size:8px;font-weight:900;color:#fff;font-family:'Syne',sans-serif;">coop</span></div>
+            <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">Coop</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--amber);">68/100</span></div><div class="sbar"><div class="sfill" style="width:68%;background:var(--amber);"></div></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;text-align:center;color:var(--text3);">5°</div>
+            <div style="width:28px;height:28px;border-radius:8px;background:#F26522;display:flex;align-items:center;justify-content:center;"><span style="font-size:6px;font-weight:900;color:#fff;font-family:'Syne',sans-serif;">ESSE</span></div>
+            <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">Esselunga</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--red);">62/100</span></div><div class="sbar"><div class="sfill" style="width:62%;background:var(--red);"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✨ SEZIONE ISPIRAMI ✨ -->
+      <div class="ricette-section">
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:17px;">✨ Ispirami oggi</div>
+            <div onclick="go('ispirami')" style="font-size:12px;color:var(--green);font-weight:700;cursor:pointer;">Vedi tutte →</div>
+          </div>
+          <div class="isp-scroll">
+            <div class="isp-pill" onclick="go('ispirami')"><span style="font-size:20px;">🍝</span><div><div style="font-size:12px;font-weight:700;color:var(--text);">Carbonara</div><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;background:#FEF3C7;color:#92400E;display:block;margin-top:2px;">Media</span></div></div>
+            <div class="isp-pill" onclick="go('ispirami')"><span style="font-size:20px;">🍕</span><div><div style="font-size:12px;font-weight:700;color:var(--text);">Pizza</div><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;background:#FEF3C7;color:#92400E;display:block;margin-top:2px;">Media</span></div></div>
+            <div class="isp-pill" onclick="go('ispirami')"><span style="font-size:20px;">🍰</span><div><div style="font-size:12px;font-weight:700;color:var(--text);">Tiramisù</div><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;background:#D1FAE5;color:#065F46;display:block;margin-top:2px;">Facile</span></div></div>
+            <div class="isp-pill" onclick="go('ispirami')"><span style="font-size:20px;">🥩</span><div><div style="font-size:12px;font-weight:700;color:var(--text);">Fiorentina</div><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;background:#D1FAE5;color:#065F46;display:block;margin-top:2px;">Facile</span></div></div>
+            <div class="isp-pill" onclick="go('ispirami')"><span style="font-size:20px;">🐟</span><div><div style="font-size:12px;font-weight:700;color:var(--text);">Branzino</div><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;background:#D1FAE5;color:#065F46;display:block;margin-top:2px;">Facile</span></div></div>
+            <div class="isp-pill" onclick="go('ispirami')"><span style="font-size:20px;">🍮</span><div><div style="font-size:12px;font-weight:700;color:var(--text);">Panna cotta</div><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;background:#D1FAE5;color:#065F46;display:block;margin-top:2px;">Facile</span></div></div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- CARD CASA -->
+      <div class="card" style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:17px;">🏠 Prodotti casa</div>
+          <div onclick="go('casa')" style="font-size:12px;color:var(--green);font-weight:700;cursor:pointer;">Vedi tutti →</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div onclick="addItem('detersivo piatti');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🧴 Detersivo piatti</div>
+          <div onclick="addItem('carta igienica');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🧻 Carta igienica</div>
+          <div onclick="addItem('shampoo');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🚿 Shampoo</div>
+          <div onclick="addItem('dentifricio');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🪥 Dentifricio</div>
+          <div onclick="go('casa')" style="background:var(--green);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#fff;">+ Altro →</div>
+        </div>
+      </div>
+
+      <button class="btn-g" onclick="go('lista')">⚡ Crea lista e confronta</button>
+      <div class="sp"></div>
+    </div>
+  </div>
+    <div class="bnav">
+    <button class="nb on" onclick="go('home')"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nb " onclick="go('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
+    <button class="nb-cam" onclick="go('scontrino')"><div class="nb-cam-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Scontrino</button>
+    <button class="nb " onclick="go('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Confronta</button>
+    <button class="nb " onclick="go('profilo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+  </div>
+</div>
+
+<!-- ══ LISTA ══ -->
+
+<!-- ══ LISTA ══ -->
+<div class="screen" id="s-lista">
+  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar"><div class="logo">🌿 Spesa<em>Facile</em></div><div class="chip cg" id="lista-count">0 prodotti</div></div>
+  <div class="scroll-area"><div style="padding:18px 16px 0;">
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:3px;">La mia lista</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">Scrivi liberamente, un prodotto per riga</div>
+    <div class="npad">
+      <div class="nph">
+        <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;">📝 Lista spesa</span>
+        <span style="font-size:11px;color:var(--text3);background:var(--surface2);border-radius:100px;padding:4px 10px;">una riga = un prodotto</span>
+      </div>
+      <div class="npb">
+        <div class="nplines"></div>
+        <textarea class="npt" id="notepad" oninput="updateCount()" placeholder="Scrivi qui...&#10;Oppure vai su Ispirami e scegli una ricetta!"></textarea>
+      </div>
+      <div class="npf">
+        <span style="font-size:12px;color:var(--text2);" id="nota-count">0 prodotti</span>
+        <span style="font-size:12px;color:var(--red);font-weight:600;cursor:pointer;" onclick="document.getElementById('notepad').value='';updateCount()">✕ Cancella tutto</span>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:12px;color:var(--text2);font-weight:600;">💡 Aggiungi veloce</div>
+        <div style="display:flex;gap:4px;">
+          <button id="tab-cibo" onclick="switchChips('cibo')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;border:none;cursor:pointer;background:var(--green);color:#fff;">🍎 Cibo</button>
+          <button id="tab-casa" onclick="switchChips('casa')" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;border:none;cursor:pointer;background:var(--surface2);color:var(--text2);">🏠 Casa</button>
+        </div>
+      </div>
+      <!-- CIBO -->
+      <div id="chips-cibo" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div onclick="addItem('patate')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🥔 Patate</div>
+        <div onclick="addItem('mele')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🍎 Mele</div>
+        <div onclick="addItem('latte')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🥛 Latte</div>
+        <div onclick="addItem('pane')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🍞 Pane</div>
+        <div onclick="addItem('uova')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🥚 Uova</div>
+        <div onclick="addItem('pasta')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🍝 Pasta</div>
+        <div onclick="addItem('pomodori')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🍅 Pomodori</div>
+        <div onclick="addItem('riso')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🍚 Riso</div>
+        <div onclick="addItem('petto di pollo')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🍗 Pollo</div>
+        <div onclick="addItem('yogurt')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🥛 Yogurt</div>
+      </div>
+      <!-- CASA -->
+      <div id="chips-casa" style="display:none;gap:8px;flex-wrap:wrap;">
+        <div style="font-size:11px;color:var(--text3);font-weight:700;width:100%;margin-bottom:2px;">🧹 Pulizia casa</div>
+        <div onclick="addItem('detersivo piatti')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🧴 Detersivo piatti</div>
+        <div onclick="addItem('detersivo lavatrice')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🫧 Detersivo lavatrice</div>
+        <div onclick="addItem('ammorbidente')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🌸 Ammorbidente</div>
+        <div onclick="addItem('candeggina')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🧼 Candeggina</div>
+        <div onclick="addItem('multiuso spray')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🧹 Multiuso spray</div>
+        <div onclick="addItem('spugne')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🧽 Spugne</div>
+        <div style="font-size:11px;color:var(--text3);font-weight:700;width:100%;margin-top:6px;margin-bottom:2px;">🚿 Igiene personale</div>
+        <div onclick="addItem('shampoo')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🧴 Shampoo</div>
+        <div onclick="addItem('dentifricio')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🪥 Dentifricio</div>
+        <div onclick="addItem('sapone mani')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🧼 Sapone mani</div>
+        <div onclick="addItem('carta igienica')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🧻 Carta igienica</div>
+        <div onclick="addItem('rasoio')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🪒 Rasoio</div>
+        <div style="font-size:11px;color:var(--text3);font-weight:700;width:100%;margin-top:6px;margin-bottom:2px;">🍽 Cucina</div>
+        <div onclick="addItem('carta da forno')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">📄 Carta da forno</div>
+        <div onclick="addItem('pellicola')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🌯 Pellicola</div>
+        <div onclick="addItem('alluminio')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🥡 Alluminio</div>
+        <div onclick="addItem('sacchetti spazzatura')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🗑 Sacchetti</div>
+        <div onclick="addItem('tovaglioli')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:100px;padding:7px 13px;font-size:13px;cursor:pointer;font-weight:500;">🗒 Tovaglioli</div>
+      </div>
+    </div>
+    <button class="btn-g" onclick="analizzaLista()">⚡ Analizza e confronta prezzi</button>
+    <div style="height:16px;"></div>
+  </div></div>
+    <div class="bnav">
+    <button class="nb " onclick="go('home')"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nb on" onclick="go('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
+    <button class="nb-cam" onclick="go('scontrino')"><div class="nb-cam-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Scontrino</button>
+    <button class="nb " onclick="go('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Confronta</button>
+    <button class="nb " onclick="go('profilo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: ISPIRAMI ══ -->
+<div class="screen" id="s-ispirami">
+  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="go('home')" style="border:none;background:rgba(255,255,255,.12);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;color:#fff;">←</button>
+      <div class="logo">🌿 Spesa<em>Facile</em></div>
+    </div>
+    <div class="chip cp" style="font-size:12px;">👨‍🍳 Ispirami</div>
+  </div>
+  <div class="scroll-area">
+    <div class="page">
+
+      <!-- HERO RICETTA DEL GIORNO -->
+      <div class="ispi-hero" onclick="apriRicettaHero()" id="hero-ricetta">
+        <div class="ispi-hero-label">✨ Ricetta del giorno</div>
+        <div class="ispi-hero-name" id="hero-nome">Spaghetti alla Carbonara</div>
+        <div class="ispi-hero-meta" id="hero-meta">⏱ 25 min · 🟢 Facile · 5 ingredienti</div>
+        <div class="ispi-hero-emoji" id="hero-emoji">🍝</div>
+      </div>
+
+      <!-- INFO MINI -->
+      <div class="ispi-info-row">
+        <div class="ispi-stat"><div class="ispi-stat-v">65</div><div class="ispi-stat-l">ricette italiane</div></div>
+        <div class="ispi-stat"><div class="ispi-stat-v">1 tap</div><div class="ispi-stat-l">in lista spesa</div></div>
+        <div class="ispi-stat"><div class="ispi-stat-v">0€</div><div class="ispi-stat-l">per usarla</div></div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="search-wrap">
+        <div class="search-icon">🔍</div>
+        <input class="search-input" id="search" placeholder="Cerca ricetta..." oninput="filterRicette()">
+      </div>
+
+      <!-- FILTRI DIFFICOLTA -->
+      <div class="diff-bar">
+        <button class="diff-btn on all" onclick="setDiff('Tutte',this)">🍽 Tutte</button>
+        <button class="diff-btn" onclick="setDiff('Facile',this)">🟢 Facile</button>
+        <button class="diff-btn" onclick="setDiff('Media',this)">🟡 Media</button>
+        <button class="diff-btn" onclick="setDiff('Difficile',this)">🔴 Difficile</button>
+      </div>
+
+      <!-- CAT SCROLL -->
+      <div class="cat-scroll" id="cat-scroll">
+        <div class="cat-chip on" onclick="setCat('Tutte',this)">Tutte</div>
+        <div class="cat-chip" onclick="setCat('Primi',this)">🍝 Primi</div>
+        <div class="cat-chip" onclick="setCat('Secondi carne',this)">🥩 Carne</div>
+        <div class="cat-chip" onclick="setCat('Secondi pesce',this)">🐟 Pesce</div>
+        <div class="cat-chip" onclick="setCat('Pizza e lievitati',this)">🍕 Pizza</div>
+        <div class="cat-chip" onclick="setCat('Dolci',this)">🍰 Dolci</div>
+        <div class="cat-chip" onclick="setCat('Colazione',this)">☕ Colazione</div>
+        <div class="cat-chip" onclick="setCat('Zuppe e minestre',this)">🍲 Zuppe</div>
+      </div>
+
+      <!-- GRIGLIA RICETTE -->
+      <div class="ricette-grid" id="ricette-grid"></div>
+      <div id="no-results" class="no-results" style="display:none;">
+        <div style="font-size:40px;margin-bottom:10px;">🤔</div>
+        <div style="font-weight:600;">Nessuna ricetta trovata</div>
+        <div style="font-size:13px;margin-top:4px;color:var(--text3);">Prova con un altro termine</div>
+      </div>
+      <div class="sp"></div>
+    </div>
+  </div>
+    <div class="bnav">
+    <button class="nb on" onclick="go('home')"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nb " onclick="go('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
+    <button class="nb-cam" onclick="go('scontrino')"><div class="nb-cam-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Scontrino</button>
+    <button class="nb " onclick="go('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Confronta</button>
+    <button class="nb " onclick="go('profilo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+  </div>
+</div>
+
+<div class="screen" id="s-confronta">
+  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar">
+    <div class="logo">🌿 Spesa<em>Facile</em></div>
+    <div class="chip cg" id="conf-chip-art">0 articoli</div>
+  </div>
+  <div class="scroll-area">
+    <div class="page">
+      <div class="stitle">Confronto prezzi</div>
+      <div class="ssub" id="conf-ssub">Analizza la tua lista per confrontare</div>
+      <!-- Empty state: visibile se nessuna lista analizzata -->
+      <div id="conf-empty" style="text-align:center;padding:40px 20px;">
+        <div style="font-size:56px;margin-bottom:14px;">🛒</div>
+        <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:8px;">Nessuna lista ancora</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.6;">Vai nella Lista, scrivi i prodotti che vuoi comprare e premi "Analizza e confronta".</div>
+        <button class="btn-g" onclick="go('lista')" style="max-width:260px;margin:0 auto;">Vai alla lista &rarr;</button>
+      </div>
+
+      <!-- Contenuto reale: nascosto finché non c'è una lista -->
+      <div id="conf-content" style="display:none;">
+      <div class="tabs">
+        <button class="tab on" onclick="switchTab(this,'t-rank')">🏆 Classifica</button>
+        <button class="tab" onclick="switchTab(this,'t-prod')">🛒 Per prodotto</button>
+      </div>
+
+      <div id="t-rank">
+        <div class="sbanner">
+          <div style="position:relative;z-index:1;">
+            <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:3px;font-weight:700;letter-spacing:.5px;">RISPARMIO STIMATO</div>
+            <div style="font-family:'Syne',sans-serif;font-size:40px;font-weight:800;color:#4ADE80;line-height:1;">€5,30</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.55);margin-top:4px;" id="lista-prodotti-count">scegliendo Lidl invece di Coop</div>
+          </div>
+        </div>
+
+        <!-- LIDL WIN + MAPPA -->
+        <div class="sc win" style="overflow:hidden;" onclick="go('mappa')">
+          <div class="wb">🏆 MIGLIOR PREZZO — TAP PER ARRIVARE QUI</div>
+          <div style="height:26px;"></div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="sico" style="width:44px;height:44px;flex-shrink:0;background:#FFD700;"><span style="color:#0050AA;font-size:13px;font-weight:900;">lidl</span></div>
+            <div style="flex:1;min-width:0;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;">Lidl</div>
+            <div style="text-align:right;flex-shrink:0;margin-left:6px;"><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;white-space:nowrap;">€21,40</div><div style="font-size:11px;color:var(--green);font-weight:600;">Vedi mappa →</div></div>
+          </div>
+          <div style="margin-top:5px;padding-left:54px;display:flex;align-items:center;gap:6px;">
+            <span class="chip cg" style="font-size:10px;padding:2px 7px;flex-shrink:0;">−€1,20</span>
+            <span style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📍 Via Torino 12 · 0,8 km · 11 min a piedi</span>
+          </div>
+        </div>
+
+        <div class="sc"><div style="display:flex;align-items:center;gap:10px;"><div class="sico" style="width:44px;height:44px;flex-shrink:0;background:#E8002D;font-size:9px;">EURO<br>SPIN</div><div style="flex:1;min-width:0;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Eurospin</div><div style="text-align:right;flex-shrink:0;margin-left:6px;"><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;white-space:nowrap;">€23,80</div><div style="font-size:11px;color:var(--red);font-weight:600;margin-top:1px;">+€2,40</div></div></div><div style="margin-top:5px;padding-left:54px;display:flex;align-items:center;gap:6px;"><span class="chip cg" style="font-size:10px;padding:2px 7px;flex-shrink:0;">−€0,60</span><span style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📍 Via Montenapoleone 5 · 1,2 km</span></div></div>
+        <div class="sc"><div style="display:flex;align-items:center;gap:10px;"><div class="sico" style="width:44px;height:44px;flex-shrink:0;background:#E31E25;">CONAD</div><div style="flex:1;min-width:0;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Conad</div><div style="text-align:right;flex-shrink:0;margin-left:6px;"><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;white-space:nowrap;">€25,10</div><div style="font-size:11px;color:var(--red);font-weight:600;margin-top:1px;">+€3,70</div></div></div><div style="margin-top:5px;padding-left:54px;display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📍 Corso Buenos Aires 44 · 2,1 km</span></div></div>
+        <div class="sc"><div style="display:flex;align-items:center;gap:10px;"><div class="sico" style="width:44px;height:44px;flex-shrink:0;background:#009246;font-size:13px;">coop</div><div style="flex:1;min-width:0;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Coop</div><div style="text-align:right;flex-shrink:0;margin-left:6px;"><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;white-space:nowrap;">€26,70</div><div style="font-size:11px;color:var(--red);font-weight:600;margin-top:1px;">+€5,30</div></div></div><div style="margin-top:5px;padding-left:54px;display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📍 Via Dante 18 · 2,8 km</span></div></div>
+        <div class="sc"><div style="display:flex;align-items:center;gap:10px;"><div class="sico" style="width:44px;height:44px;flex-shrink:0;background:#F26522;font-size:8px;">ESSE<br>LUNGA</div><div style="flex:1;min-width:0;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Esselunga</div><div style="text-align:right;flex-shrink:0;margin-left:6px;"><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;white-space:nowrap;">€28,20</div><div style="font-size:11px;color:var(--red);font-weight:600;margin-top:1px;">+€6,80</div></div></div><div style="margin-top:5px;padding-left:54px;display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📍 Via Vercelli 22 · 3,5 km</span></div></div>
+      </div>
+
+      <div id="t-prod" style="display:none;">
+        <div class="card">
+          <div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">💰 Prezzo migliore per prodotto</span></div>
+          <div style="padding:16px 18px;" id="t-prod-content">
+            <div style="text-align:center;padding:20px 0;color:var(--text2);">
+              <div style="font-size:32px;margin-bottom:8px;">📝</div>
+              <div style="font-weight:600;font-size:14px;">Scrivi la tua lista prima!</div>
+              <div style="font-size:12px;margin-top:4px;color:var(--text3);">Vai in Lista, scrivi i prodotti e clicca "Analizza"</div>
+              <button class="btn-outline" style="margin-top:14px;font-size:13px;padding:10px 20px;" onclick="go('lista')">→ Vai alla lista</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div><!-- fine conf-content -->
+      <div class="sp"></div>
+    </div>
+  </div>
+    <div class="bnav">
+    <button class="nb " onclick="go('home')"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nb " onclick="go('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
+    <button class="nb-cam" onclick="go('scontrino')"><div class="nb-cam-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Scontrino</button>
+    <button class="nb on" onclick="go('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Confronta</button>
+    <button class="nb " onclick="go('profilo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+  </div>
+</div>
+
+<!-- ══ MAPPA ══ -->
+<div class="screen" id="s-mappa">
+  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="go('confronta')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;">←</button>
+      <div class="logo">🌿 Spesa<em>Facile</em></div>
+    </div>
+    <div class="chip cg" id="mappa-chip">📍 Localizzazione...</div>
+  </div>
+  <div id="leaflet-map" style="flex:1;min-height:0;z-index:1;position:relative;">
+    <div id="mappa-loading" style="position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:12px;">
+      <div style="font-size:48px;">🗺</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px;">Carico la mappa...</div>
+      <div style="font-size:13px;color:var(--text2);text-align:center;padding:0 20px;" id="loading-msg">Serve connessione internet per la mappa</div>
+    </div>
+  </div>
+  <div id="store-panel" style="display:none;background:var(--surface);border-top:2px solid var(--border);padding:14px 16px 16px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">Supermercato selezionato</span>
+      <button onclick="closeStorePanel()" style="border:none;background:var(--surface2);border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div id="sp-logo" style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:900;font-family:'Syne',sans-serif;"></div>
+      <div style="flex:1;min-width:0;">
+        <div id="sp-name" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;"></div>
+        <div id="sp-addr" style="font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+        <div id="sp-orari" style="font-size:11px;color:var(--green);font-weight:600;margin-top:2px;"></div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div id="sp-dist" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green);"></div>
+        <div id="sp-min" style="font-size:11px;color:var(--text2);"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="apriGoogleMaps()" style="flex:1;background:linear-gradient(135deg,#1A73E8,#4285F4);color:#fff;border-radius:100px;padding:12px 8px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">🗺 Google Maps</button>
+      <button onclick="apriAppleMaps()" style="flex:1;background:transparent;color:var(--green);border:2px solid var(--green);border-radius:100px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">🍎 Apple Maps</button>
+    </div>
+  </div>
+  <div id="default-panel" style="background:var(--surface);border-top:1px solid var(--border);padding:12px 16px;flex-shrink:0;text-align:center;">
+    <div style="font-size:13px;color:var(--text2);">👆 Tocca un supermercato per i dettagli</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:3px;" id="stores-count"></div>
+  </div>
+
+  <div class="bnav">
+    <button class="nb " onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nb " onclick="go('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
+    <button class="nb-cam" onclick="go('scontrino')"><div class="nb-cam-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Scontrino</button>
+    <button class="nb on" onclick="go('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Confronta</button>
+    <button class="nb " onclick="go('profilo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+  </div>
+</div>
+
+<!-- ══ SCONTRINO ══ -->
+
+<!-- ══ SCONTRINO ══ -->
+
+<!-- ══ SCREEN: CASA ══ -->
+<div class="screen" id="s-casa">
+  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar">
+    <div onclick="go('home')" style="cursor:pointer;font-size:20px;">←</div>
+    <div class="logo">🏠 Prodotti <em>Casa</em></div>
+    <div style="width:28px;"></div>
+  </div>
+  <div class="scroll-area"><div class="page">
+
+    <!-- Search bar -->
+    <div style="position:relative;margin-bottom:16px;">
+      <input id="casa-search" type="text" placeholder="Cerca prodotto casa..." oninput="filtraCasa(this.value)"
+        style="width:100%;padding:12px 16px 12px 40px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);box-sizing:border-box;">
+      <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.4;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </div>
+
+    <!-- Filtri categoria -->
+    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none;">
+      <button id="cf-tutti" onclick="filtraCasaCat('tutti',this)" style="white-space:nowrap;padding:7px 16px;border-radius:100px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:var(--green);color:#fff;">Tutti</button>
+      <button id="cf-pulizia" onclick="filtraCasaCat('pulizia',this)" style="white-space:nowrap;padding:7px 16px;border-radius:100px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:var(--surface2);color:var(--text2);">🧹 Pulizia</button>
+      <button id="cf-igiene" onclick="filtraCasaCat('igiene',this)" style="white-space:nowrap;padding:7px 16px;border-radius:100px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:var(--surface2);color:var(--text2);">🚿 Igiene</button>
+      <button id="cf-cucina" onclick="filtraCasaCat('cucina',this)" style="white-space:nowrap;padding:7px 16px;border-radius:100px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:var(--surface2);color:var(--text2);">🍽 Cucina</button>
+      <button id="cf-bucato" onclick="filtraCasaCat('bucato',this)" style="white-space:nowrap;padding:7px 16px;border-radius:100px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:var(--surface2);color:var(--text2);">👕 Bucato</button>
+    </div>
+
+    <!-- Griglia prodotti -->
+    <div id="casa-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+
+    <div style="height:20px;"></div>
+  </div></div>
+  <div class="bnav">
+    <button class="nb on" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nb " onclick="go('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
+    <button class="nb-cam" onclick="go('scontrino')"><div class="nb-cam-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Scontrino</button>
+    <button class="nb " onclick="go('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Confronta</button>
+    <button class="nb " onclick="go('profilo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+  </div>
+</div>
+
+<div class="screen" id="s-scontrino">
+  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="history.go(-1)||go('home')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+      <div class="logo">🌿 Spesa<em>Facile</em></div>
+    </div>
+    <div class="chip ca">+50 pt</div>
+  </div>
+  <div class="scroll-area"><div class="page">
+    <div class="stitle">Carica scontrino</div>
+    <div class="ssub">Guadagna punti e aiuta la community</div>
+    <div class="card" style="margin-bottom:14px;"><div class="cb2">
+      <div class="receipt-zone" onclick="inviaFoto()">
+        <div style="font-size:48px;margin-bottom:12px;">📷</div>
+        <div style="font-weight:700;font-size:16px;color:var(--text2);">Scatta foto scontrino</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:6px;">L'app estrae i prezzi automaticamente con OCR</div>
+      </div>
+      <div style="text-align:center;margin:14px 0;font-size:13px;color:var(--text3);">— oppure —</div>
+      <button class="btn-g" onclick="inviaManuale()">✏️ Inserisci manualmente</button>
+    </div></div>
+    <div class="card"><div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Perché caricare?</span></div><div class="cb2">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;"><span style="font-size:28px;">⭐</span><div><div style="font-weight:600;">+50 punti per scontrino</div><div style="font-size:12px;color:var(--text2);">Accumula e scala la classifica</div></div></div>
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;"><span style="font-size:28px;">📊</span><div><div style="font-weight:600;">Prezzi più precisi per tutti</div><div style="font-size:12px;color:var(--text2);">I tuoi dati migliorano l'app</div></div></div>
+      <div style="display:flex;gap:12px;align-items:center;"><span style="font-size:28px;">🏆</span><div><div style="font-weight:600;">Scala la classifica di Milano</div><div style="font-size:12px;color:var(--text2);">Sfida gli altri utenti della città</div></div></div>
+    </div></div>
+    <div class="sp"></div>
+  </div></div>
+  <div class="bnav">
+    <button class="nb " onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nb " onclick="go('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
+    <button class="nb-cam" style="color:var(--green);" onclick="go('scontrino')"><div class="nb-cam-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Scontrino</button>
+    <button class="nb " onclick="go('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Confronta</button>
+    <button class="nb " onclick="go('profilo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+  </div>
+</div>
+
+<!-- ══ PROFILO ══ -->
+<div class="screen" id="s-profilo">
+  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar"><div class="logo">🌿 Spesa<em>Facile</em></div><div class="chip ca">⭐ 150 pt</div></div>
+  <div class="scroll-area"><div class="page">
+    <div class="card" style="margin-bottom:12px;"><div class="cb2" style="text-align:center;padding-top:24px;padding-bottom:22px;">
+      <div class="pava">👤</div>
+      <div id="prof-nome" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;">Utente</div>
+      <div id="prof-meta" style="font-size:13px;color:var(--text2);margin-top:3px;">Membro da oggi</div>
+      <div class="pstats">
+        <div class="ps"><div id="prof-risparmio" class="psv" style="color:var(--green);">€0,00</div><div class="psl">Risparmiati</div></div>
+        <div class="ps"><div id="prof-punti" class="psv" style="color:var(--amber);">0</div><div class="psl">Punti</div></div>
+        <div class="ps"><div id="prof-scontrini" class="psv" style="color:var(--blue);">0</div><div class="psl">Scontrini</div></div>
+      </div>
+    </div></div>
+    <div class="card" style="margin-bottom:12px;"><div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">🏅 Badge ottenuti</span></div><div class="cb2">
+      <div class="badge-wrap">
+        <div class="badge-i"><div class="badge-ico">🌱</div><div class="badge-lbl">Nuovo utente</div></div>
+        <div class="badge-i" id="badge-lista" style="opacity:.3;"><div class="badge-ico" style="background:var(--surface2);">📱</div><div class="badge-lbl">Prima lista</div></div>
+        <div class="badge-i" id="badge-scontrino" style="opacity:.3;"><div class="badge-ico" style="background:var(--surface2);">🧾</div><div class="badge-lbl">1° Scontrino</div></div>
+        <div class="badge-i" id="badge-ricetta" style="opacity:.3;"><div class="badge-ico" style="background:var(--surface2);">👨‍🍳</div><div class="badge-lbl">Prima ricetta</div></div>
+        <div class="badge-i" id="badge-5sc" style="opacity:.3;"><div class="badge-ico" style="background:var(--surface2);">🥈</div><div class="badge-lbl">5 scontrini</div></div>
+        <div class="badge-i" id="badge-50eur" style="opacity:.3;"><div class="badge-ico" style="background:var(--surface2);">💶</div><div class="badge-lbl">€50 risparmiati</div></div>
+      </div>
+    </div></div>
+    <div class="card" style="margin-bottom:12px;"><div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">🎯 Obiettivi in corso</span></div><div class="cb2">
+      <div class="goal"><div class="goal-top"><span style="font-size:13px;font-weight:600;">🥈 Carica 5 scontrini</span><span id="goal-sc-txt" style="font-size:12px;color:var(--text2);">0/5</span></div><div class="sbar"><div id="goal-sc-bar" class="sfill" style="width:0%;background:var(--blue);"></div></div></div>
+      <div class="goal"><div class="goal-top"><span style="font-size:13px;font-weight:600;">💶 Risparmia €50</span><span id="goal-eur-txt" style="font-size:12px;color:var(--text2);">€0/€50</span></div><div class="sbar"><div id="goal-eur-bar" class="sfill" style="width:0%;background:var(--green);"></div></div></div>
+      <div class="goal"><div class="goal-top"><span style="font-size:13px;font-weight:600;">👨‍🍳 Prova 5 ricette</span><span id="goal-ric-txt" style="font-size:12px;color:var(--text2);">0/5</span></div><div class="sbar"><div id="goal-ric-bar" class="sfill" style="width:0%;background:var(--purple);"></div></div></div>
+    </div></div>
+    <button class="btn-g" style="margin-bottom:10px;" onclick="go('scontrino')">🧾 Carica scontrino</button>
+    <button class="btn-outline" onclick="go('login');showToast('Arrivederci! 👋')">Esci dall'account</button>
+    
+  </div></div>
+    
+  <div class="bnav">
+    <button class="nb " onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nb " onclick="go('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
+    <button class="nb-cam" onclick="go('scontrino')"><div class="nb-cam-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Scontrino</button>
+    <button class="nb " onclick="go('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Confronta</button>
+    <button class="nb on" onclick="go('profilo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+  </div>
+</div>
+
+
+</div><!-- end phone -->
+
+<script>
+// Navigazione sicura - indipendente dal resto
+
+function tentaLogin(){
+  var email = document.getElementById('login-email');
+  var pass  = document.getElementById('login-pass');
+  if(!email || !email.value.trim()){
+    showToast('Inserisci la tua email'); return;
+  }
+  if(!email.value.includes('@') || !email.value.includes('.')){
+    showToast('Email non valida'); return;
+  }
+  if(!pass || pass.value.length < 1){
+    showToast('Inserisci la password'); return;
+  }
+  if(pass.value.length < 6){
+    showToast('Password troppo corta (min 6 caratteri)'); return;
+  }
+  userData.nome = email.value.split('@')[0];
+  if(!userData.dataIscrizione){
+    var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+    var ora = new Date();
+    userData.dataIscrizione = mesi[ora.getMonth()] + ' ' + ora.getFullYear();
+  }
+  rilevaCitta();
+  go('home');
+}
+
+function entraComeOspite(){
+  userData.nome = 'Ospite';
+  var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  var ora = new Date();
+  userData.dataIscrizione = mesi[ora.getMonth()] + ' ' + ora.getFullYear();
+  rilevaCitta();
+  showToast('Benvenuto ospite! Esplora liberamente.');
+  setTimeout(function(){ go('home'); }, 600);
+}
+
+function registrati(){
+  var nome  = document.getElementById('reg-nome');
+  var email = document.getElementById('reg-email');
+  var pass  = document.getElementById('reg-pass');
+  var pass2 = document.getElementById('reg-pass2');
+  if(!nome || !nome.value.trim()){ showToast('Inserisci il tuo nome'); return; }
+  if(!email || !email.value.includes('@')){ showToast('Inserisci una email valida'); return; }
+  if(!pass || pass.value.length < 6){ showToast('La password deve avere almeno 6 caratteri'); return; }
+  if(!pass2 || pass.value !== pass2.value){ showToast('Le password non coincidono'); return; }
+  userData.nome = nome.value.trim();
+  var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  var ora = new Date();
+  userData.dataIscrizione = mesi[ora.getMonth()] + ' ' + ora.getFullYear();
+  rilevaCitta();
+  showToast('Benvenuto, ' + userData.nome + '!');
+  setTimeout(function(){ go('home'); }, 800);
+}
+
+function go(s){
+  var ss=document.querySelectorAll('.screen');
+  for(var i=0;i<ss.length;i++) ss[i].classList.remove('active');
+  var el=document.getElementById('s-'+s);
+  if(el) el.classList.add('active');
+}
+</script>
+
+<script>
+
+// ── MAPPA LEAFLET + OVERPASS API ──
+var leafletMap=null, userMarker=null, selectedStore=null, routeLine=null;
+var userLat=null, userLng=null;
+
+var CHAINS = {
+  'lidl':      {bg:'#FFD700',text:'#003399',label:'lidl'},
+  'eurospin':  {bg:'#E30613',text:'#fff',label:'euro'},
+  'conad':     {bg:'#CC0000',text:'#fff',label:'Conad'},
+  'coop':      {bg:'#005B99',text:'#fff',label:'Coop'},
+  'esselunga': {bg:'#009B3A',text:'#fff',label:'Esse'},
+  'carrefour': {bg:'#003B8E',text:'#fff',label:'Carr'},
+  'penny':     {bg:'#CC0000',text:'#fff',label:'Penny'},
+  'aldi':      {bg:'#00529F',text:'#fff',label:'Aldi'},
+  'md':        {bg:'#F26522',text:'#fff',label:'MD'},
+  "in's":      {bg:'#6A1C8A',text:'#fff',label:"In's"},
+  'sigma':     {bg:'#E8002D',text:'#fff',label:'Sigma'},
+  'famila':    {bg:'#007A33',text:'#fff',label:'Famila'},
+  'pam':       {bg:'#EF3E33',text:'#fff',label:'PAM'},
+  'superal':   {bg:'#004B87',text:'#fff',label:'Superal'},
+  'bennet':    {bg:'#FF6600',text:'#fff',label:'Bennet'},
+  'unes':      {bg:'#E2001A',text:'#fff',label:'Unes'},
+  'pewex':     {bg:'#009B3A',text:'#fff',label:'Pewex'},
+  'default':   {bg:'#4A7C59',text:'#fff',label:'mercato'}
+};
+
+function getChain(n){
+  if(!n) return 'default';
+  var l=n.toLowerCase();
+  for(var k in CHAINS){ if(l.includes(k)) return k; }
+  return 'default';
+}
+
+function initMappa(){
+  if(typeof L === 'undefined'){
+    var lm = document.getElementById('loading-msg');
+    if(lm) lm.textContent = 'Apri il file da internet per la mappa (es. deploy su Vercel)';
+    var lm = document.getElementById('loading-msg');
+    if(lm) lm.textContent = 'Serve connessione internet per la mappa';
+    return;
+  }
+  if(leafletMap){
+    setTimeout(function(){leafletMap.invalidateSize();},150);
+    return;
+  }
+  leafletMap=L.map('leaflet-map',{zoomControl:true,attributionControl:false})
+    .setView([41.9,12.5],6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(leafletMap);
+  setTimeout(function(){leafletMap.invalidateSize();},200);
+
+  if(navigator.geolocation){
+    document.getElementById('loading-msg').textContent='Cerco il tuo GPS...';
+    navigator.geolocation.getCurrentPosition(
+      function(p){ userLat=p.coords.latitude; userLng=p.coords.longitude; onGotPos(); },
+      function(){ userLat=44.4056; userLng=8.9463; document.getElementById('mappa-chip').textContent='Genova (default)'; onGotPos(); },
+      {enableHighAccuracy:true,timeout:10000}
+    );
+  } else {
+    userLat=44.4056; userLng=8.9463; onGotPos();
+  }
+}
+
+function onGotPos(){
+  leafletMap.setView([userLat,userLng],15);
+  var uIcon=L.divIcon({
+    html:'<div style="width:16px;height:16px;background:#1A8C4E;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,140,78,.25);"></div>',
+    className:'',iconSize:[16,16],iconAnchor:[8,8]
+  });
+  userMarker=L.marker([userLat,userLng],{icon:uIcon,zIndexOffset:1000}).addTo(leafletMap).bindPopup('Sei qui');
+  document.getElementById('loading-msg').textContent='Carico supermercati vicini...';
+  loadStores(userLat,userLng);
+}
+
+function loadStores(lat,lng){
+  var r=3000;
+  var q='[out:json][timeout:25];(node["shop"~"supermarket|convenience|discount"](around:'+r+','+lat+','+lng+');way["shop"~"supermarket|convenience|discount"](around:'+r+','+lat+','+lng+'););out center;';
+  fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:q})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    document.getElementById('mappa-loading').style.display='none';
+    var els=d.elements||[], cnt=0;
+    els.forEach(function(el){
+      var lt=el.lat||(el.center&&el.center.lat);
+      var ln=el.lon||(el.center&&el.center.lon);
+      if(!lt||!ln) return;
+      var nm=(el.tags&&el.tags.name)||'Supermercato';
+      var ad='';
+      if(el.tags){
+        var st=el.tags['addr:street']||'';
+        var nu=el.tags['addr:housenumber']||'';
+        ad=st+(nu?' '+nu:'');
+      }
+      var oh=(el.tags&&el.tags['opening_hours'])||'';
+      addMarker(lt,ln,nm,ad,oh);
+      cnt++;
+    });
+    document.getElementById('mappa-chip').textContent=cnt+' supermercati';
+    document.getElementById('stores-count').textContent=cnt+' supermercati nel raggio di 3km';
+    if(cnt===0){
+      document.getElementById('mappa-loading').style.display='flex';
+      document.getElementById('loading-msg').textContent='Nessun supermercato trovato vicino a te';
+    }
+  })
+  .catch(function(){
+    document.getElementById('mappa-loading').style.display='none';
+    document.getElementById('mappa-chip').textContent='Errore connessione';
+    showToast('Errore caricamento supermercati — riprova');
+  });
+}
+
+function addMarker(lat,lng,name,addr,orari){
+  var ch=getChain(name), c=CHAINS[ch];
+  var ic=L.divIcon({
+    html:'<div style="background:'+c.bg+';color:'+c.text+';border:2px solid rgba(0,0,0,.15);border-radius:8px;padding:3px 7px;font-size:10px;font-weight:900;font-family:DM Sans,sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.2);">'+c.label+'</div>',
+    className:'',iconAnchor:[20,12]
+  });
+  L.marker([lat,lng],{icon:ic}).addTo(leafletMap).on('click',function(){selectStore(lat,lng,name,addr,orari,c);});
+}
+
+function selectStore(lat,lng,name,addr,orari,c){
+  selectedStore={lat:lat,lng:lng};
+  var dist=calcDist(userLat,userLng,lat,lng);
+  var km=dist<1?Math.round(dist*1000)+' m':dist.toFixed(1)+' km';
+  var min=Math.round(dist/0.083);
+  document.getElementById('sp-logo').style.background=c.bg;
+  document.getElementById('sp-logo').style.color=c.text;
+  document.getElementById('sp-logo').textContent=c.label;
+  document.getElementById('sp-name').textContent=name;
+  document.getElementById('sp-addr').textContent=addr||"Tocca Google Maps per l'indirizzo";
+  document.getElementById('sp-dist').textContent=km;
+  document.getElementById('sp-min').textContent=min+' min a piedi';
+  document.getElementById('sp-orari').textContent=orari?orari:'';
+  if(routeLine) leafletMap.removeLayer(routeLine);
+  if(userLat&&userLng){
+    routeLine=L.polyline([[userLat,userLng],[lat,lng]],{color:'#1A73E8',weight:4,dashArray:'10,8',opacity:.8}).addTo(leafletMap);
+    leafletMap.fitBounds(L.latLngBounds([[userLat,userLng],[lat,lng]]),{padding:[60,60]});
+  }
+  document.getElementById('default-panel').style.display='none';
+  document.getElementById('store-panel').style.display='block';
+}
+
+function calcDist(la1,lo1,la2,lo2){
+  var R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;
+  var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function closeStorePanel(){
+  document.getElementById('store-panel').style.display = 'none';
+  document.getElementById('default-panel').style.display = 'block';
+  if(routeLine){ leafletMap.removeLayer(routeLine); routeLine=null; }
+}
+function apriGoogleMaps(){
+  if(!selectedStore) return;
+  window.open('https://www.google.com/maps/dir/?api=1&destination='+selectedStore.lat+','+selectedStore.lng+'&travelmode=walking','_blank');
+}
+
+function apriAppleMaps(){
+  if(!selectedStore) return;
+  window.location.href='maps://maps.apple.com/?daddr='+selectedStore.lat+','+selectedStore.lng+'&dirflg=w';
+}
+
+
+// ── NAVIGAZIONE ──
+
+
+
+function inviaManuale(){
+  userData.punti += 50;
+  userData.scontrini += 1;
+  userData.risparmio += (Math.random() * 4 + 1);
+  showToast('Scontrino salvato! +50 punti');
+  setTimeout(function(){ go('home'); }, 1500);
+}
+
+function inviaFoto(){
+  showToast('Funzione disponibile dopo il deploy');
+}
+
+// ════════════════════════════════════════
+// STATO UTENTE (dati sessione)
+// ════════════════════════════════════════
+var userData = {
+  punti: 0,
+  scontrini: 0,
+  liste: 0,
+  risparmio: 0.00,
+  nome: '',
+  ricette: 0,
+  dataIscrizione: '',
+  citta: ''
+};
+
+function aggiornaHome(){
+  var nomeEl = document.getElementById('home-nome');
+  if(nomeEl) nomeEl.textContent = userData.nome || 'Ciao!';
+  var el = function(id){ return document.getElementById(id); };
+  if(el('stat-punti'))     el('stat-punti').textContent     = userData.punti;
+  if(el('stat-scontrini')) el('stat-scontrini').textContent = userData.scontrini;
+  if(el('stat-liste'))     el('stat-liste').textContent     = userData.liste;
+  if(el('stat-risparmio')) el('stat-risparmio').textContent = '\u20ac' + userData.risparmio.toFixed(2).replace('.',',');
+  aggiornaProfiloUI();
+  var cityEl = document.getElementById('home-city-title');
+  if(cityEl && userData.citta) cityEl.textContent = 'Convenienza oggi — ' + userData.citta;
+}
+
+function sbloccaBadge(id){
+  var b = document.getElementById(id);
+  if(!b) return;
+  b.style.opacity = '1';
+  var ico = b.querySelector('.badge-ico');
+  if(ico) ico.style.background = '';
+}
+
+function aggiornaProfiloUI(){
+  var el = function(id){ return document.getElementById(id); };
+
+  // Nome
+  var nome = userData.nome || 'Utente';
+  if(el('prof-nome')) el('prof-nome').textContent = nome;
+
+  // Data iscrizione
+  if(el('prof-meta')){
+    var meta = userData.dataIscrizione || 'oggi';
+    var citta = userData.citta ? userData.citta + ' · ' : '';
+    el('prof-meta').textContent = citta + 'Membro da ' + meta;
+  }
+
+  // Stats
+  var risp = '\u20ac' + userData.risparmio.toFixed(2).replace('.',',');
+  if(el('prof-risparmio')) el('prof-risparmio').textContent = risp;
+  if(el('prof-punti'))     el('prof-punti').textContent     = userData.punti;
+  if(el('prof-scontrini')) el('prof-scontrini').textContent = userData.scontrini;
+  if(el('prof-chip'))      el('prof-chip').textContent      = '\u2b50 ' + userData.punti + ' pt';
+
+  // Badge - si sbloccano in base alle azioni
+  if(userData.liste >= 1)    sbloccaBadge('badge-lista');
+  if(userData.scontrini >= 1) sbloccaBadge('badge-scontrino');
+  if(userData.ricette >= 1)  sbloccaBadge('badge-ricetta');
+  if(userData.scontrini >= 5) sbloccaBadge('badge-5sc');
+  if(userData.risparmio >= 50) sbloccaBadge('badge-50eur');
+
+  // Obiettivi - progress bar dinamiche
+  var sc5 = Math.min(userData.scontrini, 5);
+  if(el('goal-sc-txt')) el('goal-sc-txt').textContent = sc5 + '/5';
+  if(el('goal-sc-bar')) el('goal-sc-bar').style.width = (sc5/5*100) + '%';
+
+  var eur50 = Math.min(userData.risparmio, 50);
+  if(el('goal-eur-txt')) el('goal-eur-txt').textContent = '\u20ac' + eur50.toFixed(2).replace('.',',') + '/\u20ac50';
+  if(el('goal-eur-bar')) el('goal-eur-bar').style.width = (eur50/50*100) + '%';
+
+  var ric5 = Math.min(userData.ricette, 5);
+  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/5';
+  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/5*100) + '%';
+}
+
+// ════════════════════════════════════════
+// ANALIZZA LISTA → CONFRONTA
+// ════════════════════════════════════════
+var listaCorrente = [];
+
+function analizzaLista(){
+  var ta = document.getElementById('notepad');
+  if(!ta) return;
+  var lines = ta.value.split('\n').map(function(l){ return l.trim(); }).filter(function(l){ return l.length > 0; });
+  if(lines.length === 0){
+    showToast('Scrivi almeno un prodotto nella lista!');
+    return;
+  }
+  listaCorrente = lines;
+  userData.liste++;
+  aggiornaConfrontoConLista(lines);
+  go('confronta');
+}
+
+function aggiornaConfrontoConLista(prodotti){
+  // Mostra contenuto, nasconde empty state
+  var emptyEl  = document.getElementById('conf-empty');
+  var contentEl = document.getElementById('conf-content');
+  var chipEl   = document.getElementById('conf-chip-art');
+  var ssubEl   = document.getElementById('conf-ssub');
+  if(emptyEl)   emptyEl.style.display   = 'none';
+  if(contentEl) contentEl.style.display = 'block';
+  if(chipEl)    chipEl.textContent      = prodotti.length + (prodotti.length===1?' articolo':' articoli');
+  if(ssubEl)    ssubEl.textContent      = prodotti.length + ' prodotti · 5 supermercati analizzati';
+
+  var banner = document.getElementById('lista-prodotti-count');
+  if(banner) banner.textContent = prodotti.length + ' prodott' + (prodotti.length===1?'o':'i') + ' nella tua lista';
+
+  var tprod = document.getElementById('t-prod-content');
+  if(!tprod) return;
+
+  var stores = ['Lidl','Eurospin','Conad','Coop','Esselunga'];
+  var out = '';
+  for(var p=0; p<prodotti.length; p++){
+    var prod = prodotti[p];
+    var prezzi = [];
+    for(var s=0; s<stores.length; s++){
+      var seed = (prod.charCodeAt(0) + stores[s].charCodeAt(0)) % 100;
+      prezzi.push((0.5 + seed * 0.044).toFixed(2));
+    }
+    var minP = Math.min.apply(null, prezzi.map(parseFloat));
+    var bestIdx = prezzi.map(parseFloat).indexOf(minP);
+    var bestStore = stores[bestIdx];
+    out += '<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);">';
+    out += '<div style="font-size:13px;font-weight:600;">' + prod + '</div>';
+    out += '<div style="text-align:right;">';
+    out += '<div style="font-weight:800;font-size:14px;color:var(--green);">' + String.fromCharCode(8364) + minP.toFixed(2) + '</div>';
+    out += '<div style="font-size:10px;color:var(--text3);">miglior prezzo: ' + bestStore + '</div>';
+    out += '</div></div>';
+  }
+  tprod.innerHTML = out;
+}
+
+function go(screen){ if(screen==='mappa'){setTimeout(initMappa,200);}
+  if(screen==='home'){setTimeout(aggiornaHome,50);}
+  if(screen==='profilo'){setTimeout(aggiornaProfiloUI,50);}
+  if(screen==='casa'){setTimeout(renderCasa,50);}
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el = document.getElementById('s-'+screen);
+  if(el) el.classList.add('active');
+  var sa = document.querySelector('#s-'+screen+' .scroll-area');
+  if(sa) sa.scrollTop=0;
+}
+function switchTab(btn,tabId){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  btn.classList.add('on');
+  document.getElementById('t-rank').style.display=tabId==='t-rank'?'block':'none';
+  document.getElementById('t-prod').style.display=tabId==='t-prod'?'block':'none';
+}
+function updateCount(){
+  var lines=document.getElementById('notepad').value.split('\n').filter(function(l){return l.trim().length>0;});
+  var n=lines.length;
+  var el1=document.getElementById('nota-count');
+  var el2=document.getElementById('lista-count');
+  if(el1) el1.textContent=n+' prodott'+(n===1?'o':'i')+' scritti';
+  if(el2) el2.textContent=n+' prodott'+(n===1?'o':'i');
+}
+function rilevaCitta(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var lat = pos.coords.latitude;
+      var lng = pos.coords.longitude;
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lng)
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          var city = d.address.city || d.address.town || d.address.village || '';
+          if(city){ userData.citta = city; aggiornaProfiloUI(); }
+        }).catch(function(){});
+    }, function(){}, {timeout:5000});
+  }
+}
+
+function switchChips(tipo){
+  var cibo = document.getElementById('chips-cibo');
+  var casa = document.getElementById('chips-casa');
+  var tCibo = document.getElementById('tab-cibo');
+  var tCasa = document.getElementById('tab-casa');
+  if(tipo==='cibo'){
+    if(cibo) cibo.style.display='flex';
+    if(casa) casa.style.display='none';
+    if(tCibo){ tCibo.style.background='var(--green)'; tCibo.style.color='#fff'; }
+    if(tCasa){ tCasa.style.background='var(--surface2)'; tCasa.style.color='var(--text2)'; }
+  } else {
+    if(cibo) cibo.style.display='none';
+    if(casa) casa.style.display='flex';
+    if(tCibo){ tCibo.style.background='var(--surface2)'; tCibo.style.color='var(--text2)'; }
+    if(tCasa){ tCasa.style.background='var(--green)'; tCasa.style.color='#fff'; }
+  }
+}
+
+function addItem(item){
+  var ta=document.getElementById('notepad');
+  var v=ta.value;
+  ta.value=v+(v.length>0&&!v.endsWith('\n')?'\n':'')+item;
+  updateCount();
+  showToast(item+' aggiunto!');
+}
+function showToast(msg){
+  var existing=document.querySelector('.toast');
+  if(existing) existing.remove();
+  var t=document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  document.getElementById('app').appendChild(t);
+  setTimeout(function(){t.remove();},3000);
+}
+// ── FUNZIONI AGGIUNGI LISTA (compatibilità v5) ──
+// ═══════════════════════════════════════════════
+// DATABASE RICETTE ITALIANE — 160 ricette
+// ═══════════════════════════════════════════════
+const DB = [
+
+// ─── PRIMI PIATTI ───────────────────────────────
+{id:1,nome:"Spaghetti alla Carbonara",cat:"Primi",emoji:"🍝",bg:"linear-gradient(135deg,#FEF3C7,#FDE68A)",diff:"Media",tempo:"25 min",persone_base:2,
+desc:"La ricetta originale romana con guanciale, pecorino e uova. Cremosa e senza panna.",
+ingredienti:[
+  {n:"Spaghetti",q:200,u:"g"},
+  {n:"Guanciale",q:100,u:"g"},
+  {n:"Uova intere",q:2,u:""},
+  {n:"Tuorli d'uovo",q:2,u:""},
+  {n:"Pecorino Romano",q:60,u:"g"},
+  {n:"Pepe nero macinato",q:1,u:"q.b."}
+],
+prep:["Taglia il guanciale a listarelle e fallo rosolare in padella a fuoco medio senza olio fino a che non diventa croccante.","Sbatti le uova intere con i tuorli in una ciotola, aggiungi il pecorino grattugiato e pepe abbondante. Mescola bene.","Cuoci gli spaghetti in abbondante acqua salata. Scolali al dente conservando 1 bicchiere di acqua di cottura.","Spegni il fuoco sotto il guanciale. Aggiungi gli spaghetti scolati e mescola fuori dal fuoco.","Versa il composto di uova sugli spaghetti e mescola velocemente aggiungendo poca acqua di cottura per rendere la salsa cremosa.","Servi subito con altro pecorino e pepe nero."]},
+
+{id:2,nome:"Rigatoni all'Amatriciana",cat:"Primi",emoji:"🍅",bg:"linear-gradient(135deg,#FEE2E2,#FCA5A5)",diff:"Media",tempo:"30 min",persone_base:2,
+desc:"Il sugo dell'Amatrice con guanciale croccante, pomodoro e pecorino. Niente cipolla, niente aglio.",
+ingredienti:[
+  {n:"Rigatoni o Bucatini",q:200,u:"g"},
+  {n:"Guanciale",q:120,u:"g"},
+  {n:"Pomodori pelati",q:400,u:"g"},
+  {n:"Pecorino Romano",q:60,u:"g"},
+  {n:"Peperoncino",q:1,u:""},
+  {n:"Vino bianco secco",q:50,u:"ml"}
+],
+prep:["Taglia il guanciale a listarelle e rosola in padella a fuoco medio.","Sfuma con il vino bianco e aggiungi il peperoncino.","Aggiungi i pomodori pelati schiacciati con la forchetta. Sala e cuoci 20 minuti a fuoco basso.","Cuoci la pasta al dente, scola e manteca nel sugo.","Servi con pecorino grattugiato abbondante."]},
+
+{id:3,nome:"Cacio e Pepe",cat:"Primi",emoji:"⚫",bg:"linear-gradient(135deg,#F5F5F4,#E7E5E4)",diff:"Difficile",tempo:"20 min",persone_base:2,
+desc:"La pasta più semplice di Roma: solo cacio, pepe e acqua di cottura. Ma nasconde molti segreti.",
+ingredienti:[
+  {n:"Spaghetti o Tonnarelli",q:200,u:"g"},
+  {n:"Pecorino Romano",q:80,u:"g"},
+  {n:"Pepe nero in grani",q:1,u:"q.b."}
+],
+prep:["Tosta i grani di pepe in padella e poi macinali grossolanamente.","Cuoci la pasta in poca acqua salata (si concentra l'amido).","Grattugia finemente il pecorino.","Crea una crema con pecorino e acqua tiepida di cottura.","Manteca la pasta nel pepe tostato, aggiungi la crema di pecorino fuori dal fuoco mescolando energicamente.","Servi subito."]},
+
+{id:4,nome:"Lasagne alla Bolognese",cat:"Primi",emoji:"🫕",bg:"linear-gradient(135deg,#FEF3C7,#F59E0B)",diff:"Difficile",tempo:"2h 30min",persone_base:4,
+desc:"Le vere lasagne bolognesi con ragù di carne, besciamella e sfoglie all'uovo. Piatto della domenica.",
+ingredienti:[
+  {n:"Lasagne all'uovo",q:250,u:"g"},
+  {n:"Macinato di manzo",q:300,u:"g"},
+  {n:"Macinato di maiale",q:150,u:"g"},
+  {n:"Carote",q:1,u:""},
+  {n:"Sedano",q:1,u:"costa"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Pomodori pelati",q:400,u:"g"},
+  {n:"Vino rosso",q:100,u:"ml"},
+  {n:"Latte intero",q:500,u:"ml"},
+  {n:"Burro",q:50,u:"g"},
+  {n:"Farina 00",q:50,u:"g"},
+  {n:"Parmigiano Reggiano",q:100,u:"g"},
+  {n:"Noce moscata",q:1,u:"q.b."}
+],
+prep:["Prepara il ragù: rosola il trito di carota, sedano e cipolla. Aggiungi le carni e rosolale.","Sfuma con vino rosso, aggiungi i pomodori e cuoci a fuoco lento 1h30.","Prepara la besciamella: sciogli il burro, aggiungi la farina, poi il latte caldo. Mescola fino ad addensare. Sala e aggiungi noce moscata.","Componi la lasagna alternando strati di ragù, besciamella e pasta.","Termina con besciamella e parmigiano grattugiato.","Cuoci in forno a 180°C per 35 minuti."]},
+
+{id:5,nome:"Pasta al Ragù Bolognese",cat:"Primi",emoji:"🥩",bg:"linear-gradient(135deg,#FEE2E2,#FECACA)",diff:"Lunga",tempo:"2h",persone_base:4,
+desc:"Il ragù bolognese originale secondo la ricetta depositata alla Camera di Commercio di Bologna.",
+ingredienti:[
+  {n:"Tagliatelle all'uovo",q:400,u:"g"},
+  {n:"Macinato di manzo",q:300,u:"g"},
+  {n:"Pancetta",q:100,u:"g"},
+  {n:"Carota",q:1,u:""},
+  {n:"Sedano",q:1,u:"costa"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Pomodori pelati",q:300,u:"g"},
+  {n:"Vino bianco secco",q:100,u:"ml"},
+  {n:"Latte intero",q:100,u:"ml"},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Parmigiano Reggiano",q:80,u:"g"}
+],
+prep:["Trita finemente carota, sedano e cipolla (soffritto).","Rosola la pancetta a dadini, poi aggiungi il soffritto.","Aggiungi la carne macinata e rosola a fuoco alto mescolando.","Sfuma con il vino bianco.","Aggiungi i pomodori pelati e il latte. Cuoci 1h30 a fuoco basso con coperchio.","Cuoci le tagliatelle al dente e manteca nel ragù con parmigiano."]},
+
+{id:6,nome:"Pasta ai Funghi Porcini",cat:"Primi",emoji:"🍄",bg:"linear-gradient(135deg,#D6D3D1,#A8A29E)",diff:"Facile",tempo:"20 min",persone_base:2,
+desc:"Cremosa e profumata, con funghi porcini freschi o secchi e un tocco di prezzemolo.",
+ingredienti:[
+  {n:"Penne o Tagliatelle",q:200,u:"g"},
+  {n:"Funghi porcini",q:300,u:"g"},
+  {n:"Aglio",q:2,u:"spicchi"},
+  {n:"Prezzemolo fresco",q:1,u:"mazzo"},
+  {n:"Panna fresca",q:100,u:"ml"},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Parmigiano grattugiato",q:40,u:"g"}
+],
+prep:["Pulisci i funghi con un panno umido e tagliali a fettine.","Soffriggi l'aglio in olio, aggiungi i funghi a fuoco alto.","Sala, aggiungi la panna e cuoci 5 minuti.","Scola la pasta al dente e manteca coi funghi.","Aggiungi prezzemolo tritato e parmigiano. Servi."]},
+
+{id:7,nome:"Risotto alla Milanese",cat:"Primi",emoji:"🍚",bg:"linear-gradient(135deg,#FFFBEB,#FDE68A)",diff:"Media",tempo:"35 min",persone_base:2,
+desc:"Il risotto allo zafferano della tradizione milanese. Perfetto con l'ossobuco.",
+ingredienti:[
+  {n:"Riso Carnaroli",q:180,u:"g"},
+  {n:"Brodo di carne caldo",q:800,u:"ml"},
+  {n:"Zafferano",q:1,u:"bustina"},
+  {n:"Cipolla dorata",q:1,u:""},
+  {n:"Burro",q:60,u:"g"},
+  {n:"Vino bianco secco",q:80,u:"ml"},
+  {n:"Parmigiano Reggiano",q:60,u:"g"}
+],
+prep:["Soffriggi la cipolla tritata finemente in metà burro a fuoco basso.","Tosta il riso per 2 minuti a fuoco alto.","Sfuma con il vino bianco.","Aggiungi il brodo caldo un mestolo alla volta, mescolando spesso. Cuoci 17 minuti.","Sciogli lo zafferano in un po' di brodo caldo e aggiungilo al risotto.","Spegni il fuoco e manteca con il burro rimasto e il parmigiano. Lascia riposare 1 minuto."]},
+
+{id:8,nome:"Risotto ai Funghi",cat:"Primi",emoji:"🍄",bg:"linear-gradient(135deg,#F0FDF4,#BBF7D0)",diff:"Media",tempo:"35 min",persone_base:2,
+desc:"Risotto cremoso con porcini secchi e freschi, mantecato con burro e parmigiano.",
+ingredienti:[
+  {n:"Riso Arborio",q:180,u:"g"},
+  {n:"Funghi misti",q:250,u:"g"},
+  {n:"Porcini secchi",q:20,u:"g"},
+  {n:"Brodo vegetale",q:700,u:"ml"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Vino bianco",q:80,u:"ml"},
+  {n:"Burro",q:50,u:"g"},
+  {n:"Parmigiano",q:50,u:"g"},
+  {n:"Prezzemolo",q:1,u:"q.b."}
+],
+prep:["Ammolla i porcini secchi in acqua calda per 20 minuti. Filtra l'acqua e tienila.","Trita la cipolla e soffriggila nel burro.","Aggiungi i funghi freschi a pezzi e i porcini ammollati.","Tosta il riso, sfuma con vino.","Cuoci aggiungendo brodo e acqua dei porcini. 17 minuti.","Manteca con burro e parmigiano. Decora con prezzemolo."]},
+
+{id:9,nome:"Pasta al Pesto Genovese",cat:"Primi",emoji:"🌿",bg:"linear-gradient(135deg,#D1FAE5,#6EE7B7)",diff:"Facile",tempo:"15 min",persone_base:2,
+desc:"Il pesto alla genovese originale con basilico DOP, pinoli, pecorino e parmigiano.",
+ingredienti:[
+  {n:"Trofie o Trenette",q:200,u:"g"},
+  {n:"Basilico fresco",q:50,u:"g"},
+  {n:"Pinoli",q:30,u:"g"},
+  {n:"Parmigiano Reggiano",q:30,u:"g"},
+  {n:"Pecorino Sardo",q:30,u:"g"},
+  {n:"Aglio",q:1,u:"spicchio"},
+  {n:"Olio extravergine Ligure",q:80,u:"ml"}
+],
+prep:["Nel mortaio (o frullatore) unisci basilico, aglio e sale grosso. Pesta.","Aggiungi i pinoli e pesta ancora.","Incorpora i formaggi grattugiati.","Versa l'olio a filo mescolando fino a ottenere una crema.","Cuoci la pasta, scola e condisci con il pesto allungato con un po' di acqua di cottura."]},
+
+{id:10,nome:"Penne all'Arrabbiata",cat:"Primi",emoji:"🌶️",bg:"linear-gradient(135deg,#FEE2E2,#EF4444)",diff:"Facile",tempo:"20 min",persone_base:2,
+desc:"Pasta piccante con aglio, pomodoro e peperoncino. Veloce, economica e gustosissima.",
+ingredienti:[
+  {n:"Penne rigate",q:200,u:"g"},
+  {n:"Pomodori pelati",q:400,u:"g"},
+  {n:"Aglio",q:3,u:"spicchi"},
+  {n:"Peperoncino secco",q:2,u:""},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Prezzemolo",q:1,u:"q.b."}
+],
+prep:["Soffriggi aglio e peperoncino spezzato in olio abbondante.","Aggiungi i pelati schiacciati e sala. Cuoci 15 minuti a fuoco medio.","Cuoci le penne al dente e scolale.","Manteca nel sugo e aggiungi prezzemolo tritato.","Servi senza formaggio."]},
+
+{id:11,nome:"Pasta e Fagioli",cat:"Primi",emoji:"🫘",bg:"linear-gradient(135deg,#FEF3C7,#D97706)",diff:"Media",tempo:"45 min",persone_base:4,
+desc:"Il piatto povero della tradizione italiana. Cremoso, nutriente e confortante.",
+ingredienti:[
+  {n:"Pasta mista",q:200,u:"g"},
+  {n:"Fagioli borlotti",q:400,u:"g"},
+  {n:"Pancetta",q:80,u:"g"},
+  {n:"Rosmarino",q:1,u:"rametto"},
+  {n:"Aglio",q:2,u:"spicchi"},
+  {n:"Pomodori pelati",q:200,u:"g"},
+  {n:"Brodo vegetale",q:500,u:"ml"},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Rosola la pancetta a dadini con aglio e rosmarino.","Aggiungi i fagioli scolati e i pelati. Mescola.","Aggiungi il brodo e cuoci 20 minuti.","Frulla metà dei fagioli per rendere il brodo cremoso.","Cuoci la pasta direttamente nel brodo con i fagioli.","Servi con un filo di olio a crudo."]},
+
+{id:12,nome:"Orecchiette alle Cime di Rapa",cat:"Primi",emoji:"🥦",bg:"linear-gradient(135deg,#D1FAE5,#34D399)",diff:"Facile",tempo:"25 min",persone_base:2,
+desc:"Il piatto simbolo della cucina pugliese con le cime di rapa saltate in padella.",
+ingredienti:[
+  {n:"Orecchiette",q:200,u:"g"},
+  {n:"Cime di rapa",q:400,u:"g"},
+  {n:"Aglio",q:3,u:"spicchi"},
+  {n:"Acciughe sott'olio",q:4,u:"filetti"},
+  {n:"Peperoncino",q:1,u:""},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Lessa le cime di rapa in acqua salata abbondante.","Nella stessa acqua cuoci poi le orecchiette.","In padella soffriggi aglio e peperoncino, scioglie le acciughe nell'olio caldo.","Aggiungi le cime di rapa e saltale.","Scola le orecchiette e manteca tutto insieme."]},
+
+{id:13,nome:"Pasta al Tonno",cat:"Primi",emoji:"🐟",bg:"linear-gradient(135deg,#DBEAFE,#93C5FD)",diff:"Facile",tempo:"15 min",persone_base:2,
+desc:"Pasta veloce e gustosa con tonno, pomodorini e capperi. Pronta in 15 minuti.",
+ingredienti:[
+  {n:"Spaghetti",q:200,u:"g"},
+  {n:"Tonno sott'olio",q:160,u:"g"},
+  {n:"Pomodorini ciliegino",q:200,u:"g"},
+  {n:"Capperi",q:20,u:"g"},
+  {n:"Aglio",q:2,u:"spicchi"},
+  {n:"Prezzemolo",q:1,u:"q.b."},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Soffriggi l'aglio in olio, aggiungi i pomodorini tagliati a metà.","Cuoci 5 minuti, aggiungi il tonno sgocciolato e i capperi.","Cuoci gli spaghetti al dente.","Manteca nel sugo e aggiungi prezzemolo abbondante."]},
+
+{id:14,nome:"Zuppa di Lenticchie",cat:"Zuppe e minestre",emoji:"🍲",bg:"linear-gradient(135deg,#FEF3C7,#A16207)",diff:"Facile",tempo:"40 min",persone_base:4,
+desc:"Zuppa calda e nutriente con lenticchie, sedano, carota e un filo di olio a crudo.",
+ingredienti:[
+  {n:"Lenticchie secche",q:300,u:"g"},
+  {n:"Carota",q:2,u:""},
+  {n:"Sedano",q:2,u:"coste"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Pomodori pelati",q:200,u:"g"},
+  {n:"Rosmarino",q:1,u:"rametto"},
+  {n:"Aglio",q:2,u:"spicchi"},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Brodo vegetale",q:1,u:"L"}
+],
+prep:["Sciacqua le lenticchie sotto acqua fredda.","Trita carota, sedano, cipolla e aglio. Soffriggi in olio.","Aggiungi le lenticchie, il rosmarino e i pelati.","Copri con il brodo e cuoci 30 minuti.","Frulla parzialmente per rendere cremosa. Aggiusta di sale.","Servi con pane tostato e olio a crudo."]},
+
+{id:15,nome:"Minestrone della Nonna",cat:"Zuppe e minestre",emoji:"🥣",bg:"linear-gradient(135deg,#D1FAE5,#059669)",diff:"Facile",tempo:"1h",persone_base:4,
+desc:"Il classico minestrone di verdure con pasta o riso. Ogni nonna ha la sua versione.",
+ingredienti:[
+  {n:"Patate",q:2,u:""},
+  {n:"Zucchine",q:2,u:""},
+  {n:"Carote",q:2,u:""},
+  {n:"Sedano",q:2,u:"coste"},
+  {n:"Pomodori",q:2,u:""},
+  {n:"Fagioli borlotti",q:200,u:"g"},
+  {n:"Pasta di semola",q:100,u:"g"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Parmigiano",q:1,u:"q.b."}
+],
+prep:["Taglia tutte le verdure a dadini.","Soffriggi la cipolla in olio in una pentola grande.","Aggiungi tutte le verdure e i fagioli. Copri con acqua fredda abbondante.","Sala e cuoci 40 minuti a fuoco medio.","Aggiungi la pasta e cuoci altri 10 minuti.","Servi con parmigiano e olio a crudo."]},
+
+{id:16,nome:"Ribollita Toscana",cat:"Zuppe e minestre",emoji:"🫘",bg:"linear-gradient(135deg,#FEF9C3,#CA8A04)",diff:"Media",tempo:"1h 30min",persone_base:4,
+desc:"La zuppa toscana con pane raffermo, cavolo nero, fagioli e verdure. Si mangia il giorno dopo riscaldata.",
+ingredienti:[
+  {n:"Pane toscano raffermo",q:300,u:"g"},
+  {n:"Fagioli cannellini",q:400,u:"g"},
+  {n:"Cavolo nero",q:200,u:"g"},
+  {n:"Verza",q:200,u:"g"},
+  {n:"Patate",q:2,u:""},
+  {n:"Carota",q:1,u:""},
+  {n:"Sedano",q:1,u:"costa"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Pomodori pelati",q:200,u:"g"},
+  {n:"Olio extravergine Toscano",q:1,u:"q.b."}
+],
+prep:["Soffriggi il trito di carota, sedano e cipolla.","Aggiungi le verdure a pezzi e i pelati. Cuoci 20 minuti.","Aggiungi i fagioli (metà frullati per addensare) e il brodo.","Cuoci altri 30 minuti.","Aggiungi il pane a fette. Lascia riposare almeno 1 ora.","Riscalda (ribollisce) e servi con olio extravergine a crudo."]},
+
+{id:17,nome:"Pasta e Ceci",cat:"Zuppe e minestre",emoji:"🫘",bg:"linear-gradient(135deg,#FEF3C7,#B45309)",diff:"Facile",tempo:"35 min",persone_base:4,
+desc:"Piatto povero e nutriente della cucina romana. Cremoso e confortante.",
+ingredienti:[
+  {n:"Pasta corta mista",q:200,u:"g"},
+  {n:"Ceci",q:400,u:"g"},
+  {n:"Rosmarino",q:1,u:"rametto"},
+  {n:"Aglio",q:3,u:"spicchi"},
+  {n:"Pomodori pelati",q:200,u:"g"},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Peperoncino",q:1,u:""}
+],
+prep:["Soffriggi aglio, rosmarino e peperoncino in olio.","Aggiungi i ceci scolati e i pelati. Mescola.","Frulla metà del composto per rendere cremosa la base.","Aggiungi acqua o brodo e porta a ebollizione.","Cuoci la pasta direttamente nel brodo di ceci.","Servi con olio extravergine a crudo."]},
+
+// ─── SECONDI DI CARNE ──────────────────────────
+{id:18,nome:"Pollo al Limone",cat:"Secondi carne",emoji:"🍋",bg:"linear-gradient(135deg,#FEF9C3,#FDE047)",diff:"Facile",tempo:"40 min",persone_base:2,
+desc:"Petto di pollo tenero e profumato al limone con rosmarino. Leggero e gustoso.",
+ingredienti:[
+  {n:"Petto di pollo",q:500,u:"g"},
+  {n:"Limoni",q:2,u:""},
+  {n:"Aglio",q:3,u:"spicchi"},
+  {n:"Rosmarino fresco",q:2,u:"rametti"},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Vino bianco",q:80,u:"ml"},
+  {n:"Burro",q:20,u:"g"}
+],
+prep:["Taglia il petto di pollo a fettine. Schiaccia gli spicchi d'aglio.","Rosola il pollo in olio a fuoco vivace su entrambi i lati.","Aggiungi aglio e rosmarino. Sfuma con il vino bianco.","Spremi il succo di 1 limone e aggiungi le scorze dell'altro.","Copri e cuoci 15 minuti a fuoco basso.","Manteca con il burro a fuoco spento. Servi."]},
+
+{id:19,nome:"Polpette al Sugo",cat:"Secondi carne",emoji:"🍝",bg:"linear-gradient(135deg,#FEE2E2,#EF4444)",diff:"Media",tempo:"1h",persone_base:4,
+desc:"Le polpette della nonna: morbide, saporite, cotte nel sugo di pomodoro.",
+ingredienti:[
+  {n:"Macinato misto",q:500,u:"g"},
+  {n:"Pane raffermo",q:100,u:"g"},
+  {n:"Latte intero",q:80,u:"ml"},
+  {n:"Uova",q:2,u:""},
+  {n:"Parmigiano",q:50,u:"g"},
+  {n:"Prezzemolo",q:1,u:"q.b."},
+  {n:"Pomodori pelati",q:400,u:"g"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Ammolla il pane nel latte e strizzalo.","Mescola la carne con pane, uova, parmigiano, prezzemolo, sale e pepe.","Forma le polpette e rosolale in olio da tutti i lati.","Prepara il sugo: soffriggi la cipolla, aggiungi i pelati.","Adagia le polpette nel sugo e cuoci a fuoco basso 30 minuti."]},
+
+{id:20,nome:"Vitello Tonnato",cat:"Secondi carne",emoji:"🐄",bg:"linear-gradient(135deg,#FEF9C3,#EAB308)",diff:"Media",tempo:"1h 30min",persone_base:4,
+desc:"Il classico piatto piemontese delle feste: vitello lesso servito freddo con salsa tonnata.",
+ingredienti:[
+  {n:"Girello di vitello",q:600,u:"g"},
+  {n:"Tonno sott'olio",q:150,u:"g"},
+  {n:"Acciughe",q:4,u:"filetti"},
+  {n:"Capperi",q:30,u:"g"},
+  {n:"Maionese",q:150,u:"g"},
+  {n:"Limone",q:1,u:""},
+  {n:"Carota",q:1,u:""},
+  {n:"Sedano",q:1,u:"costa"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Alloro",q:2,u:"foglie"}
+],
+prep:["Cuoci il vitello in acqua con carota, sedano, cipolla e alloro per 1h.","Lascia raffreddare completamente nel brodo.","Frulla tonno, acciughe, capperi e maionese. Aggiungi succo di limone.","Affetta il vitello sottilmente.","Disponi le fettine su un piatto e copri con la salsa tonnata.","Decora con capperi. Lascia in frigo almeno 2 ore prima di servire."]},
+
+{id:21,nome:"Ossobuco alla Milanese",cat:"Secondi carne",emoji:"🍖",bg:"linear-gradient(135deg,#FEE2E2,#DC2626)",diff:"Difficile",tempo:"1h 45min",persone_base:2,
+desc:"Il grande classico milanese: ossobuco di vitello brasato con gremolata di limone.",
+ingredienti:[
+  {n:"Ossobuco di vitello",q:4,u:"pezzi"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Carota",q:1,u:""},
+  {n:"Sedano",q:1,u:"costa"},
+  {n:"Pomodori pelati",q:200,u:"g"},
+  {n:"Vino bianco",q:150,u:"ml"},
+  {n:"Brodo di carne",q:300,u:"ml"},
+  {n:"Aglio",q:1,u:"spicchio"},
+  {n:"Limone",q:1,u:"(la scorza)"},
+  {n:"Prezzemolo",q:1,u:"mazzo"},
+  {n:"Farina",q:1,u:"q.b."},
+  {n:"Burro",q:40,u:"g"}
+],
+prep:["Infarina gli ossobuchi e rosolali nel burro da entrambi i lati.","Trita carota, sedano e cipolla. Soffriggi nel burro rimasto.","Aggiungi gli ossobuchi, sfuma con vino bianco.","Aggiungi i pelati e il brodo. Cuoci coperto 1h 20min.","Prepara la gremolata: trita prezzemolo, aglio e scorza di limone.","Servi gli ossobuchi con il fondo di cottura e la gremolata. Accompagna col risotto milanese."]},
+
+{id:22,nome:"Scaloppine al Marsala",cat:"Secondi carne",emoji:"🥩",bg:"linear-gradient(135deg,#FEF9C3,#92400E)",diff:"Facile",tempo:"20 min",persone_base:2,
+desc:"Fettine di vitello tenere e saporite con salsa al Marsala. Pronte in 20 minuti.",
+ingredienti:[
+  {n:"Fettine di vitello",q:400,u:"g"},
+  {n:"Marsala secco",q:150,u:"ml"},
+  {n:"Burro",q:40,u:"g"},
+  {n:"Farina",q:1,u:"q.b."},
+  {n:"Brodo di carne",q:100,u:"ml"}
+],
+prep:["Infarina le fettine di vitello battute sottili.","Rosolale nel burro a fuoco vivace, pochi minuti per lato.","Togli la carne. Aggiungi il Marsala nella stessa padella.","Lascia evaporare l'alcol, aggiungi il brodo e addensa la salsa.","Rimetti la carne per 2 minuti. Servi subito."]},
+
+{id:23,nome:"Bistecca alla Fiorentina",cat:"Secondi carne",emoji:"🥩",bg:"linear-gradient(135deg,#FEE2E2,#991B1B)",diff:"Facile",tempo:"15 min",persone_base:2,
+desc:"La regina della carne italiana: bistecca di Chianina cotta al sangue sulla brace.",
+ingredienti:[
+  {n:"Bistecca Fiorentina 1kg",q:1,u:""},
+  {n:"Sale grosso marino",q:1,u:"q.b."},
+  {n:"Pepe nero",q:1,u:"q.b."},
+  {n:"Olio extravergine Toscano",q:1,u:"q.b."},
+  {n:"Rosmarino",q:1,u:"rametto"},
+  {n:"Limone",q:1,u:""}
+],
+prep:["Porta la bistecca a temperatura ambiente almeno 1h prima.","Scotta la bistecca su brace ardente 5 minuti per lato (totale sul filetto).","Poi cuoci 5-7 minuti in piedi sul lato dell'osso.","Sala solo a fine cottura con sale grosso.","Lascia riposare 5 minuti prima di tagliare.","Servi con un filo di olio, limone e rosmarino."]},
+
+{id:24,nome:"Pollo alla Cacciatora",cat:"Secondi carne",emoji:"🍗",bg:"linear-gradient(135deg,#FEE2E2,#F97316)",diff:"Media",tempo:"1h",persone_base:4,
+desc:"Pollo brasato con pomodoro, olive, capperi e erbe aromatiche. Piatto rustico e saporito.",
+ingredienti:[
+  {n:"Pollo a pezzi",q:1,u:""},
+  {n:"Pomodori pelati",q:400,u:"g"},
+  {n:"Olive nere",q:80,u:"g"},
+  {n:"Capperi",q:30,u:"g"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Carota",q:1,u:""},
+  {n:"Vino bianco",q:100,u:"ml"},
+  {n:"Rosmarino",q:1,u:"rametto"},
+  {n:"Salvia",q:4,u:"foglie"},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Rosola i pezzi di pollo in olio fino a doratura.","Soffriggi cipolla e carota nello stesso tegame.","Sfuma con il vino bianco.","Aggiungi pomodori, olive, capperi e erbe aromatiche.","Cuoci coperto a fuoco basso 40 minuti girando il pollo.","Aggiusta di sale e servi."]},
+
+{id:25,nome:"Cotoletta alla Milanese",cat:"Secondi carne",emoji:"🍳",bg:"linear-gradient(135deg,#FFFBEB,#FDE68A)",diff:"Facile",tempo:"20 min",persone_base:2,
+desc:"La vera cotoletta milanese con l'osso: panata nel pane grattugiato e fritta nel burro.",
+ingredienti:[
+  {n:"Costolette di vitello con osso",q:2,u:""},
+  {n:"Uova",q:2,u:""},
+  {n:"Pangrattato",q:150,u:"g"},
+  {n:"Burro chiarificato",q:100,u:"g"},
+  {n:"Limone",q:1,u:""},
+  {n:"Sale",q:1,u:"q.b."}
+],
+prep:["Batti leggermente le costolette.","Passale nell'uovo sbattuto e poi nel pangrattato. Premi bene.","Friggi nel burro chiarificato a fuoco medio, 4-5 minuti per lato.","Asciuga su carta assorbente.","Servi con spicchio di limone."]},
+
+{id:26,nome:"Braciolette di Agnello",cat:"Secondi carne",emoji:"🥩",bg:"linear-gradient(135deg,#FEE2E2,#B91C1C)",diff:"Facile",tempo:"20 min",persone_base:2,
+desc:"Costolette di agnello grigliate con rosmarino e aglio. Perfette per Pasqua.",
+ingredienti:[
+  {n:"Costolette di agnello",q:8,u:""},
+  {n:"Aglio",q:3,u:"spicchi"},
+  {n:"Rosmarino",q:2,u:"rametti"},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Sale e pepe",q:1,u:"q.b."},
+  {n:"Limone",q:1,u:""}
+],
+prep:["Marina le costolette con olio, aglio schiacciato, rosmarino, sale e pepe per 30 minuti.","Scalda la griglia o padella a fuoco alto.","Cuoci le costolette 3-4 minuti per lato.","Servi subito con limone."]},
+
+{id:27,nome:"Involtini di Carne",cat:"Secondi carne",emoji:"🌯",bg:"linear-gradient(135deg,#FEE2E2,#EF4444)",diff:"Media",tempo:"50 min",persone_base:4,
+desc:"Fettine di carne arrotolate con ripieno di pane, formaggio e prezzemolo, cotte nel sugo.",
+ingredienti:[
+  {n:"Fettine di manzo",q:8,u:""},
+  {n:"Prosciutto cotto",q:100,u:"g"},
+  {n:"Provola affumicata",q:80,u:"g"},
+  {n:"Prezzemolo",q:1,u:"q.b."},
+  {n:"Aglio",q:2,u:"spicchi"},
+  {n:"Pomodori pelati",q:400,u:"g"},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Vino bianco",q:80,u:"ml"},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Stendi le fettine, metti sopra prosciutto, provola, prezzemolo e aglio.","Arrotola e chiudi con stecchini.","Rosola gli involtini in olio a fuoco vivace.","Soffriggi la cipolla nello stesso tegame, aggiungi il vino e i pelati.","Immergi gli involtini nel sugo e cuoci 35 minuti coperto."]},
+
+// ─── SECONDI DI PESCE ──────────────────────────
+{id:28,nome:"Branzino al Forno",cat:"Secondi pesce",emoji:"🐟",bg:"linear-gradient(135deg,#DBEAFE,#60A5FA)",diff:"Facile",tempo:"35 min",persone_base:2,
+desc:"Branzino intero al forno con patate, pomodorini e olive. Fresco e leggero.",
+ingredienti:[
+  {n:"Branzino intero",q:2,u:"(600g l'uno)"},
+  {n:"Patate",q:3,u:""},
+  {n:"Pomodorini ciliegino",q:200,u:"g"},
+  {n:"Olive verdi",q:80,u:"g"},
+  {n:"Aglio",q:3,u:"spicchi"},
+  {n:"Prezzemolo",q:1,u:"mazzo"},
+  {n:"Limone",q:1,u:""},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Pulisci i branzini e farcisci con aglio, prezzemolo e limone.","Taglia le patate a fettine sottili e disponile nella teglia unta.","Adagia i branzini sulle patate, aggiungi pomodorini e olive.","Condisci con olio, sale e pepe.","Cuoci in forno a 200°C per 25-30 minuti."]},
+
+{id:29,nome:"Salmone in Padella",cat:"Secondi pesce",emoji:"🍣",bg:"linear-gradient(135deg,#FEE2E2,#FB923C)",diff:"Facile",tempo:"15 min",persone_base:2,
+desc:"Filetti di salmone croccanti in padella con salsa al limone e capperi.",
+ingredienti:[
+  {n:"Filetti di salmone",q:2,u:"(200g l'uno)"},
+  {n:"Limone",q:1,u:""},
+  {n:"Capperi",q:20,u:"g"},
+  {n:"Burro",q:30,u:"g"},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Aneto fresco",q:1,u:"q.b."}
+],
+prep:["Asciuga i filetti di salmone con carta assorbente. Sala e pepa.","Scalda olio in padella antiaderente a fuoco alto.","Cuoci il salmone 3-4 minuti per lato partendo dal lato pelle.","Aggiungi burro, succo di limone e capperi. Fai glassare 1 minuto.","Servi con aneto fresco."]},
+
+{id:30,nome:"Baccalà alla Livornese",cat:"Secondi pesce",emoji:"🐟",bg:"linear-gradient(135deg,#FEE2E2,#EF4444)",diff:"Media",tempo:"45 min",persone_base:4,
+desc:"Baccalà infarinato e cotto nel sugo di pomodoro con olive e capperi.",
+ingredienti:[
+  {n:"Baccalà già ammollato",q:600,u:"g"},
+  {n:"Pomodori pelati",q:400,u:"g"},
+  {n:"Olive nere",q:80,u:"g"},
+  {n:"Capperi",q:30,u:"g"},
+  {n:"Aglio",q:3,u:"spicchi"},
+  {n:"Farina",q:1,u:"q.b."},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Prezzemolo",q:1,u:"q.b."}
+],
+prep:["Taglia il baccalà a tranci, infarina e friggi in olio.","Soffriggi l'aglio in olio, aggiungi i pelati.","Aggiungi olive e capperi. Cuoci 10 minuti.","Immergi il baccalà nel sugo e cuoci 15 minuti a fuoco basso.","Servi con prezzemolo fresco."]},
+
+{id:31,nome:"Frittura di Paranza",cat:"Secondi pesce",emoji:"🦐",bg:"linear-gradient(135deg,#FFFBEB,#FDE68A)",diff:"Facile",tempo:"20 min",persone_base:2,
+desc:"Frittura mista di pesci e crostacei piccoli, croccante e dorata.",
+ingredienti:[
+  {n:"Paranza mista (alici, calamari, gamberi)",q:500,u:"g"},
+  {n:"Farina 00",q:200,u:"g"},
+  {n:"Olio di semi per friggere",q:1,u:"abbondante"},
+  {n:"Limone",q:2,u:""},
+  {n:"Sale",q:1,u:"q.b."}
+],
+prep:["Pulisci il pesce. Asciuga bene.","Infarinalo abbondantemente passandolo nella farina.","Friggi in olio a 180°C in piccole quantità per non abbassare la temperatura.","Scola su carta assorbente e sala subito.","Servi con spicchi di limone."]},
+
+{id:32,nome:"Calamari Ripieni",cat:"Secondi pesce",emoji:"🦑",bg:"linear-gradient(135deg,#DBEAFE,#3B82F6)",diff:"Media",tempo:"1h",persone_base:2,
+desc:"Calamari interi farciti con pane, gamberi e prezzemolo, cotti al pomodoro.",
+ingredienti:[
+  {n:"Calamari medi",q:4,u:""},
+  {n:"Pane raffermo",q:80,u:"g"},
+  {n:"Gamberi",q:100,u:"g"},
+  {n:"Prezzemolo",q:1,u:"q.b."},
+  {n:"Aglio",q:2,u:"spicchi"},
+  {n:"Pomodorini",q:200,u:"g"},
+  {n:"Vino bianco",q:80,u:"ml"},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Pulisci i calamari. Trita i tentacoli.","Prepara il ripieno: pane bagnato e strizzato, gamberi tritati, tentacoli, prezzemolo, aglio.","Farcisci i calamari e chiudi con uno stecchino.","Rosola in olio, sfuma con vino bianco.","Aggiungi i pomodorini e cuoci 30 minuti a fuoco basso."]},
+
+// ─── CONTORNI ──────────────────────────────────
+{id:33,nome:"Patate al Forno",cat:"Contorni",emoji:"🥔",bg:"linear-gradient(135deg,#FEF9C3,#CA8A04)",diff:"Facile",tempo:"45 min",persone_base:4,
+desc:"Le migliori patate al forno: croccanti fuori, morbide dentro, con rosmarino e aglio.",
+ingredienti:[
+  {n:"Patate a pasta gialla",q:800,u:"g"},
+  {n:"Aglio",q:4,u:"spicchi"},
+  {n:"Rosmarino fresco",q:2,u:"rametti"},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Sale grosso",q:1,u:"q.b."},
+  {n:"Pepe nero",q:1,u:"q.b."}
+],
+prep:["Sbuccia e taglia le patate a spicchi. Sciacqua e asciuga bene.","Condisci con olio, sale grosso, pepe, aglio schiacciato e rosmarino.","Disponi in teglia senza sovrapporle.","Cuoci in forno già caldo a 200°C per 35-40 minuti.","Gira a metà cottura per dorare uniformemente."]},
+
+{id:34,nome:"Melanzane alla Parmigiana",cat:"Contorni",emoji:"🍆",bg:"linear-gradient(135deg,#EDE9FE,#8B5CF6)",diff:"Media",tempo:"1h 30min",persone_base:4,
+desc:"Il grande classico del Sud Italia: melanzane fritte, pomodoro, fiordilatte e parmigiano.",
+ingredienti:[
+  {n:"Melanzane",q:3,u:""},
+  {n:"Pomodori pelati",q:400,u:"g"},
+  {n:"Fiordilatte",q:300,u:"g"},
+  {n:"Parmigiano Reggiano",q:100,u:"g"},
+  {n:"Basilico fresco",q:1,u:"mazzo"},
+  {n:"Uova",q:2,u:""},
+  {n:"Farina",q:1,u:"q.b."},
+  {n:"Olio per friggere",q:1,u:"abbondante"}
+],
+prep:["Taglia le melanzane a fettine, salale e lascia spurgare 30 minuti.","Asciugale, infarina, passa nell'uovo e friggi.","Prepara il sugo con i pelati e il basilico.","In una teglia alterna strati di melanzane, sugo, fiordilatte e parmigiano.","Termina con sugo e parmigiano.","Cuoci in forno a 180°C per 30 minuti."]},
+
+{id:35,nome:"Verdure Grigliate",cat:"Contorni",emoji:"🥒",bg:"linear-gradient(135deg,#D1FAE5,#059669)",diff:"Facile",tempo:"30 min",persone_base:4,
+desc:"Mix di verdure grigliate condite con olio, aglio e prezzemolo. Leggere e gustose.",
+ingredienti:[
+  {n:"Zucchine",q:2,u:""},
+  {n:"Melanzane",q:1,u:""},
+  {n:"Peperoni rossi e gialli",q:2,u:""},
+  {n:"Cipolla rossa",q:1,u:""},
+  {n:"Aglio",q:2,u:"spicchi"},
+  {n:"Prezzemolo",q:1,u:"q.b."},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Taglia le verdure a fette di 1 cm.","Griglia su piastra calda 3-4 minuti per lato.","Disponi in un piatto e condisci con aglio, prezzemolo e olio.","Lascia marinare almeno 30 minuti prima di servire."]},
+
+{id:36,nome:"Spinaci all'Aglio",cat:"Contorni",emoji:"🥬",bg:"linear-gradient(135deg,#D1FAE5,#16A34A)",diff:"Facile",tempo:"10 min",persone_base:2,
+desc:"Spinaci saltati in padella con aglio e olio. Pronti in 10 minuti.",
+ingredienti:[
+  {n:"Spinaci freschi",q:500,u:"g"},
+  {n:"Aglio",q:3,u:"spicchi"},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Sale e pepe",q:1,u:"q.b."}
+],
+prep:["Lava bene gli spinaci.","Soffriggi l'aglio in olio a fuoco medio.","Aggiungi gli spinaci ancora bagnati e copri con coperchio.","Cuoci 3-4 minuti mescolando.","Sala, pepa e servi."]},
+
+{id:37,nome:"Peperonata",cat:"Contorni",emoji:"🫑",bg:"linear-gradient(135deg,#FEF9C3,#EF4444)",diff:"Facile",tempo:"40 min",persone_base:4,
+desc:"Peperoni rossi e gialli in padella con cipolla e pomodoro. Ottima calda o fredda.",
+ingredienti:[
+  {n:"Peperoni rossi",q:3,u:""},
+  {n:"Peperoni gialli",q:2,u:""},
+  {n:"Cipolla",q:2,u:""},
+  {n:"Pomodori pelati",q:200,u:"g"},
+  {n:"Basilico",q:1,u:"q.b."},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Taglia i peperoni a listarelle e la cipolla ad anelli.","Soffriggi la cipolla in olio.","Aggiungi i peperoni e cuoci a fuoco medio 15 minuti mescolando.","Aggiungi i pelati e il basilico. Cuoci altri 15 minuti.","Aggiusta di sale. Ottima anche il giorno dopo."]},
+
+{id:38,nome:"Insalata Caprese",cat:"Contorni",emoji:"🍅",bg:"linear-gradient(135deg,#D1FAE5,#EF4444)",diff:"Facile",tempo:"10 min",persone_base:2,
+desc:"Il simbolo dell'estate italiana: pomodori, mozzarella, basilico e olio extravergine.",
+ingredienti:[
+  {n:"Pomodori rossi maturi",q:3,u:""},
+  {n:"Mozzarella di bufala",q:250,u:"g"},
+  {n:"Basilico fresco",q:1,u:"mazzo"},
+  {n:"Olio extravergine di qualità",q:1,u:"q.b."},
+  {n:"Sale",q:1,u:"q.b."},
+  {n:"Origano",q:1,u:"q.b. (opzionale)"}
+],
+prep:["Taglia i pomodori e la mozzarella a fette di uguale spessore.","Alterna fette di pomodoro e mozzarella sul piatto.","Aggiungi foglie di basilico fresco.","Condisci con olio extravergine e sale.","Non usare aceto! Servi subito."]},
+
+// ─── PIZZA E LIEVITATI ─────────────────────────
+{id:39,nome:"Pizza Margherita",cat:"Pizza e lievitati",emoji:"🍕",bg:"linear-gradient(135deg,#FEE2E2,#EF4444)",diff:"Media",tempo:"3h (con lievitazione)",persone_base:2,
+desc:"La pizza napoletana originale con mozzarella fiordilatte, pomodoro San Marzano e basilico.",
+ingredienti:[
+  {n:"Farina 00",q:500,u:"g"},
+  {n:"Acqua tiepida",q:320,u:"ml"},
+  {n:"Lievito di birra fresco",q:7,u:"g"},
+  {n:"Sale fino",q:10,u:"g"},
+  {n:"Pomodori San Marzano",q:400,u:"g"},
+  {n:"Fiordilatte",q:300,u:"g"},
+  {n:"Basilico fresco",q:1,u:"mazzo"},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Sciogli il lievito nell'acqua tiepida.","Impasta la farina con acqua e lievito. Aggiungi il sale. Lavora 10 minuti.","Lascia lievitare coperto 2h o finché raddoppia.","Dividi in panetti e stendi i dischi di pizza.","Condisci con pomodoro passato, sale e olio.","Cuoci in forno al massimo (250°C+) 8-10 minuti.","Aggiungi fiordilatte a metà cottura e basilico alla fine."]},
+
+{id:40,nome:"Focaccia Genovese",cat:"Pizza e lievitati",emoji:"🫓",bg:"linear-gradient(135deg,#FFFBEB,#D97706)",diff:"Media",tempo:"3h (con lievitazione)",persone_base:6,
+desc:"La vera focaccia di Genova: alta, morbida, con olio abbondante e salamoia.",
+ingredienti:[
+  {n:"Farina 00",q:500,u:"g"},
+  {n:"Acqua tiepida",q:350,u:"ml"},
+  {n:"Lievito di birra",q:10,u:"g"},
+  {n:"Olio extravergine",q:80,u:"ml"},
+  {n:"Sale fino",q:10,u:"g"},
+  {n:"Sale grosso",q:1,u:"q.b."}
+],
+prep:["Impasta farina, acqua, lievito, metà olio e il sale.","Lascia lievitare 1h.","Stendi in teglia unta generosamente con olio.","Lascia lievitare ancora 1h.","Fai i buchi con le dita. Versa la salamoia (acqua, olio, sale) sui buchi.","Cuoci a 220°C per 20-25 minuti."]},
+
+{id:41,nome:"Pane Casereccio",cat:"Pizza e lievitati",emoji:"🍞",bg:"linear-gradient(135deg,#FEF9C3,#92400E)",diff:"Media",tempo:"4h (con lievitazione)",persone_base:1,
+desc:"Il pane fatto in casa con lievito di birra. Crosta croccante e mollica morbida.",
+ingredienti:[
+  {n:"Farina tipo 0",q:500,u:"g"},
+  {n:"Acqua tiepida",q:320,u:"ml"},
+  {n:"Lievito di birra fresco",q:15,u:"g"},
+  {n:"Sale",q:10,u:"g"},
+  {n:"Olio extravergine",q:20,u:"ml"}
+],
+prep:["Sciogli il lievito nell'acqua tiepida con un pizzico di zucchero.","Impasta la farina con acqua e lievito. Aggiungi olio e sale.","Lavora l'impasto 10 minuti fino a ottenere una massa liscia.","Lascia lievitare coperto 2h.","Forma il pane, lascia lievitare ancora 1h.","Cuoci in forno a 220°C con vapore per 35-40 minuti."]},
+
+{id:42,nome:"Pizza Quattro Formaggi",cat:"Pizza e lievitati",emoji:"🧀",bg:"linear-gradient(135deg,#FFFBEB,#FDE68A)",diff:"Media",tempo:"3h",persone_base:2,
+desc:"Pizza bianca con quattro formaggi italiani: mozzarella, gorgonzola, fontina e parmigiano.",
+ingredienti:[
+  {n:"Impasto per pizza",q:400,u:"g"},
+  {n:"Mozzarella",q:150,u:"g"},
+  {n:"Gorgonzola dolce",q:80,u:"g"},
+  {n:"Fontina",q:80,u:"g"},
+  {n:"Parmigiano Reggiano",q:50,u:"g"},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Stendi l'impasto lievitato.","Distribuisci la mozzarella sbriciolata.","Aggiungi il gorgonzola a pezzi e la fontina a dadini.","Completa col parmigiano grattugiato.","Condisci con un filo d'olio.","Cuoci a 250°C per 8-10 minuti."]},
+
+// ─── DOLCI ─────────────────────────────────────
+{id:43,nome:"Tiramisù Classico",cat:"Dolci",emoji:"☕",bg:"linear-gradient(135deg,#FEF3C7,#92400E)",diff:"Facile",tempo:"30 min + riposo",persone_base:6,
+desc:"Il dolce italiano più famoso nel mondo. Con mascarpone, savoiardi e caffè.",
+ingredienti:[
+  {n:"Mascarpone",q:500,u:"g"},
+  {n:"Uova",q:4,u:""},
+  {n:"Zucchero semolato",q:100,u:"g"},
+  {n:"Savoiardi",q:200,u:"g"},
+  {n:"Caffè espresso freddo",q:300,u:"ml"},
+  {n:"Cacao amaro in polvere",q:1,u:"q.b."},
+  {n:"Marsala o Rum (opzionale)",q:1,u:"q.b."}
+],
+prep:["Separa i tuorli dagli albumi. Monta i tuorli con lo zucchero fino a ottenere una crema chiara.","Incorpora il mascarpone ai tuorli montati.","Monta gli albumi a neve ferma e incorporali delicatamente.","Immergi rapidamente i savoiardi nel caffè.","Componi il tiramisù a strati: savoiardi, crema, savoiardi, crema.","Spolvera con cacao amaro e lascia in frigo almeno 4 ore."]},
+
+{id:44,nome:"Panna Cotta",cat:"Dolci",emoji:"🍮",bg:"linear-gradient(135deg,#FEE2E2,#FECACA)",diff:"Facile",tempo:"20 min + riposo",persone_base:4,
+desc:"Dolce cremoso piemontese con salsa di fragole o frutti rossi. Semplicissimo.",
+ingredienti:[
+  {n:"Panna fresca",q:500,u:"ml"},
+  {n:"Zucchero",q:80,u:"g"},
+  {n:"Gelatina in fogli",q:8,u:"g"},
+  {n:"Vaniglia",q:1,u:"bacca"},
+  {n:"Fragole",q:200,u:"g"},
+  {n:"Zucchero a velo",q:30,u:"g"},
+  {n:"Limone",q:1,u:""}
+],
+prep:["Ammolla la gelatina in acqua fredda per 10 minuti.","Scalda la panna con lo zucchero e i semi di vaniglia. Non bollire.","Strizza la gelatina e scioglila nella panna calda.","Versa negli stampini e lascia in frigo almeno 4 ore.","Prepara la salsa: frulla le fragole con zucchero a velo e limone.","Sforma la panna cotta e servi con la salsa."]},
+
+{id:45,nome:"Cannoli Siciliani",cat:"Dolci",emoji:"🧁",bg:"linear-gradient(135deg,#FEF3C7,#D97706)",diff:"Difficile",tempo:"2h",persone_base:8,
+desc:"I re della pasticceria siciliana: cialda croccante con ripieno di ricotta e canditi.",
+ingredienti:[
+  {n:"Farina 00",q:250,u:"g"},
+  {n:"Zucchero",q:30,u:"g"},
+  {n:"Strutto",q:30,u:"g"},
+  {n:"Vino Marsala",q:80,u:"ml"},
+  {n:"Ricotta di pecora",q:500,u:"g"},
+  {n:"Zucchero a velo",q:150,u:"g"},
+  {n:"Gocce di cioccolato",q:80,u:"g"},
+  {n:"Scorza d'arancia candita",q:50,u:"g"},
+  {n:"Olio per friggere",q:1,u:"abbondante"},
+  {n:"Uovo",q:1,u:"(per sigillare)"}
+],
+prep:["Impasta farina, zucchero, strutto e Marsala. Lascia riposare 30 min.","Stendi sottile e ritaglia cerchi. Arrotola sulle forme cilindriche.","Friggi in olio a 180°C fino a doratura. Raffredda.","Setaccia la ricotta, mescola con zucchero a velo.","Aggiungi gocce di cioccolato e canditi.","Farcisci i cannoli al momento di servire. Spolve con zucchero a velo."]},
+
+{id:46,nome:"Torta della Nonna",cat:"Dolci",emoji:"🥧",bg:"linear-gradient(135deg,#FFFBEB,#FDE68A)",diff:"Media",tempo:"1h 30min",persone_base:8,
+desc:"La crostata toscana con crema pasticcera e pinoli. Il classico dolce di casa.",
+ingredienti:[
+  {n:"Farina 00",q:300,u:"g"},
+  {n:"Burro",q:150,u:"g"},
+  {n:"Zucchero",q:100,u:"g"},
+  {n:"Uova",q:3,u:""},
+  {n:"Latte intero",q:500,u:"ml"},
+  {n:"Amido di mais",q:40,u:"g"},
+  {n:"Vaniglia",q:1,u:"bacca"},
+  {n:"Pinoli",q:80,u:"g"},
+  {n:"Zucchero a velo",q:1,u:"q.b."}
+],
+prep:["Prepara la frolla: impasta farina, burro, zucchero, 2 uova. Lascia riposare 30 min.","Prepara la crema: scalda latte con vaniglia. Monta 2 tuorli con zucchero e amido, poi versa il latte caldo mescolando. Cuoci fino ad addensare.","Stendi metà frolla in una teglia imburrata.","Versa la crema pasticcera fredda.","Copri con l'altra metà di frolla. Spennella con uovo e cospargi di pinoli.","Cuoci a 175°C per 35 minuti."]},
+
+{id:47,nome:"Crostata di Marmellata",cat:"Dolci",emoji:"🥧",bg:"linear-gradient(135deg,#FEE2E2,#FB923C)",diff:"Facile",tempo:"1h",persone_base:8,
+desc:"La torta più semplice e buona: pasta frolla friabile con marmellata a scelta.",
+ingredienti:[
+  {n:"Farina 00",q:300,u:"g"},
+  {n:"Burro freddo",q:150,u:"g"},
+  {n:"Zucchero a velo",q:100,u:"g"},
+  {n:"Uova",q:2,u:""},
+  {n:"Scorza di limone",q:1,u:""},
+  {n:"Marmellata a scelta",q:300,u:"g"}
+],
+prep:["Impasta velocemente farina, burro a pezzetti, zucchero, uova e scorza limone.","Forma una palla e lascia riposare in frigo 30 min.","Stendi 2/3 della frolla in teglia.","Distribuisci la marmellata.","Con il rimanente impasto forma le strisce della griglia.","Cuoci a 175°C per 30-35 minuti."]},
+
+{id:48,nome:"Ciambella allo Yogurt",cat:"Dolci",emoji:"🍩",bg:"linear-gradient(135deg,#FEF9C3,#EAB308)",diff:"Facile",tempo:"1h",persone_base:8,
+desc:"La torta di casa più semplice: sofficissima, si prepara con i vasetti dello yogurt come misura.",
+ingredienti:[
+  {n:"Yogurt bianco",q:125,u:"g (1 vasetto)"},
+  {n:"Farina 00",q:375,u:"g (3 vasetti)"},
+  {n:"Zucchero",q:250,u:"g (2 vasetti)"},
+  {n:"Olio di semi",q:125,u:"ml (1 vasetto)"},
+  {n:"Uova",q:3,u:""},
+  {n:"Lievito per dolci",q:16,u:"g"},
+  {n:"Scorza di limone",q:1,u:""}
+],
+prep:["Mescola yogurt, zucchero e uova.","Aggiungi l'olio e la scorza di limone.","Incorpora farina setacciata con il lievito.","Versa in stampo da ciambella unto.","Cuoci a 180°C per 35-40 minuti.","Prova con lo stecchino: deve uscire asciutto."]},
+
+{id:49,nome:"Semifreddo al Cioccolato",cat:"Dolci",emoji:"🍫",bg:"linear-gradient(135deg,#292524,#78350F)",diff:"Media",tempo:"30 min + freeze",persone_base:6,
+desc:"Dolce gelato al cioccolato fondente da preparare in anticipo. Scenografico e buonissimo.",
+ingredienti:[
+  {n:"Cioccolato fondente 70%",q:200,u:"g"},
+  {n:"Panna fresca",q:400,u:"ml"},
+  {n:"Uova",q:3,u:""},
+  {n:"Zucchero",q:80,u:"g"},
+  {n:"Cacao amaro",q:1,u:"q.b."}
+],
+prep:["Fonde il cioccolato a bagnomaria. Lascia intiepidire.","Monta la panna ben ferma.","Monta i tuorli con lo zucchero fino a ottenere una crema chiara.","Monta gli albumi a neve.","Incorpora il cioccolato fuso ai tuorli, poi la panna e infine gli albumi.","Versa in stampo e congela almeno 6 ore. Spolve con cacao."]},
+
+{id:50,nome:"Pastiera Napoletana",cat:"Dolci",emoji:"🥧",bg:"linear-gradient(135deg,#D1FAE5,#FFFBEB)",diff:"Difficile",tempo:"2h + riposo",persone_base:8,
+desc:"Il dolce di Pasqua per eccellenza: pasta frolla con ripieno di ricotta, grano e acqua di fiori d'arancio.",
+ingredienti:[
+  {n:"Farina 00",q:300,u:"g"},
+  {n:"Burro",q:150,u:"g"},
+  {n:"Zucchero",q:100,u:"g"},
+  {n:"Uova",q:2,u:""},
+  {n:"Grano cotto",q:350,u:"g"},
+  {n:"Ricotta",q:400,u:"g"},
+  {n:"Zucchero",q:200,u:"g"},
+  {n:"Uova",q:4,u:""},
+  {n:"Acqua di fiori d'arancio",q:2,u:"cucchiai"},
+  {n:"Cedro candito",q:50,u:"g"},
+  {n:"Cannella",q:1,u:"q.b."}
+],
+prep:["Prepara la frolla e lascia riposare 30 min.","Amalgama il grano cotto con burro e latte in padella.","Mescola ricotta setacciata, zucchero, uova, acqua di fiori d'arancio, cedro e cannella.","Unisci il grano alla crema di ricotta.","Fodera la teglia con la frolla, versa il ripieno e decora con strisce di frolla.","Cuoci a 180°C per 50-60 minuti. Lascia riposare 1 giorno prima di servire."]},
+
+// ─── COLAZIONE ─────────────────────────────────
+{id:51,nome:"Cornetti all'Italiana",cat:"Colazione",emoji:"🥐",bg:"linear-gradient(135deg,#FFFBEB,#FDE68A)",diff:"Difficile",tempo:"4h",persone_base:8,
+desc:"I cornetti sfogliati italiani, più dolci dei croissant francesi. Profumati di vaniglia.",
+ingredienti:[
+  {n:"Farina Manitoba",q:500,u:"g"},
+  {n:"Burro",q:250,u:"g"},
+  {n:"Zucchero",q:80,u:"g"},
+  {n:"Lievito di birra",q:15,u:"g"},
+  {n:"Uova",q:2,u:""},
+  {n:"Latte tiepido",q:200,u:"ml"},
+  {n:"Miele",q:30,u:"g"},
+  {n:"Vaniglia",q:1,u:""},
+  {n:"Sale",q:5,u:"g"}
+],
+prep:["Impasta farina, lievito, latte, zucchero, uova, miele e vaniglia.","Aggiungi il sale. Lascia lievitare 1h.","Sfoglia con il burro in 3 giri di riposo (come i croissant).","Stendi, ritaglia triangoli e arrotola verso la punta.","Lascia lievitare 2h.","Spennella con uovo e cuoci a 190°C per 15-18 minuti."]},
+
+{id:52,nome:"Pancakes all'Italiana",cat:"Colazione",emoji:"🥞",bg:"linear-gradient(135deg,#FFFBEB,#F59E0B)",diff:"Facile",tempo:"20 min",persone_base:2,
+desc:"Pancakes soffici e gonfi, ottimi con miele, marmellata o Nutella.",
+ingredienti:[
+  {n:"Farina 00",q:150,u:"g"},
+  {n:"Latte intero",q:200,u:"ml"},
+  {n:"Uova",q:2,u:""},
+  {n:"Zucchero",q:30,u:"g"},
+  {n:"Lievito per dolci",q:8,u:"g"},
+  {n:"Burro",q:20,u:"g"},
+  {n:"Miele o marmellata",q:1,u:"q.b."}
+],
+prep:["Separa i tuorli dagli albumi.","Mescola tuorli, zucchero, latte e farina. Aggiungi lievito e burro fuso.","Monta gli albumi a neve e incorporali.","Cuoci in padella antiaderente unta con un filo di burro.","Versa un mestolino di impasto per pancake.","Quando si formano le bolle in superficie, gira. Servi con miele."]},
+
+{id:53,nome:"Frittelle di Mele",cat:"Colazione",emoji:"🍎",bg:"linear-gradient(135deg,#FEF9C3,#DC2626)",diff:"Facile",tempo:"25 min",persone_base:4,
+desc:"Frittelle soffici con mele, ottime per colazione o merenda.",
+ingredienti:[
+  {n:"Mele golden",q:3,u:""},
+  {n:"Farina 00",q:200,u:"g"},
+  {n:"Latte",q:150,u:"ml"},
+  {n:"Uova",q:2,u:""},
+  {n:"Zucchero",q:50,u:"g"},
+  {n:"Lievito per dolci",q:8,u:"g"},
+  {n:"Olio per friggere",q:1,u:"abbondante"},
+  {n:"Zucchero a velo",q:1,u:"q.b."},
+  {n:"Cannella",q:1,u:"q.b."}
+],
+prep:["Sbuccia e taglia le mele a rondelle di 1 cm.","Prepara la pastella: mescola farina, latte, uova, zucchero e lievito.","Immergi le rondelle di mela nella pastella.","Friggi in olio caldo finché dorate.","Scola e spolvera con zucchero a velo e cannella."]},
+
+// ─── UOVA ──────────────────────────────────────
+{id:54,nome:"Frittata di Patate",cat:"Uova",emoji:"🥚",bg:"linear-gradient(135deg,#FFFBEB,#D97706)",diff:"Facile",tempo:"25 min",persone_base:2,
+desc:"La frittata di patate alta e soffice, croccante fuori e morbida dentro.",
+ingredienti:[
+  {n:"Patate",q:300,u:"g"},
+  {n:"Uova",q:4,u:""},
+  {n:"Cipolla",q:1,u:""},
+  {n:"Parmigiano",q:40,u:"g"},
+  {n:"Sale e pepe",q:1,u:"q.b."},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Taglia le patate a fettine sottili e la cipolla ad anelli.","Soffriggi cipolla e patate in padella antiaderente con olio finché morbide.","Sbatti le uova con parmigiano, sale e pepe.","Versa le uova sulle patate. Cuoci a fuoco basso con coperchio 5 minuti.","Gira la frittata con un piatto e completa la cottura sull'altro lato."]},
+
+{id:55,nome:"Uova all'Occhio di Bue",cat:"Uova",emoji:"🍳",bg:"linear-gradient(135deg,#FFFBEB,#FDE68A)",diff:"Facile",tempo:"5 min",persone_base:1,
+desc:"Le uova fritte perfette: albume cotto e tuorlo ancora morbido.",
+ingredienti:[
+  {n:"Uova freschissime",q:2,u:""},
+  {n:"Burro",q:15,u:"g"},
+  {n:"Sale",q:1,u:"q.b."},
+  {n:"Pepe nero",q:1,u:"q.b."},
+  {n:"Pane in cassetta",q:2,u:"fette"}
+],
+prep:["Scalda il burro in padella antiaderente a fuoco basso.","Rompi le uova delicatamente nella padella.","Copri con coperchio e cuoci 3-4 minuti.","Il tuorlo deve restare morbido, l'albume completamente cotto.","Sala solo sull'albume, mai sul tuorlo. Servi con pane tostato."]},
+
+{id:56,nome:"Frittata di Zucchine",cat:"Uova",emoji:"🥒",bg:"linear-gradient(135deg,#D1FAE5,#16A34A)",diff:"Facile",tempo:"20 min",persone_base:2,
+desc:"Frittata leggera con zucchine fresche, basilico e menta.",
+ingredienti:[
+  {n:"Zucchine",q:300,u:"g"},
+  {n:"Uova",q:4,u:""},
+  {n:"Parmigiano",q:40,u:"g"},
+  {n:"Basilico",q:1,u:"q.b."},
+  {n:"Olio extravergine",q:1,u:"q.b."},
+  {n:"Sale e pepe",q:1,u:"q.b."}
+],
+prep:["Taglia le zucchine a rondelle e saltale in padella con olio.","Sbatti le uova con parmigiano, basilico, sale e pepe.","Aggiungi le zucchine all'impasto di uova.","Versa nella padella unta e cuoci coperto 5 minuti.","Gira e completa la cottura."]},
+
+// ─── EXTRA RICETTE POPOLARI ─────────────────────
+{id:57,nome:"Supplì al Telefono",cat:"Antipasti",emoji:"🍙",bg:"linear-gradient(135deg,#FEE2E2,#EF4444)",diff:"Media",tempo:"1h",persone_base:4,
+desc:"I supplì romani fritti con risotto al ragù e mozzarella filante dentro.",
+ingredienti:[
+  {n:"Riso",q:300,u:"g"},
+  {n:"Macinato di manzo",q:200,u:"g"},
+  {n:"Pomodori pelati",q:300,u:"g"},
+  {n:"Mozzarella",q:150,u:"g"},
+  {n:"Uova",q:2,u:""},
+  {n:"Pangrattato",q:200,u:"g"},
+  {n:"Parmigiano",q:60,u:"g"},
+  {n:"Olio per friggere",q:1,u:"abbondante"}
+],
+prep:["Prepara il ragù con il macinato e i pelati. Cuoci 30 min.","Cuoci il riso nel ragù finché assorbe tutto il liquido.","Lascia raffreddare. Aggiungi uova e parmigiano.","Forma i supplì inserendo un pezzetto di mozzarella dentro.","Passa nell'uovo e nel pangrattato.","Friggi in olio a 180°C finché dorati."]},
+
+{id:58,nome:"Arancini di Riso",cat:"Antipasti",emoji:"🍊",bg:"linear-gradient(135deg,#FEF3C7,#F97316)",diff:"Media",tempo:"1h 30min",persone_base:8,
+desc:"Gli arancini siciliani: palle di riso fritte con ragù, piselli e mozzarella.",
+ingredienti:[
+  {n:"Riso",q:400,u:"g"},
+  {n:"Macinato",q:200,u:"g"},
+  {n:"Piselli",q:100,u:"g"},
+  {n:"Pomodori pelati",q:200,u:"g"},
+  {n:"Mozzarella",q:150,u:"g"},
+  {n:"Parmigiano",q:80,u:"g"},
+  {n:"Uova",q:3,u:""},
+  {n:"Pangrattato",q:200,u:"g"},
+  {n:"Zafferano",q:1,u:"bustina"},
+  {n:"Olio per friggere",q:1,u:"abbondante"}
+],
+prep:["Cuoci il riso al dente con lo zafferano. Lascia raffreddare con parmigiano.","Prepara il ragù con macinato, pomodori e piselli.","Prendi una manciata di riso, fai un incavo, metti ragù e mozzarella.","Chiudi e forma la palla (o cono).","Passa in uovo e pangrattato.","Friggi in olio a 180°C finché dorati."]},
+
+{id:59,nome:"Bruschetta al Pomodoro",cat:"Antipasti",emoji:"🍅",bg:"linear-gradient(135deg,#FEE2E2,#B91C1C)",diff:"Facile",tempo:"10 min",persone_base:4,
+desc:"L'antipasto italiano più semplice e buono: pane tostato con pomodoro fresco e basilico.",
+ingredienti:[
+  {n:"Pane casereccio",q:8,u:"fette"},
+  {n:"Pomodori maturi",q:4,u:""},
+  {n:"Basilico fresco",q:1,u:"mazzo"},
+  {n:"Aglio",q:2,u:"spicchi"},
+  {n:"Olio extravergine di qualità",q:1,u:"q.b."},
+  {n:"Sale grosso",q:1,u:"q.b."},
+  {n:"Pepe nero",q:1,u:"q.b."}
+],
+prep:["Tosta le fette di pane sulla griglia o in forno.","Taglia i pomodori a dadini, sala e lascia scolare 5 minuti.","Strofina l'aglio sulle fette di pane ancora calde.","Aggiungi i pomodori sul pane.","Aggiungi basilico, olio extravergine abbondante e pepe.","Servi subito."]},
+
+{id:60,nome:"Gnocchi di Patate",cat:"Primi",emoji:"🥔",bg:"linear-gradient(135deg,#FEF9C3,#CA8A04)",diff:"Media",tempo:"1h",persone_base:4,
+desc:"Gnocchi fatti in casa, morbidi e leggeri. Con burro e salvia o qualsiasi sugo.",
+ingredienti:[
+  {n:"Patate a pasta bianca",q:1,u:"kg"},
+  {n:"Farina 00",q:200,u:"g"},
+  {n:"Uovo",q:1,u:""},
+  {n:"Sale",q:1,u:"q.b."},
+  {n:"Burro",q:60,u:"g"},
+  {n:"Salvia",q:6,u:"foglie"},
+  {n:"Parmigiano",q:60,u:"g"}
+],
+prep:["Lessale le patate con la buccia. Pelale e passale finché calde.","Disponi su piano di lavoro, aggiungi farina, uovo e sale.","Lavora velocemente l'impasto senza scalfirlo troppo.","Forma i filoni e taglia gli gnocchi.","Passa sui rebbi della forchetta per rigarli.","Cuoci in acqua bollente salata fino a quando vengono a galla (2 min).","Condisci con burro fuso e salvia."]},
+
+{id:61,nome:"Pasta alla Norma",cat:"Primi",emoji:"🍆",bg:"linear-gradient(135deg,#EDE9FE,#7C3AED)",diff:"Media",tempo:"40 min",persone_base:2,
+desc:"Il piatto simbolo di Catania: pasta con melanzane fritte, pomodoro, basilico e ricotta salata.",
+ingredienti:[
+  {n:"Rigatoni",q:200,u:"g"},
+  {n:"Melanzane",q:2,u:""},
+  {n:"Pomodori pelati",q:400,u:"g"},
+  {n:"Ricotta salata",q:80,u:"g"},
+  {n:"Basilico fresco",q:1,u:"mazzo"},
+  {n:"Aglio",q:2,u:"spicchi"},
+  {n:"Olio per friggere",q:1,u:"abbondante"}
+],
+prep:["Taglia le melanzane a fette, sala e lascia spurgare 30 min. Asciuga e friggi.","Prepara il sugo: soffriggi l'aglio, aggiungi i pelati, cuoci 15 min.","Cuoci la pasta al dente.","Manteca nel sugo con le melanzane fritte.","Servi con basilico fresco e ricotta salata grattugiata abbondante."]},
+
+{id:62,nome:"Spaghetti alle Vongole",cat:"Primi",emoji:"🐚",bg:"linear-gradient(135deg,#DBEAFE,#0284C7)",diff:"Media",tempo:"30 min",persone_base:2,
+desc:"Il classico della cucina marinara napoletana, in bianco o con pomodorini.",
+ingredienti:[
+  {n:"Spaghetti",q:200,u:"g"},
+  {n:"Vongole veraci",q:600,u:"g"},
+  {n:"Aglio",q:4,u:"spicchi"},
+  {n:"Prezzemolo",q:1,u:"mazzo"},
+  {n:"Vino bianco secco",q:100,u:"ml"},
+  {n:"Peperoncino",q:1,u:""},
+  {n:"Olio extravergine",q:1,u:"abbondante"}
+],
+prep:["Fai spurgare le vongole in acqua salata per 2h. Sciacqua bene.","Soffriggi aglio e peperoncino in olio abbondante.","Aggiungi le vongole, sfuma con vino bianco. Copri fino a che si aprono.","Cuoci gli spaghetti molto al dente. Scola conservando l'acqua.","Manteca nel sugo delle vongole aggiungendo acqua di cottura.","Aggiungi prezzemolo abbondante e olio a crudo."]},
+
+{id:63,nome:"Risotto al Limone",cat:"Primi",emoji:"🍋",bg:"linear-gradient(135deg,#FEFCE8,#BEF264)",diff:"Media",tempo:"30 min",persone_base:2,
+desc:"Risotto delicato e profumato con scorza e succo di limone, mantecato con burro e parmigiano.",
+ingredienti:[
+  {n:"Riso Carnaroli",q:180,u:"g"},
+  {n:"Limoni",q:2,u:""},
+  {n:"Brodo vegetale",q:700,u:"ml"},
+  {n:"Cipolla",q:1,u:"piccola"},
+  {n:"Burro",q:60,u:"g"},
+  {n:"Vino bianco",q:80,u:"ml"},
+  {n:"Parmigiano",q:60,u:"g"},
+  {n:"Erba cipollina",q:1,u:"q.b."}
+],
+prep:["Soffriggi la cipolla in metà burro.","Tosta il riso, sfuma con vino bianco.","Cuoci aggiungendo brodo caldo a mestoli. 17 minuti.","A fine cottura aggiungi succo e scorza di limone.","Manteca con burro rimasto e parmigiano.","Decora con erba cipollina e scorza di limone."]},
+
+{id:64,nome:"Pollo alla Pizzaiola",cat:"Secondi carne",emoji:"🍕",bg:"linear-gradient(135deg,#FEE2E2,#F97316)",diff:"Facile",tempo:"30 min",persone_base:2,
+desc:"Petto di pollo con sugo alla pizzaiola: pomodoro, origano e olive. Veloce e saporito.",
+ingredienti:[
+  {n:"Petto di pollo",q:400,u:"g"},
+  {n:"Pomodori pelati",q:400,u:"g"},
+  {n:"Olive nere",q:60,u:"g"},
+  {n:"Origano",q:1,u:"q.b."},
+  {n:"Aglio",q:2,u:"spicchi"},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Taglia il pollo a fettine. Rosola in padella con aglio.","Aggiungi i pelati schiacciati e le olive.","Condisci con origano abbondante.","Cuoci a fuoco medio 15 minuti.","Aggiusta di sale e servi."]},
+
+{id:65,nome:"Panzanella Toscana",cat:"Contorni",emoji:"🍅",bg:"linear-gradient(135deg,#FEF9C3,#EF4444)",diff:"Facile",tempo:"20 min + riposo",persone_base:4,
+desc:"L'insalata toscana estiva con pane raffermo, pomodori, cipolla e basilico.",
+ingredienti:[
+  {n:"Pane toscano raffermo",q:300,u:"g"},
+  {n:"Pomodori maturi",q:4,u:""},
+  {n:"Cipolla rossa",q:1,u:""},
+  {n:"Cetrioli",q:1,u:""},
+  {n:"Basilico fresco",q:1,u:"mazzo"},
+  {n:"Aceto di vino rosso",q:2,u:"cucchiai"},
+  {n:"Olio extravergine",q:1,u:"q.b."}
+],
+prep:["Bagna il pane con acqua e aceto e strizzalo.","Taglia pomodori, cipolla e cetrioli.","Unisci tutti gli ingredienti in una ciotola.","Condisci con olio, aceto, sale e pepe.","Lascia riposare almeno 30 minuti in frigo.","Aggiungi basilico fresco prima di servire."]}
+];
+
+// ═══════════════════════════════════════════════
+// STATO APP - RICETTE
+// ═══════════════════════════════════════════════
+var catAttiva = 'Tutte';
+var diffAttiva = 'Tutte';
+var ricettaAperta = null;
+var persone = 2;
+
+function filterRicette() {
+  var q = (document.getElementById('search').value || '').toLowerCase();
+  var lista = DB.filter(function(r) {
+    var matchCat  = catAttiva  === 'Tutte' || r.cat === catAttiva;
+    var matchDiff = diffAttiva === 'Tutte' || r.diff === diffAttiva;
+    var matchQ    = !q || r.nome.toLowerCase().includes(q);
+    return matchCat && matchDiff && matchQ;
+  });
+  renderGriglia(lista);
+}
+
+function setCat(cat, btn) {
+  catAttiva = cat;
+  document.querySelectorAll('.cat-chip').forEach(function(c) { c.classList.remove('on'); });
+  btn.classList.add('on');
+  filterRicette();
+}
+
+function setDiff(diff, btn) {
+  diffAttiva = diff;
+  document.querySelectorAll('.diff-btn').forEach(function(b) { b.classList.remove('on','easy','med','hard','all'); });
+  var cls = diff === 'Facile' ? 'easy' : diff === 'Media' ? 'med' : diff === 'Difficile' ? 'hard' : 'all';
+  btn.classList.add('on', cls);
+  filterRicette();
+}
+
+function renderGriglia(lista) {
+  var grid = document.getElementById('ricette-grid');
+  var noRes = document.getElementById('no-results');
+  if (!grid) return;
+  if (lista.length === 0) {
+    grid.innerHTML = '';
+    noRes.style.display = 'block';
+    return;
+  }
+  noRes.style.display = 'none';
+  grid.innerHTML = lista.map(function(r) {
+    var cls = r.diff === 'Facile' ? 'diff-easy' : r.diff === 'Media' ? 'diff-med' : 'diff-hard';
+    return '<div class="ricetta-card" onclick="apriRicetta(' + r.id + ')">'
+      + '<div class="r-img" style="background:' + r.bg + '">'
+      + r.emoji
+      + '<div class="r-badge ' + cls + '">' + r.diff + '</div>'
+      + '</div>'
+      + '<div class="r-body">'
+      + '<div class="r-name">' + r.nome + '</div>'
+      + '<div class="r-meta">⏱ ' + r.tempo + '</div>'
+      + '</div></div>';
+  }).join('');
+}
+
+function apriRicettaHero() {
+  var id = window._heroRicettaId || DB[0].id;
+  apriRicetta(id);
+}
+
+function apriRicetta(id) {
+  ricettaAperta = null;
+  for (var i = 0; i < DB.length; i++) {
+    if (DB[i].id === parseInt(id)) { ricettaAperta = DB[i]; break; }
+  }
+  if (!ricettaAperta) { showToast('Ricetta non trovata'); return; }
+  persone = ricettaAperta.persone_base || 2;
+
+  var el = function(id) { return document.getElementById(id); };
+  if (el('m-title')) el('m-title').textContent = ricettaAperta.nome;
+  if (el('m-emoji')) { el('m-emoji').textContent = ricettaAperta.emoji; el('m-emoji').style.background = ricettaAperta.bg; }
+  if (el('m-meta')) el('m-meta').textContent = '⏱ ' + ricettaAperta.tempo + ' · 🍽 ' + ricettaAperta.diff + ' · 📋 ' + ricettaAperta.ingredienti.length + ' ingredienti';
+  if (el('m-desc')) el('m-desc').textContent = ricettaAperta.desc || '';
+  if (el('m-persone')) el('m-persone').textContent = persone;
+  renderIngredienti();
+  renderPrep();
+
+  var modal = document.getElementById('modal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeModal() {
+  var modal = document.getElementById('modal');
+  if (modal) modal.classList.remove('open');
+}
+
+function changeP(delta) {
+  persone = Math.max(1, persone + delta);
+  var el = document.getElementById('m-persone');
+  if (el) el.textContent = persone;
+  renderIngredienti();
+}
+
+function toggleIngr(el) {
+  el.classList.toggle('checked');
+}
+function renderIngredienti() {
+  if (!ricettaAperta) return;
+  var el = document.getElementById('m-ingredienti');
+  if (!el) return;
+  var base = ricettaAperta.persone_base || 2;
+  var mult = persone / base;
+  var out = '';
+  for (var i = 0; i < ricettaAperta.ingredienti.length; i++) {
+    var ing = ricettaAperta.ingredienti[i];
+    var qty = ing.q ? (Math.round(ing.q * mult * 10) / 10) + (ing.u ? ' ' + ing.u : '') : '';
+    out += '<div class="ingr-row" onclick="toggleIngr(this.querySelector(String.fromCharCode(39)+\'ingr-check\'+String.fromCharCode(39)))">';
+    out += '<div class="ingr-check"></div>';
+    out += '<span style="flex:1;font-size:13px;">' + ing.n + '</span>';
+    if (qty) out += '<span style="font-size:12px;font-weight:700;color:var(--green);">' + qty + '</span>';
+    out += '</div>';
+  }
+  el.innerHTML = out;
+}
+
+function renderPrep() {
+  if (!ricettaAperta) return;
+  var el = document.getElementById('m-preparazione');
+  if (!el) return;
+  el.innerHTML = (ricettaAperta.prep || []).map(function(step, i) {
+    return '<div style="display:flex;gap:10px;margin-bottom:12px;">'
+      + '<div style="width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + (i+1) + '</div>'
+      + '<div style="font-size:13px;line-height:1.5;color:var(--text);padding-top:3px;">' + step + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function switchModalTab(btn, tabId) {
+  document.querySelectorAll('.modal-tab').forEach(function(t) { t.classList.remove('on'); });
+  btn.classList.add('on');
+  var ing = document.getElementById('tab-ing');
+  var prep = document.getElementById('tab-prep');
+  if (ing)  ing.style.display  = tabId === 'tab-ing'  ? 'block' : 'none';
+  if (prep) prep.style.display = tabId === 'tab-prep' ? 'block' : 'none';
+}
+
+function aggiungiLista() {
+  if (!ricettaAperta) return;
+  var checked = document.querySelectorAll('.ingr-check.checked');
+  var items = [];
+  if (checked.length === 0) {
+    // Aggiungi tutti
+    ricettaAperta.ingredienti.forEach(function(ing) { items.push(ing.n); });
+  } else {
+    checked.forEach(function(el) {
+      items.push(el.nextElementSibling.textContent.trim());
+    });
+  }
+  var ta = document.getElementById('notepad');
+  if (ta) {
+    var v = ta.value;
+    ta.value = v + (v.length > 0 && !v.endsWith('\n') ? '\n' : '') + items.join('\n');
+    updateCount();
+  }
+  closeModal();
+  userData.ricette++;
+  showToast('Aggiunti ' + items.length + ' ingredienti alla lista!');
+  setTimeout(function() { go('lista'); }, 1200);
+}
+
+// Imposta ricetta del giorno nell hero
+function initHero() {
+  if (!DB || DB.length === 0) return;
+  var r = DB[Math.floor(Math.random() * Math.min(8, DB.length))];
+  var el = function(id) { return document.getElementById(id); };
+  if (el('hero-nome')) el('hero-nome').textContent = r.nome;
+  if (el('hero-meta')) el('hero-meta').textContent = '⏱ ' + r.tempo + ' · ' + (r.diff === 'Facile' ? 'Facile' : r.diff === 'Media' ? 'Media' : 'Difficile') + ' ' + r.diff + ' · ' + r.ingredienti.length + ' ingredienti';
+  if (el('hero-emoji')) el('hero-emoji').textContent = r.emoji;
+  window._heroRicettaId = r.id;
+}
+
+// Init
+try { renderGriglia(DB); } catch(e) { console.error('renderGriglia error:', e); }
+try { setTimeout(initHero, 100); } catch(e) {}
+// ── SPLASH SCREEN ──────────────────────────────
+(function(){
+  // Avvia barra progress subito
+  setTimeout(function(){
+    var bar = document.getElementById('splash-bar');
+    if(bar) bar.style.width = '100%';
+  }, 30);
+  // Nascondi splash dopo 1.5s
+  setTimeout(function(){
+    var splash = document.getElementById('app-splash');
+    if(splash){
+      splash.style.opacity = '0';
+      setTimeout(function(){
+        splash.style.display = 'none';
+      }, 500);
+    }
+  }, 1500);
+})();
+
+try { aggiornaHome(); } catch(e) {}
+
+
+
+
+
+// ── DATABASE PRODOTTI CASA ──
+var prodottiCasa = [
+  // PULIZIA
+  {n:'Detersivo piatti',cat:'pulizia',ico:'🧴',prezzoMin:0.89,prezzoMax:2.30,bestStore:'Lidl'},
+  {n:'Detersivo lavatrice',cat:'pulizia',ico:'🫧',prezzoMin:3.50,prezzoMax:7.90,bestStore:'Eurospin'},
+  {n:'Ammorbidente',cat:'pulizia',ico:'🌸',prezzoMin:1.20,prezzoMax:3.50,bestStore:'Lidl'},
+  {n:'Candeggina',cat:'pulizia',ico:'🧼',prezzoMin:0.69,prezzoMax:1.80,bestStore:'Eurospin'},
+  {n:'Multiuso spray',cat:'pulizia',ico:'🧹',prezzoMin:1.10,prezzoMax:3.20,bestStore:'Lidl'},
+  {n:'Spugne',cat:'pulizia',ico:'🧽',prezzoMin:0.49,prezzoMax:1.50,bestStore:'Lidl'},
+  {n:'Scopa e paletta',cat:'pulizia',ico:'🧹',prezzoMin:2.50,prezzoMax:8.90,bestStore:'Eurospin'},
+  {n:'Guanti gomma',cat:'pulizia',ico:'🧤',prezzoMin:0.79,prezzoMax:2.50,bestStore:'Lidl'},
+  // IGIENE
+  {n:'Carta igienica',cat:'igiene',ico:'🧻',prezzoMin:1.99,prezzoMax:5.90,bestStore:'Eurospin'},
+  {n:'Shampoo',cat:'igiene',ico:'🧴',prezzoMin:0.99,prezzoMax:4.50,bestStore:'Lidl'},
+  {n:'Dentifricio',cat:'igiene',ico:'🪥',prezzoMin:0.79,prezzoMax:3.20,bestStore:'Eurospin'},
+  {n:'Sapone mani',cat:'igiene',ico:'🧼',prezzoMin:0.59,prezzoMax:2.80,bestStore:'Lidl'},
+  {n:'Balsamo capelli',cat:'igiene',ico:'💆',prezzoMin:1.29,prezzoMax:5.90,bestStore:'Lidl'},
+  {n:'Rasoio',cat:'igiene',ico:'🪒',prezzoMin:0.99,prezzoMax:4.50,bestStore:'Eurospin'},
+  {n:'Deodorante',cat:'igiene',ico:'🌬',prezzoMin:0.89,prezzoMax:3.80,bestStore:'Lidl'},
+  {n:'Salviette umidificate',cat:'igiene',ico:'🗒',prezzoMin:0.79,prezzoMax:2.50,bestStore:'Eurospin'},
+  {n:'Assorbenti',cat:'igiene',ico:'🌸',prezzoMin:1.29,prezzoMax:3.90,bestStore:'Lidl'},
+  {n:'Cotton fioc',cat:'igiene',ico:'🪄',prezzoMin:0.49,prezzoMax:1.50,bestStore:'Eurospin'},
+  // CUCINA
+  {n:'Carta da forno',cat:'cucina',ico:'📄',prezzoMin:0.69,prezzoMax:2.20,bestStore:'Lidl'},
+  {n:'Pellicola trasparente',cat:'cucina',ico:'🌯',prezzoMin:0.79,prezzoMax:2.50,bestStore:'Eurospin'},
+  {n:'Alluminio',cat:'cucina',ico:'🥡',prezzoMin:0.89,prezzoMax:2.80,bestStore:'Lidl'},
+  {n:'Sacchetti spazzatura',cat:'cucina',ico:'🗑',prezzoMin:0.99,prezzoMax:3.50,bestStore:'Eurospin'},
+  {n:'Sacchetti frigo',cat:'cucina',ico:'🛍',prezzoMin:0.59,prezzoMax:1.80,bestStore:'Lidl'},
+  {n:'Tovaglioli carta',cat:'cucina',ico:'🗒',prezzoMin:0.49,prezzoMax:1.90,bestStore:'Eurospin'},
+  {n:'Piatti carta',cat:'cucina',ico:'🍽',prezzoMin:0.99,prezzoMax:2.80,bestStore:'Lidl'},
+  {n:'Bicchieri plastica',cat:'cucina',ico:'🥤',prezzoMin:0.89,prezzoMax:2.50,bestStore:'Eurospin'},
+  // BUCATO
+  {n:'Detersivo bucato a mano',cat:'bucato',ico:'🤲',prezzoMin:0.79,prezzoMax:2.80,bestStore:'Eurospin'},
+  {n:'Smacchiatore',cat:'bucato',ico:'✨',prezzoMin:1.50,prezzoMax:4.90,bestStore:'Lidl'},
+  {n:'Mollette',cat:'bucato',ico:'🔒',prezzoMin:0.49,prezzoMax:1.80,bestStore:'Eurospin'},
+  {n:'Fogli asciugatrice',cat:'bucato',ico:'🌬',prezzoMin:1.29,prezzoMax:3.50,bestStore:'Lidl'},
+  {n:'Appendi abiti',cat:'bucato',ico:'👕',prezzoMin:0.99,prezzoMax:3.20,bestStore:'Eurospin'}
+];
+
+var casaCatCorrente = 'tutti';
+var casaSearchCorrente = '';
+
+function renderCasa(){
+  var grid = document.getElementById('casa-grid');
+  if(!grid) return;
+  var filtrati = prodottiCasa.filter(function(p){
+    var okCat = casaCatCorrente==='tutti' || p.cat===casaCatCorrente;
+    var q = casaSearchCorrente.toLowerCase();
+    var okSearch = !q || p.n.toLowerCase().includes(q);
+    return okCat && okSearch;
+  });
+  grid.innerHTML = filtrati.map(function(p){
+    var risparmio = (p.prezzoMax - p.prezzoMin).toFixed(2).replace('.',',');
+    return '<div style="background:var(--surface);border-radius:16px;padding:14px;box-shadow:var(--shadow);cursor:pointer;" onclick="addItemCasa(\'' + p.n + '\')">' +
+      '<div style="font-size:28px;margin-bottom:6px;">' + p.ico + '</div>' +
+      '<div style="font-family:\'Syne\',sans-serif;font-size:13px;font-weight:800;margin-bottom:4px;line-height:1.3;">' + p.n + '</div>' +
+      '<div style="font-size:11px;color:var(--text2);margin-bottom:6px;">da <strong style="color:var(--green);">\u20ac' + p.prezzoMin.toFixed(2).replace('.',',') + '</strong></div>' +
+      '<div style="font-size:10px;color:var(--text3);background:var(--surface2);border-radius:100px;padding:3px 8px;display:inline-block;">-\u20ac' + risparmio + ' con ' + p.bestStore + '</div>' +
+      '<div style="margin-top:8px;background:var(--green);color:#fff;border-radius:8px;padding:5px;text-align:center;font-size:11px;font-weight:700;">+ Aggiungi lista</div>' +
+    '</div>';
+  }).join('');
+  if(filtrati.length===0){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px 0;color:var(--text2);font-size:14px;">Nessun prodotto trovato</div>';
+  }
+}
+
+function filtraCasa(q){
+  casaSearchCorrente = q;
+  renderCasa();
+}
+
+function filtraCasaCat(cat, btn){
+  casaCatCorrente = cat;
+  // Reset tutti i bottoni
+  ['tutti','pulizia','igiene','cucina','bucato'].forEach(function(c){
+    var b = document.getElementById('cf-'+c);
+    if(b){ b.style.background='var(--surface2)'; b.style.color='var(--text2)'; }
+  });
+  if(btn){ btn.style.background='var(--green)'; btn.style.color='#fff'; }
+  renderCasa();
+}
+
+function addItemCasa(nome){
+  addItem(nome);
+  showToast(nome + ' aggiunto alla lista!');
+}
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</body>
+</html>
