@@ -1789,6 +1789,7 @@ function rilevaCitta(){
       fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lng)
         .then(function(r){ return r.json(); })
         .then(function(d){
+          if(!d || !d.address) return;
           var city = d.address.city || d.address.town || d.address.village || '';
           if(city){ userData.citta = city; aggiornaProfiloUI(); }
         }).catch(function(){});
@@ -1816,6 +1817,7 @@ function switchChips(tipo){
 
 function addItem(item){
   var ta=document.getElementById('notepad');
+  if(!ta) return;
   var v=ta.value;
   ta.value=v+(v.length>0&&!v.endsWith('\n')?'\n':'')+item;
   updateCount();
@@ -2774,7 +2776,8 @@ function renderGriglia(lista) {
 }
 
 function apriRicettaHero() {
-  var id = window._heroRicettaId || DB[0].id;
+  var id = window._heroRicettaId || (DB.length > 0 ? DB[0].id : null);
+  if(!id) return;
   apriRicetta(id);
 }
 
@@ -2812,6 +2815,7 @@ function changeP(delta) {
 }
 
 function toggleIngr(el) {
+  if(!el) return;
   el.classList.toggle('checked');
 }
 function renderIngredienti() {
@@ -2824,7 +2828,7 @@ function renderIngredienti() {
   for (var i = 0; i < ricettaAperta.ingredienti.length; i++) {
     var ing = ricettaAperta.ingredienti[i];
     var qty = ing.q ? (Math.round(ing.q * mult * 10) / 10) + (ing.u ? ' ' + ing.u : '') : '';
-    out += '<div class="ingr-row" onclick="toggleIngr(this.querySelector(String.fromCharCode(39)+\'ingr-check\'+String.fromCharCode(39)))">';
+    out += '<div class="ingr-row" onclick="toggleIngr(this.querySelector(\'.ingr-check\'))">';
     out += '<div class="ingr-check"></div>';
     out += '<span style="flex:1;font-size:13px;">' + ing.n + '</span>';
     if (qty) out += '<span style="font-size:12px;font-weight:700;color:var(--green);">' + qty + '</span>';
@@ -2863,7 +2867,7 @@ function aggiungiLista() {
     ricettaAperta.ingredienti.forEach(function(ing) { items.push(ing.n); });
   } else {
     checked.forEach(function(el) {
-      items.push(el.nextElementSibling.textContent.trim());
+      if(el.nextElementSibling) items.push(el.nextElementSibling.textContent.trim());
     });
   }
   var ta = document.getElementById('notepad');
