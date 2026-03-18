@@ -1395,12 +1395,12 @@ function aggiornaProfiloUI(){
 var listaCorrente = [];
 
 // Estrae quantità e nome prodotto da una riga.
-// Esempi supportati: "10 uova", "10x uova", "uova x10", "uova 10", "2 pasta"
+// Esempi supportati: "10 uova", "10x uova", "uova x10", "2 pasta"
 function parseQtyProduct(line){
   var s = line.trim();
   var qty = 1, name = s;
   var m;
-  // "10 uova" / "10x uova" / "10 x uova"
+  // "10x uova" / "10 x uova" / "10 uova"
   m = s.match(/^(\d+)\s*[xX]?\s+(.+)$/);
   if(m && parseInt(m[1]) > 1 && parseInt(m[1]) < 1000){ qty = parseInt(m[1]); name = m[2].trim(); }
   else {
@@ -2910,14 +2910,22 @@ function switchModalTab(btn, tabId) {
 
 function aggiungiLista() {
   if (!ricettaAperta) return;
+  var base = ricettaAperta.persone_base || 2;
+  // Moltiplicatore intero: quante volte la ricetta base va replicata
+  var mult = Math.ceil(persone / base);
   var checked = document.querySelectorAll('.ingr-check.checked');
   var items = [];
+
+  function buildItem(name) {
+    return mult > 1 ? (mult + 'x ' + name) : name;
+  }
+
   if (checked.length === 0) {
-    // Aggiungi tutti
-    ricettaAperta.ingredienti.forEach(function(ing) { items.push(ing.n); });
+    ricettaAperta.ingredienti.forEach(function(ing) { items.push(buildItem(ing.n)); });
   } else {
     checked.forEach(function(el) {
-      if(el.nextElementSibling) items.push(el.nextElementSibling.textContent.trim());
+      if (!el.nextElementSibling) return;
+      items.push(buildItem(el.nextElementSibling.textContent.trim()));
     });
   }
   var ta = document.getElementById('notepad');
@@ -2929,7 +2937,7 @@ function aggiungiLista() {
   closeModal();
   userData.ricette++;
   salvaUserData();
-  showToast('Aggiunti ' + items.length + ' ingredienti alla lista!');
+  showToast('Aggiunti ' + items.length + ' ingredienti per ' + persone + ' persone!');
   setTimeout(function() { go('lista'); }, 1200);
 }
 
