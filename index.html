@@ -490,7 +490,7 @@ body{
 
 <!-- ══ HOME ══ -->
 <div class="screen" id="s-home">
-  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div class="logo">🌿 Spesa<em>Facile</em></div>
     <div class="chip ca" id="prof-chip">⭐ 0 pt</div>
@@ -515,37 +515,17 @@ body{
         <div class="scard"><div class="si">⭐</div><div class="sv" style="color:var(--amber);" id="stat-punti">0</div><div class="sl">Punti reward</div></div>
         <div class="scard" style="cursor:pointer;" onclick="go('scontrino')"><div class="si">🧾</div><div class="sv" style="color:var(--blue);" id="stat-scontrini">0</div><div class="sl">Scontrini caricati</div></div>
         <div class="scard"><div class="si">🛒</div><div class="sv" id="stat-liste">0</div><div class="sl">Liste create</div></div>
-        <div class="scard"><div class="si">🏅</div><div class="sv" style="color:var(--green);">2°</div><div class="sl">In classifica città</div></div>
+        <div class="scard"><div class="si">🏅</div><div class="sv" style="color:var(--green);" id="stat-badge">0</div><div class="sl">Badge sbloccati</div></div>
       </div>
 
-      <!-- CONVENIENZA -->
+      <!-- SUPERMERCATI VICINI -->
       <div class="card">
-        <div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;" id="home-city-title">📍 Convenienza oggi — la tua zona</span></div>
-        <div class="cb2" style="padding-top:12px;padding-bottom:12px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;cursor:pointer;" onclick="go('confronta')">
-            <div style="width:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;text-align:center;color:#FFD700;">1°</div>
-            <div style="width:28px;height:28px;border-radius:8px;background:#0050AA;display:flex;align-items:center;justify-content:center;"><span style="font-size:8px;font-weight:900;color:#FFD700;font-family:'Syne',sans-serif;">lidl</span></div>
-            <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">Lidl</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--green);">92/100</span></div><div class="sbar"><div class="sfill" style="width:92%;background:var(--green);"></div></div></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;cursor:pointer;" onclick="go('confronta')">
-            <div style="width:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;text-align:center;color:#C0C0C0;">2°</div>
-            <div style="width:28px;height:28px;border-radius:8px;background:#E8002D;display:flex;align-items:center;justify-content:center;"><span style="font-size:7px;font-weight:900;color:#fff;font-family:'Syne',sans-serif;">EURO</span></div>
-            <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">Eurospin</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--green);">88/100</span></div><div class="sbar"><div class="sfill" style="width:88%;background:var(--green);"></div></div></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;cursor:pointer;" onclick="go('confronta')">
-            <div style="width:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;text-align:center;color:#CD7F32;">3°</div>
-            <div style="width:28px;height:28px;border-radius:8px;background:#E31E25;display:flex;align-items:center;justify-content:center;"><span style="font-size:7px;font-weight:900;color:#fff;font-family:'Syne',sans-serif;">CON</span></div>
-            <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">Conad</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--amber);">71/100</span></div><div class="sbar"><div class="sfill" style="width:71%;background:var(--amber);"></div></div></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;cursor:pointer;" onclick="go('confronta')">
-            <div style="width:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;text-align:center;color:var(--text3);">4°</div>
-            <div style="width:28px;height:28px;border-radius:8px;background:#009246;display:flex;align-items:center;justify-content:center;"><span style="font-size:8px;font-weight:900;color:#fff;font-family:'Syne',sans-serif;">coop</span></div>
-            <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">Coop</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--amber);">68/100</span></div><div class="sbar"><div class="sfill" style="width:68%;background:var(--amber);"></div></div></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:24px;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;text-align:center;color:var(--text3);">5°</div>
-            <div style="width:28px;height:28px;border-radius:8px;background:#F26522;display:flex;align-items:center;justify-content:center;"><span style="font-size:6px;font-weight:900;color:#fff;font-family:'Syne',sans-serif;">ESSE</span></div>
-            <div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-weight:600;font-size:13px;">Esselunga</span><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--red);">62/100</span></div><div class="sbar"><div class="sfill" style="width:62%;background:var(--red);"></div></div></div>
+        <div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;" id="home-city-title">🗺️ Supermercati vicini a te</span></div>
+        <div class="cb2" style="padding-top:12px;padding-bottom:12px;" id="home-supermercati-box">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 0;color:var(--text2);font-size:13px;">
+            <div style="font-size:32px;">🗺️</div>
+            <div style="text-align:center;">Vai alla <b>Mappa</b> per vedere i supermercati nella tua zona.</div>
+            <div onclick="go('mappa')" style="margin-top:4px;padding:8px 20px;background:var(--green);color:#fff;border-radius:99px;font-weight:700;font-size:13px;cursor:pointer;">Apri Mappa →</div>
           </div>
         </div>
       </div>
@@ -601,7 +581,7 @@ body{
 
 <!-- ══ LISTA ══ -->
 <div class="screen" id="s-lista">
-  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar"><div class="logo">🌿 Spesa<em>Facile</em></div><div class="chip cg" id="lista-count">0 prodotti</div></div>
   <div class="scroll-area"><div style="padding:18px 16px 0;">
     <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:3px;">La mia lista</div>
@@ -678,7 +658,7 @@ body{
 
 <!-- ══ SCREEN: ISPIRAMI ══ -->
 <div class="screen" id="s-ispirami">
-  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
       <button onclick="go('home')" style="border:none;background:rgba(255,255,255,.12);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;color:#fff;">←</button>
@@ -750,7 +730,7 @@ body{
 </div>
 
 <div class="screen" id="s-confronta">
-  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div class="logo">🌿 Spesa<em>Facile</em></div>
     <div class="chip cg" id="conf-chip-art">0 articoli</div>
@@ -834,7 +814,7 @@ body{
 
 <!-- ══ MAPPA ══ -->
 <div class="screen" id="s-mappa" style="display:flex;flex-direction:column;">
-  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
       <button onclick="go('confronta')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;">←</button>
@@ -897,7 +877,7 @@ body{
 </div>
 
 <div class="screen" id="s-casa">
-  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div onclick="go('home')" style="cursor:pointer;font-size:20px;">←</div>
     <div class="logo">🏠 Prodotti <em>Casa</em></div>
@@ -936,7 +916,7 @@ body{
 </div>
 
 <div class="screen" id="s-scontrino">
-  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
       <button onclick="history.go(-1)||go('home')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
@@ -974,8 +954,8 @@ body{
 
 <!-- ══ PROFILO ══ -->
 <div class="screen" id="s-profilo">
-  <div class="status"><span>9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
-  <div class="navbar"><div class="logo">🌿 Spesa<em>Facile</em></div><div class="chip ca">⭐ 150 pt</div></div>
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar"><div class="logo">🌿 Spesa<em>Facile</em></div><div class="chip ca" id="prof-chip-p">⭐ 0 pt</div></div>
   <div class="scroll-area"><div class="page">
     <div class="card" style="margin-bottom:12px;"><div class="cb2" style="text-align:center;padding-top:24px;padding-bottom:22px;">
       <div class="pava">👤</div>
@@ -1020,6 +1000,16 @@ body{
 </div><!-- end phone -->
 
 <script>
+// ── OROLOGIO LIVE ──
+function aggiornaOrologio(){
+  var now = new Date();
+  var h = now.getHours(), m = now.getMinutes();
+  var t = h + ':' + (m < 10 ? '0' + m : m);
+  document.querySelectorAll('.status-time').forEach(function(el){ el.textContent = t; });
+}
+aggiornaOrologio();
+setInterval(aggiornaOrologio, 30000);
+
 // Navigazione sicura - indipendente dal resto
 
 function tentaLogin(){
@@ -1312,6 +1302,8 @@ function aggiornaHome(){
   if(el('stat-scontrini')) el('stat-scontrini').textContent = userData.scontrini;
   if(el('stat-liste'))     el('stat-liste').textContent     = userData.liste;
   if(el('stat-risparmio')) el('stat-risparmio').textContent = '\u20ac' + userData.risparmio.toFixed(2).replace('.',',');
+  var badges = [userData.liste>=1, userData.scontrini>=1, userData.ricette>=1, userData.scontrini>=5, userData.risparmio>=50].filter(Boolean).length + 1;
+  if(el('stat-badge')) el('stat-badge').textContent = badges;
   aggiornaProfiloUI();
   var cityEl = document.getElementById('home-city-title');
   if(cityEl && userData.citta) cityEl.textContent = 'Convenienza oggi — ' + userData.citta;
@@ -1347,6 +1339,7 @@ function aggiornaProfiloUI(){
   if(el('prof-punti'))     el('prof-punti').textContent     = userData.punti;
   if(el('prof-scontrini')) el('prof-scontrini').textContent = userData.scontrini;
   if(el('prof-chip'))      el('prof-chip').textContent      = '\u2b50 ' + userData.punti + ' pt';
+  if(el('prof-chip-p'))   el('prof-chip-p').textContent   = '\u2b50 ' + userData.punti + ' pt';
 
   // Badge - si sbloccano in base alle azioni
   if(userData.liste >= 1)    sbloccaBadge('badge-lista');
@@ -3261,10 +3254,8 @@ function _mapAggiornaUI(lat, lng){
   var linkG   = document.getElementById('link-gmaps-open');
 
   var city = userData.citta || '';
-  if(cityBar) cityBar.textContent = city
-    ? '📍 ' + city
-    : (lat !== 41.9028 ? lat.toFixed(4) + ', ' + lng.toFixed(4) : 'Italia');
-  if(chip) chip.textContent = city ? '📍 ' + city : '📍 zona tua';
+  if(cityBar) cityBar.textContent = city ? '📍 ' + city : '📍 ' + lat.toFixed(4) + ', ' + lng.toFixed(4);
+  if(chip) chip.textContent = city ? '📍 ' + city : '📍 posizione stimata';
   if(linkG && lat && lng){
     linkG.href = 'https://www.google.com/maps/search/supermercati/@'
       + lat.toFixed(6) + ',' + lng.toFixed(6) + ',15z';
