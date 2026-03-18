@@ -1028,6 +1028,7 @@ function tentaLogin(){
     userData.dataIscrizione = mesi[ora.getMonth()] + ' ' + ora.getFullYear();
   }
   rilevaCitta();
+  salvaUserData();
   go('home');
 }
 
@@ -1037,6 +1038,7 @@ function entraComeOspite(){
   var ora = new Date();
   userData.dataIscrizione = mesi[ora.getMonth()] + ' ' + ora.getFullYear();
   rilevaCitta();
+  salvaUserData();
   showToast('Benvenuto ospite! Esplora liberamente.');
   setTimeout(function(){ go('home'); }, 600);
 }
@@ -1055,18 +1057,11 @@ function registrati(){
   var ora = new Date();
   userData.dataIscrizione = mesi[ora.getMonth()] + ' ' + ora.getFullYear();
   rilevaCitta();
+  salvaUserData();
   showToast('Benvenuto, ' + userData.nome + '!');
   setTimeout(function(){ go('home'); }, 800);
 }
 
-function go(s){
-  var ss=document.querySelectorAll('.screen');
-  for(var i=0;i<ss.length;i++) ss[i].classList.remove('active');
-  var el=document.getElementById('s-'+s);
-  if(el) el.classList.add('active');
-  // Azioni per schermata specifica
-  if(s==='mappa') setTimeout(initMappa, 50);
-}
 </script>
 
 
@@ -1256,6 +1251,7 @@ function inviaManuale(){
   userData.punti += 50;
   userData.scontrini += 1;
   userData.risparmio += parseFloat((Math.random() * 4 + 1).toFixed(2));
+  salvaUserData();
   aggiornaHome();
   showToast('Scontrino salvato! +50 punti 🎉');
   setTimeout(function(){ go('home'); }, 1500);
@@ -1271,6 +1267,8 @@ function inviaFoto(){
     if(e.target.files && e.target.files[0]){
       userData.punti = (userData.punti||0) + 50;
       userData.scontrini = (userData.scontrini||0) + 1;
+      userData.risparmio = (userData.risparmio||0) + parseFloat((Math.random() * 4 + 1).toFixed(2));
+      salvaUserData();
       aggiornaHome();
       showToast('📸 Scontrino caricato! +50 punti 🎉');
     }
@@ -1293,6 +1291,18 @@ var userData = {
   dataIscrizione: '',
   citta: ''
 };
+
+function salvaUserData(){
+  try { localStorage.setItem('sf_user', JSON.stringify(userData)); } catch(e){}
+}
+
+function caricaUserData(){
+  try {
+    var s = localStorage.getItem('sf_user');
+    if(s){ var d = JSON.parse(s); Object.assign(userData, d); return true; }
+  } catch(e){}
+  return false;
+}
 
 function aggiornaHome(){
   var nomeEl = document.getElementById('home-nome');
@@ -1377,6 +1387,7 @@ function analizzaLista(){
   }
   listaCorrente = lines;
   userData.liste++;
+  salvaUserData();
   aggiornaConfrontoConLista(lines);
   go('confronta');
 }
@@ -2871,6 +2882,7 @@ function aggiungiLista() {
   }
   closeModal();
   userData.ricette++;
+  salvaUserData();
   showToast('Aggiunti ' + items.length + ' ingredienti alla lista!');
   setTimeout(function() { go('lista'); }, 1200);
 }
@@ -2906,6 +2918,16 @@ try { setTimeout(initHero, 100); } catch(e) {}
       }, 500);
     }
   }, 1500);
+})();
+
+// Auto-login: se userData già salvato in localStorage, salta il login
+(function(){
+  if(caricaUserData() && userData.nome){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    var hs = document.getElementById('s-home');
+    if(hs) hs.classList.add('active');
+    try { aggiornaHome(); } catch(e){}
+  }
 })();
 
 try { aggiornaHome(); } catch(e) {}
@@ -3003,12 +3025,15 @@ function addItemCasa(nome){
 
 // -- LOGOUT --
 function logout(){
-  userData.nome           = 'Utente';
+  try { localStorage.removeItem('sf_user'); } catch(e){}
+  userData.nome           = '';
   userData.punti          = 0;
   userData.scontrini      = 0;
   userData.risparmio      = 0;
   userData.liste          = 0;
-  userData.dataIscrizione = null;
+  userData.dataIscrizione = '';
+  userData.citta          = '';
+  userData.ricette        = 0;
   listaCorrente = [];
   var notepad = document.getElementById('notepad');
   if(notepad) notepad.value = '';
