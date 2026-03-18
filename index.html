@@ -1107,7 +1107,24 @@ function initMappa(){
     return;
   }
   if(leafletMap){
-    setTimeout(function(){leafletMap.invalidateSize();},150);
+    setTimeout(function(){
+      leafletMap.invalidateSize();
+      if(userLat && userLng) leafletMap.setView([userLat,userLng],15);
+    },150);
+    // Aggiorna posizione GPS ad ogni riapertura mappa
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        function(p){
+          userLat=p.coords.latitude; userLng=p.coords.longitude;
+          leafletMap.setView([userLat,userLng],15);
+          if(userMarker) leafletMap.removeLayer(userMarker);
+          var uIcon=L.divIcon({html:'<div style="width:16px;height:16px;background:#1A8C4E;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,140,78,.25);"></div>',className:'',iconSize:[16,16],iconAnchor:[8,8]});
+          userMarker=L.marker([userLat,userLng],{icon:uIcon,zIndexOffset:1000}).addTo(leafletMap).bindPopup('Sei qui');
+        },
+        function(){},
+        {enableHighAccuracy:true,timeout:8000,maximumAge:60000}
+      );
+    }
     return;
   }
   leafletMap=L.map('leaflet-map',{zoomControl:true,attributionControl:false})
@@ -1130,7 +1147,7 @@ function initMappa(){
           })
           .catch(function(){ userLat=44.4056; userLng=8.9463; onGotPos(); });
       },
-      {enableHighAccuracy:true,timeout:10000}
+      {enableHighAccuracy:true,timeout:15000,maximumAge:0}
     );
   } else {
     userLat=44.4056; userLng=8.9463; onGotPos();
@@ -1377,6 +1394,23 @@ function aggiornaProfiloUI(){
 // ════════════════════════════════════════
 var listaCorrente = [];
 
+// Estrae quantità e nome prodotto da una riga.
+// Esempi supportati: "10 uova", "10x uova", "uova x10", "uova 10", "2 pasta"
+function parseQtyProduct(line){
+  var s = line.trim();
+  var qty = 1, name = s;
+  var m;
+  // "10 uova" / "10x uova" / "10 x uova"
+  m = s.match(/^(\d+)\s*[xX]?\s+(.+)$/);
+  if(m && parseInt(m[1]) > 1 && parseInt(m[1]) < 1000){ qty = parseInt(m[1]); name = m[2].trim(); }
+  else {
+    // "uova x10" / "uova x 10"
+    m = s.match(/^(.+?)\s+[xX]\s*(\d+)$/);
+    if(m && parseInt(m[2]) > 1 && parseInt(m[2]) < 1000){ qty = parseInt(m[2]); name = m[1].trim(); }
+  }
+  return {qty: qty, name: name};
+}
+
 function analizzaLista(){
   var ta = document.getElementById('notepad');
   if(!ta) return;
@@ -1388,7 +1422,7 @@ function analizzaLista(){
   listaCorrente = lines;
   userData.liste++;
   salvaUserData();
-  aggiornaConfrontoConLista(lines);
+  aggiornaConfrontoConLista(lines.map(parseQtyProduct));
   go('confronta');
 }
 
@@ -1400,8 +1434,10 @@ function aggiornaConfrontoConLista(prodotti){
   var ssubEl   = document.getElementById('conf-ssub');
   if(emptyEl)   emptyEl.style.display   = 'none';
   if(contentEl) contentEl.style.display = 'block';
-  if(chipEl)    chipEl.textContent      = prodotti.length + (prodotti.length===1?' articolo':' articoli');
-  if(ssubEl)    ssubEl.textContent      = prodotti.length + ' prodotti · 5 supermercati analizzati';
+  var totItems = prodotti.reduce(function(acc,it){ return acc + ((typeof it==='object'&&it.qty>1)?it.qty:1); },0);
+  var nProd = prodotti.length;
+  if(chipEl)    chipEl.textContent      = totItems + (totItems===1?' articolo':' articoli');
+  if(ssubEl)    ssubEl.textContent      = nProd + ' prodott' + (nProd===1?'o':'i') + ' · 5 supermercati analizzati';
 
   // ── DATABASE PREZZI REALI — 150 PRODOTTI ──
   // Fonte: Altroconsumo 2025 (1.6M prezzi) + Il Resto del Carlino oct 2024
@@ -1649,23 +1685,30 @@ function aggiornaConfrontoConLista(prodotti){
   var out = '';
 
   for(var p=0; p<prodotti.length; p++){
-    var prod = prodotti[p];
+    var item = prodotti[p];
+    // Supporta sia oggetti {qty,name} che stringhe semplici
+    var prod = (typeof item === 'object') ? item.name : item;
+    var qty  = (typeof item === 'object' && item.qty > 1) ? item.qty : 1;
     var entry = cercaInDB(prod);
-    var prezzi = entry ? entry.p.slice() : stimaPrezzi(prod);
+    var prezziUnitari = entry ? entry.p.slice() : stimaPrezzi(prod);
     var unita  = entry ? entry.u : '';
     var isReal = !!entry;
+    // Moltiplica per la quantità
+    var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * qty).toFixed(2)); });
 
     for(var s=0; s<5; s++) totali[s] += prezzi[s];
 
     var minP = Math.min.apply(null, prezzi);
     var bestIdx = prezzi.indexOf(minP);
     var bestStore = STORES[bestIdx];
+    var prodLabel = qty > 1 ? (qty + 'x ' + prod) : prod;
+    var unitaLabel = qty > 1 ? (qty + ' × ' + unita) : unita;
 
     out += '<div style="padding:11px 0;border-bottom:1px solid var(--border);">';
     out += '<div style="display:flex;align-items:center;justify-content:space-between;">';
     out += '<div>';
-    out += '<div style="font-size:13px;font-weight:600;">' + prod + '</div>';
-    if(unita) out += '<div style="font-size:10px;color:var(--text3);">' + unita + (isReal ? '' : '') + '</div>';
+    out += '<div style="font-size:13px;font-weight:600;">' + prodLabel + '</div>';
+    if(unita) out += '<div style="font-size:10px;color:var(--text3);">' + unitaLabel + '</div>';
     out += '</div>';
     out += '<div style="text-align:right;">';
     out += '<div style="font-weight:800;font-size:14px;color:var(--green);">€' + minP.toFixed(2) + '</div>';
@@ -1699,7 +1742,7 @@ function aggiornaConfrontoConLista(prodotti){
   if(subEl) subEl.textContent = 'scegliendo ' + STORES[bestStoreIdx] + ' invece di ' + STORES[worstStoreIdx];
 
   // ── Aggiorna classifica tab con totali reali ──
-  aggiornaClassificaTab(totali, STORES, prodotti.length, bestStoreIdx);
+  aggiornaClassificaTab(totali, STORES, totItems, bestStoreIdx);
 }
 
 // ─────────────────────────────────────────────────────────────────────
