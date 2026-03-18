@@ -2911,23 +2911,30 @@ function switchModalTab(btn, tabId) {
 function aggiungiLista() {
   if (!ricettaAperta) return;
   var base = ricettaAperta.persone_base || 2;
-  // Moltiplicatore intero: quante volte la ricetta base va replicata
-  var mult = Math.ceil(persone / base);
+  var mult = persone / base;
   var checked = document.querySelectorAll('.ingr-check.checked');
   var items = [];
 
-  function buildItem(name) {
-    return mult > 1 ? (mult + 'x ' + name) : name;
+  function buildItem(ing) {
+    if (ing.q) {
+      var qty = Math.round(ing.q * mult * 10) / 10;
+      return qty + (ing.u ? ' ' + ing.u : '') + ' ' + ing.n;
+    }
+    return ing.n;
   }
 
-  if (checked.length === 0) {
-    ricettaAperta.ingredienti.forEach(function(ing) { items.push(buildItem(ing.n)); });
-  } else {
+  var nomiSelezionati = [];
+  if (checked.length > 0) {
     checked.forEach(function(el) {
-      if (!el.nextElementSibling) return;
-      items.push(buildItem(el.nextElementSibling.textContent.trim()));
+      if (el.nextElementSibling) nomiSelezionati.push(el.nextElementSibling.textContent.trim());
     });
   }
+
+  ricettaAperta.ingredienti.forEach(function(ing) {
+    if (nomiSelezionati.length === 0 || nomiSelezionati.indexOf(ing.n) !== -1) {
+      items.push(buildItem(ing));
+    }
+  });
   var ta = document.getElementById('notepad');
   if (ta) {
     var v = ta.value;
