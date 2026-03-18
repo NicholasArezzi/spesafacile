@@ -3098,10 +3098,8 @@ function _mapAvviaConPosizione(){
 
 // ─── Render mappa Leaflet ────────────────────────────────────────────────
 function _mapRender(lat, lng){
-  _mapSetLoading('Carico la mappa...', 60);
-
   var container = document.getElementById('leaflet-map');
-  if(!container) return;
+  if(!container){ _mapNascondiLoading(); return; }
 
   // Se la mappa esiste già la sposto solo se coordinate cambiate
   if(_mapInstance && _mapInitialized){
@@ -3113,6 +3111,8 @@ function _mapRender(lat, lng){
     _mapCercaSupermercati(lat, lng);
     return;
   }
+
+  _mapSetLoading('Carico la mappa...', 60);
 
   // Prima inizializzazione
   try {
