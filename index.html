@@ -3146,28 +3146,56 @@ function caricaGoogleMaps(lat,lng){ initMappa(); }
 
 // ─── Recupera posizione poi inizializza la mappa ─────────────────────────
 function _mapAvviaConPosizione(){
-  // Se coordinate già disponibili → vai subito
+  // Fallback IP: usato se GPS fallisce o non disponibile
+  function _ipFallback(){
+    fetch('https://ipwho.is/')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d && d.latitude && d.longitude){
+          userLat = d.latitude; userLng = d.longitude;
+          if(d.city) userData.citta = d.city;
+        }
+        _mapRender(userLat || 41.9028, userLng || 12.4964);
+      })
+      .catch(function(){ _mapRender(41.9028, 12.4964); });
+  }
+
+  // Se coordinate già disponibili → renderizza subito, poi prova a raffinare con GPS
   if(userLat && userLng){
     _mapRender(userLat, userLng);
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        function(pos){
+          userLat = pos.coords.latitude; userLng = pos.coords.longitude;
+          _mapRender(userLat, userLng);
+        },
+        function(){},
+        {enableHighAccuracy:true, timeout:8000, maximumAge:60000}
+      );
+    }
     return;
   }
-  _mapSetLoading('Rilevo posizione tramite rete...', 25);
 
-  // IP geolocation: nessuna permission richiesta all'utente
-  fetch('https://ipwho.is/')
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(d && d.latitude && d.longitude){
-        userLat = d.latitude;
-        userLng = d.longitude;
-        if(d.city) userData.citta = d.city;
-      }
-      _mapRender(userLat || 41.9028, userLng || 12.4964);
-    })
-    .catch(function(){
-      // Fallback: Roma
-      _mapRender(41.9028, 12.4964);
-    });
+  _mapSetLoading('Cerco la tua posizione GPS...', 25);
+
+  // 1. Prova GPS reale (alta precisione)
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      function(pos){
+        userLat = pos.coords.latitude; userLng = pos.coords.longitude;
+        _mapRender(userLat, userLng);
+      },
+      function(){
+        // 2. GPS negato/fallito → IP geolocation
+        _mapSetLoading('Rilevo posizione tramite rete...', 40);
+        _ipFallback();
+      },
+      {enableHighAccuracy:true, timeout:10000, maximumAge:0}
+    );
+  } else {
+    // 3. GPS non disponibile → IP geolocation diretta
+    _ipFallback();
+  }
 }
 
 // ─── Render mappa Leaflet ────────────────────────────────────────────────
