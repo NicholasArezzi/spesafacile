@@ -1437,7 +1437,7 @@ function aggiornaConfrontoConLista(prodotti){
   var ssubEl   = document.getElementById('conf-ssub');
   if(emptyEl)   emptyEl.style.display   = 'none';
   if(contentEl) contentEl.style.display = 'block';
-  var totItems = prodotti.reduce(function(acc,it){ return acc + ((typeof it==='object'&&it.qty>1)?it.qty:1); },0);
+  var totItems = prodotti.length;
   var nProd = prodotti.length;
   if(chipEl)    chipEl.textContent      = totItems + (totItems===1?' articolo':' articoli');
   if(ssubEl)    ssubEl.textContent      = nProd + ' prodott' + (nProd===1?'o':'i') + ' · 5 supermercati analizzati';
