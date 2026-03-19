@@ -1398,8 +1398,11 @@ var listaCorrente = [];
 // Esempi supportati: "10 uova", "10x uova", "uova x10", "2 pasta"
 function parseQtyProduct(line){
   var s = line.trim();
-  var qty = 1, name = s;
+  var qty = 1, unit = '', name = s;
   var m;
+  // "300 g Spaghetti" / "1.5 kg Farina" / "200 ml Panna"
+  m = s.match(/^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l|cl|dl|pz|pezzi|fette|cucchiai?|cucchiaini?)\.?\s+(.+)$/i);
+  if(m){ qty = parseFloat(m[1].replace(',','.')); unit = m[2].toLowerCase(); name = m[3].trim(); return {qty:qty,unit:unit,name:name}; }
   // "10x uova" / "10 x uova" / "10 uova"
   m = s.match(/^(\d+)\s*[xX]?\s+(.+)$/);
   if(m && parseInt(m[1]) > 1 && parseInt(m[1]) < 1000){ qty = parseInt(m[1]); name = m[2].trim(); }
@@ -1408,7 +1411,7 @@ function parseQtyProduct(line){
     m = s.match(/^(.+?)\s+[xX]\s*(\d+)$/);
     if(m && parseInt(m[2]) > 1 && parseInt(m[2]) < 1000){ qty = parseInt(m[2]); name = m[1].trim(); }
   }
-  return {qty: qty, name: name};
+  return {qty: qty, unit: unit, name: name};
 }
 
 function analizzaLista(){
@@ -1689,20 +1692,35 @@ function aggiornaConfrontoConLista(prodotti){
     // Supporta sia oggetti {qty,name} che stringhe semplici
     var prod = (typeof item === 'object') ? item.name : item;
     var qty  = (typeof item === 'object' && item.qty > 1) ? item.qty : 1;
+    var unit = (typeof item === 'object') ? (item.unit || '') : '';
     var entry = cercaInDB(prod);
     var prezziUnitari = entry ? entry.p.slice() : stimaPrezzi(prod);
     var unita  = entry ? entry.u : '';
     var isReal = !!entry;
-    // Moltiplica per la quantità
-    var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * qty).toFixed(2)); });
+    // Converti qty+unit in numero di confezioni rispetto al riferimento DB
+    var confez = qty;
+    if(unit && entry && unita){
+      var inputBase = qty;
+      if(unit==='kg') inputBase = qty*1000;
+      else if(unit==='l') inputBase = qty*1000;
+      else if(unit==='cl') inputBase = qty*10;
+      else if(unit==='dl') inputBase = qty*100;
+      var dbRef = parseFloat(unita) || 1;
+      var dbUnit = unita.replace(/[\d.,]/g,'').trim().toLowerCase();
+      var dbBase = dbRef;
+      if(dbUnit==='kg') dbBase = dbRef*1000;
+      else if(dbUnit==='l') dbBase = dbRef*1000;
+      if(dbBase > 0) confez = Math.max(0.1, inputBase / dbBase);
+    }
+    var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * confez).toFixed(2)); });
 
     for(var s=0; s<5; s++) totali[s] += prezzi[s];
 
     var minP = Math.min.apply(null, prezzi);
     var bestIdx = prezzi.indexOf(minP);
     var bestStore = STORES[bestIdx];
-    var prodLabel = qty > 1 ? (qty + 'x ' + prod) : prod;
-    var unitaLabel = qty > 1 ? (qty + ' × ' + unita) : unita;
+    var prodLabel = unit ? (qty + ' ' + unit + ' ' + prod) : (qty > 1 ? qty + 'x ' + prod : prod);
+    var unitaLabel = unit ? (confez.toFixed(1) + ' × ' + unita) : (qty > 1 ? qty + ' × ' + unita : unita);
 
     out += '<div style="padding:11px 0;border-bottom:1px solid var(--border);">';
     out += '<div style="display:flex;align-items:center;justify-content:space-between;">';
