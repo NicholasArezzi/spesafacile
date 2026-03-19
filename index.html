@@ -549,6 +549,15 @@ body{
       </div>
 
 
+      <!-- CARD OFFERTE -->
+      <div class="card" style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:17px;">🏷️ Offerte oggi</div>
+          <div onclick="go('offerte')" style="font-size:12px;color:var(--green);font-weight:700;cursor:pointer;">Vedi tutte →</div>
+        </div>
+        <div id="home-offerte-preview" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;"></div>
+      </div>
+
       <!-- CARD CASA -->
       <div class="card" style="margin-bottom:12px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -942,7 +951,7 @@ body{
       <div class="card"><div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Perché caricare?</span></div><div class="cb2">
         <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;"><span style="font-size:28px;">⭐</span><div><div style="font-weight:600;">Punti proporzionali alla spesa</div><div style="font-size:12px;color:var(--text2);">1 punto per ogni €1 speso</div></div></div>
         <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;"><span style="font-size:28px;">📊</span><div><div style="font-weight:600;">Prezzi più precisi per tutti</div><div style="font-size:12px;color:var(--text2);">I tuoi dati migliorano l'app</div></div></div>
-        <div style="display:flex;gap:12px;align-items:center;"><span style="font-size:28px;">🏆</span><div><div style="font-weight:600;">Scala la classifica di Milano</div><div style="font-size:12px;color:var(--text2);">Sfida gli altri utenti della città</div></div></div>
+        <div style="display:flex;gap:12px;align-items:center;cursor:pointer;" onclick="go('classifica')"><span style="font-size:28px;">🏆</span><div><div style="font-weight:600;">Scala la classifica di Milano</div><div style="font-size:12px;color:var(--green);font-weight:700;">Vai alla classifica →</div></div></div>
       </div></div>
     </div>
 
@@ -1023,7 +1032,8 @@ body{
       <div class="goal"><div class="goal-top"><span style="font-size:13px;font-weight:600;">👨‍🍳 Prova 5 ricette</span><span id="goal-ric-txt" style="font-size:12px;color:var(--text2);">0/5</span></div><div class="sbar"><div id="goal-ric-bar" class="sfill" style="width:0%;background:var(--purple);"></div></div></div>
     </div></div>
     <button class="btn-g" style="margin-bottom:10px;" onclick="go('scontrino')">🧾 Carica scontrino</button>
-        <button onclick="logout()" style="width:100%;max-width:340px;margin:16px auto 0;display:block;padding:14px;background:transparent;border:2px solid var(--red);color:var(--red);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🚪 Esci dall'account</button>
+    <button onclick="go('classifica')" style="width:100%;max-width:340px;margin:0 auto 10px;display:block;padding:14px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🏆 Vedi classifica Milano</button>
+    <button onclick="logout()" style="width:100%;max-width:340px;margin:6px auto 0;display:block;padding:14px;background:transparent;border:2px solid var(--red);color:var(--red);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🚪 Esci dall'account</button>
     
   </div></div>
     
@@ -1036,6 +1046,65 @@ body{
   </div>
 </div>
 
+
+
+<!-- ══ CLASSIFICA ══ -->
+<div class="screen" id="s-classifica">
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="go('profilo')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+      <div class="logo">🌿 Spesa<em>Facile</em></div>
+    </div>
+    <div class="chip ca">Milano 🏙️</div>
+  </div>
+  <div class="scroll-area"><div class="page">
+    <div class="stitle">Classifica</div>
+    <div class="ssub">I migliori risparmiatori di Milano</div>
+    <div id="class-podio" style="margin-bottom:4px;"></div>
+    <div class="card"><div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">🏅 Classifica completa</span></div>
+      <div id="class-lista"></div>
+    </div>
+    <div class="sp"></div>
+  </div></div>
+  <div class="bnav">
+    <button class="nb " onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nb " onclick="go('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
+    <button class="nb-cam" onclick="go('scontrino')"><div class="nb-cam-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Scontrino</button>
+    <button class="nb " onclick="go('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Confronta</button>
+    <button class="nb " onclick="go('profilo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+  </div>
+</div>
+
+<!-- ══ OFFERTE ══ -->
+<div class="screen" id="s-offerte">
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="go('home')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+      <div class="logo">🌿 Spesa<em>Facile</em></div>
+    </div>
+    <div class="chip ca">Oggi 🏷️</div>
+  </div>
+  <div class="scroll-area"><div class="page">
+    <div class="stitle">Offerte oggi</div>
+    <div class="ssub">Prezzi migliori aggiornati ogni giorno</div>
+    <div id="off-cat-btns" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none;">
+      <div id="off-cat-tutti" class="chip" onclick="filtraOffCat('tutti')" style="background:var(--green);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;">Tutti</div>
+      <div id="off-cat-cibo" class="chip" onclick="filtraOffCat('cibo')" style="cursor:pointer;white-space:nowrap;flex-shrink:0;">🥦 Cibo</div>
+      <div id="off-cat-casa" class="chip" onclick="filtraOffCat('casa')" style="cursor:pointer;white-space:nowrap;flex-shrink:0;">🧴 Casa</div>
+    </div>
+    <div id="off-grid"></div>
+    <div class="sp"></div>
+  </div></div>
+  <div class="bnav">
+    <button class="nb " onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nb " onclick="go('lista')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lista</button>
+    <button class="nb-cam" onclick="go('scontrino')"><div class="nb-cam-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>Scontrino</button>
+    <button class="nb " onclick="go('confronta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Confronta</button>
+    <button class="nb " onclick="go('profilo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilo</button>
+  </div>
+</div>
 
 </div><!-- end phone -->
 
@@ -1538,6 +1607,21 @@ function aggiornaHome(){
   if(cityEl && userData.citta) cityEl.textContent = 'Convenienza oggi — ' + userData.citta;
   var chipEl = document.getElementById('prof-chip');
   if(chipEl) chipEl.textContent = '⭐ ' + (userData.punti||0) + ' pt';
+  // Preview offerte nella home (max 4 card compatte)
+  var prevEl = document.getElementById('home-offerte-preview');
+  if(prevEl){
+    try {
+      var offPreview = generaOfferte().slice(0,4);
+      prevEl.innerHTML = offPreview.map(function(o){
+        return '<div onclick="go(\'offerte\')" style="flex-shrink:0;width:100px;background:var(--surface2);border-radius:12px;padding:10px;cursor:pointer;text-align:center;">'
+          + '<div style="font-size:28px;margin-bottom:4px;">'+o.ico+'</div>'
+          + '<div style="font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+o.nome+'</div>'
+          + '<div style="font-size:13px;font-weight:800;color:var(--green);margin-top:2px;">€'+o.prezzoOff.toFixed(2)+'</div>'
+          + '<div style="font-size:9px;background:#FEF3C7;color:#92400E;font-weight:800;padding:1px 6px;border-radius:99px;display:inline-block;margin-top:2px;">-'+o.sconto+'%</div>'
+          + '</div>';
+      }).join('');
+    } catch(e){}
+  }
 }
 
 function sbloccaBadge(id){
@@ -2028,6 +2112,8 @@ function go(screen){ if(screen==='mappa'){setTimeout(initMappa,200);}
   if(screen==='home'){setTimeout(aggiornaHome,50);}
   if(screen==='profilo'){setTimeout(aggiornaProfiloUI,50);}
   if(screen==='casa'){setTimeout(renderCasa,50);}
+  if(screen==='classifica'){setTimeout(renderClassifica,50);}
+  if(screen==='offerte'){setTimeout(renderOfferte,50);}
   document.querySelectorAll('.screen').forEach(function(s){
     s.classList.remove('active');
     s.style.display='none';
@@ -3339,6 +3425,152 @@ function goMappaStore(storeName){
 function aggiornaContatori(){
   try { updateCount(); } catch(e){}
   try { aggiornaHome(); } catch(e){}
+}
+
+// ════════════════════════════════════════
+// CLASSIFICA
+// ════════════════════════════════════════
+var NOMI_IT = ['Giulia R.','Marco B.','Sofia T.','Luca M.','Anna V.','Francesco P.','Chiara G.','Alessandro N.','Valentina C.','Matteo F.','Elena D.','Davide L.','Martina S.','Andrea B.','Sara C.','Riccardo M.','Federica A.','Simone T.','Elisa R.','Lorenzo G.','Giorgia V.','Emanuele P.','Alice N.','Nicola D.','Beatrice F.','Tommaso A.','Irene M.','Stefano C.','Laura B.','Roberto T.'];
+
+function renderClassifica(){
+  var oggi = new Date();
+  var seed = oggi.getFullYear() * 10000 + (oggi.getMonth()+1) * 100 + oggi.getDate();
+  function sr(s){ var x = Math.sin(s+1) * 10000; return x - Math.floor(x); }
+
+  var utenti = NOMI_IT.map(function(nome, i){
+    return { nome: nome, punti: Math.floor(sr(seed + i*17) * 480 + 20) };
+  });
+  var mioNome = ((userData.nome||'Tu').split(' ')[0]) + ' (tu)';
+  utenti.push({ nome: mioNome, punti: userData.punti||0, isMe: true });
+  utenti.sort(function(a,b){ return b.punti - a.punti; });
+
+  // Podio top 3
+  var ordine = [utenti[1], utenti[0], utenti[2]]; // sinistra=2°, centro=1°, destra=3°
+  var podioHTML = '<div style="display:flex;align-items:flex-end;justify-content:center;gap:6px;margin-bottom:16px;">';
+  ordine.forEach(function(u, vi){
+    if(!u) return;
+    var pos = vi===1 ? 1 : (vi===0 ? 2 : 3);
+    var altezza = pos===1 ? '88px' : pos===2 ? '66px' : '56px';
+    var medal = pos===1 ? '🥇' : pos===2 ? '🥈' : '🥉';
+    var colBg = pos===1 ? 'var(--amber)' : pos===2 ? '#9CA3AF' : '#B45309';
+    if(u.isMe) colBg = 'var(--green)';
+    podioHTML += '<div style="flex:1;max-width:110px;text-align:center;">'
+      + '<div style="font-size:11px;font-weight:700;color:'+(u.isMe?'var(--green)':'var(--text2)')+';margin-bottom:4px;word-break:break-all;">'+u.nome+'</div>'
+      + '<div style="font-size:11px;font-weight:800;color:var(--text3);margin-bottom:4px;">'+u.punti+' pt</div>'
+      + '<div style="background:'+colBg+';border-radius:8px 8px 0 0;height:'+altezza+';display:flex;align-items:flex-start;justify-content:center;padding-top:8px;">'
+      + '<span style="font-size:22px;">'+medal+'</span></div>'
+      + '</div>';
+  });
+  podioHTML += '</div>';
+  document.getElementById('class-podio').innerHTML = podioHTML;
+
+  // Lista completa
+  var listaHTML = '';
+  utenti.forEach(function(u, i){
+    var me = u.isMe;
+    var medaglia = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    listaHTML += '<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--surface2);'+(me?'background:rgba(74,222,128,.1);':'')+'\">'
+      + '<div style="width:28px;text-align:center;font-size:'+(i<3?'18':'12')+'px;font-weight:800;color:'+(i<3?'var(--amber)':'var(--text3)');'">'+( i<3 ? medaglia : (i+1))+'</div>'
+      + '<div style="flex:1;font-size:13px;font-weight:'+(me?'800':'600')+';color:'+(me?'var(--green)':'var(--text)')+'">'+(me?'⭐ ':'')+u.nome+'</div>'
+      + '<div style="font-size:13px;font-weight:700;color:var(--amber);">'+u.punti+' pt</div>'
+      + '</div>';
+  });
+  document.getElementById('class-lista').innerHTML = listaHTML;
+}
+
+// ════════════════════════════════════════
+// OFFERTE
+// ════════════════════════════════════════
+var offCatCorrente = 'tutti';
+var OFFERTE_CACHE = null;
+var OFFERTE_DATA = '';
+
+function generaOfferte(){
+  var oggi = new Date();
+  var dataStr = oggi.getFullYear()+'-'+(oggi.getMonth()+1)+'-'+oggi.getDate();
+  if(OFFERTE_CACHE && OFFERTE_DATA===dataStr) return OFFERTE_CACHE;
+  var seed = oggi.getFullYear()*10000 + (oggi.getMonth()+1)*100 + oggi.getDate();
+  function sr(s){ var x = Math.sin(s+1)*10000; return x-Math.floor(x); }
+
+  var indices = [];
+  var i = 0;
+  while(indices.length < 12 && i < 200){
+    var idx = Math.floor(sr(seed + i*37) * DB_PREZZI.length);
+    if(indices.indexOf(idx)===-1) indices.push(idx);
+    i++;
+  }
+
+  var offerte = indices.map(function(idx, j){
+    var entry = DB_PREZZI[idx];
+    var prezzoMin = Math.min.apply(null, entry.p);
+    var prezzoMax = Math.max.apply(null, entry.p);
+    var scontoPerc = 10 + Math.floor(sr(seed + j*53) * 25);
+    var prezzoNorm = parseFloat((prezzoMin * (1 + scontoPerc/100)).toFixed(2));
+    var storeIdx = entry.p.indexOf(prezzoMin);
+    var k0 = entry.k[0];
+    var ico = '🛒';
+    if(k0.match(/pasta|spaghetti|penne|rigatoni|fusilli/)) ico='🍝';
+    else if(k0.match(/pane|toast|crackers|fette/)) ico='🍞';
+    else if(k0.match(/latte|yogurt|mozzarella|formaggio|burro|panna/)) ico='🥛';
+    else if(k0.match(/uova?/)) ico='🥚';
+    else if(k0.match(/pollo|manzo|maiale|salsiccia|prosciutto|salame/)) ico='🥩';
+    else if(k0.match(/salmone|tonno|merluzzo|gamber/)) ico='🐟';
+    else if(k0.match(/pomodor|zucchine|insalata|spinaci|carote|patate|cipolla|peperone/)) ico='🥦';
+    else if(k0.match(/mele|banane|aranc|limone|fragole|uva/)) ico='🍎';
+    else if(k0.match(/olio|sale|zucchero|farina|pelati|passata|aceto/)) ico='🧂';
+    else if(k0.match(/acqua|succo|birra|vino|aranciata|the/)) ico='🥤';
+    else if(k0.match(/surgelat|piselli surgelati|verdure surgelate/)) ico='🧊';
+    else if(k0.match(/deterg|shampoo|dentifricio|carta|sapone|deodorante/)) ico='🧴';
+    var cat = (k0.match(/deterg|shampoo|dentifricio|carta|sapone|deodorante|candegg|ammorbid|bucato/) ? 'casa' : 'cibo');
+    return {
+      nome: k0.charAt(0).toUpperCase()+k0.slice(1),
+      unita: entry.u,
+      prezzoNorm: prezzoNorm,
+      prezzoOff: prezzoMin,
+      sconto: scontoPerc,
+      store: STORES[storeIdx]||STORES[0],
+      ico: ico,
+      cat: cat
+    };
+  });
+
+  OFFERTE_CACHE = offerte;
+  OFFERTE_DATA = dataStr;
+  return offerte;
+}
+
+function renderOfferte(){
+  var tutte = generaOfferte();
+  var filtrate = tutte.filter(function(o){
+    return offCatCorrente==='tutti' || o.cat===offCatCorrente;
+  });
+  var html = filtrate.map(function(o){
+    return '<div class="card" style="margin-bottom:10px;"><div class="cb2" style="padding:14px;">'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="font-size:36px;flex-shrink:0;">'+o.ico+'</div>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+o.nome+'</div>'
+      + '<div style="font-size:12px;color:var(--text3);margin-top:2px;">'+o.unita+' · <b style="color:var(--green);">'+o.store+'</b></div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0;">'
+      + '<div style="font-size:11px;color:var(--text3);text-decoration:line-through;">€'+o.prezzoNorm.toFixed(2)+'</div>'
+      + '<div style="font-size:20px;font-weight:800;color:var(--green);line-height:1.1;">€'+o.prezzoOff.toFixed(2)+'</div>'
+      + '<div style="display:inline-block;background:#FEF3C7;color:#92400E;font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;margin-top:2px;">-'+o.sconto+'%</div>'
+      + '</div>'
+      + '</div>'
+      + '</div></div>';
+  }).join('');
+  document.getElementById('off-grid').innerHTML = html || '<div style="text-align:center;padding:40px 0;color:var(--text3);">Nessuna offerta</div>';
+}
+
+function filtraOffCat(cat){
+  offCatCorrente = cat;
+  document.querySelectorAll('#off-cat-btns .chip').forEach(function(c){
+    c.style.background='var(--surface2)'; c.style.color='var(--text)';
+  });
+  var selBtn = document.getElementById('off-cat-'+cat);
+  if(selBtn){ selBtn.style.background='var(--green)'; selBtn.style.color='#fff'; }
+  renderOfferte();
 }
 
 </script>
