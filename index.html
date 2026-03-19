@@ -922,25 +922,65 @@ body{
       <button onclick="history.go(-1)||go('home')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
       <div class="logo">🌿 Spesa<em>Facile</em></div>
     </div>
-    <div class="chip ca">+50 pt</div>
+    <div class="chip ca">1pt/€</div>
   </div>
   <div class="scroll-area"><div class="page">
-    <div class="stitle">Carica scontrino</div>
-    <div class="ssub">Guadagna punti e aiuta la community</div>
-    <div class="card" style="margin-bottom:14px;"><div class="cb2">
-      <div class="receipt-zone" onclick="inviaFoto()">
-        <div style="font-size:48px;margin-bottom:12px;">📷</div>
-        <div style="font-weight:700;font-size:16px;color:var(--text2);">Scatta foto scontrino</div>
-        <div style="font-size:13px;color:var(--text3);margin-top:6px;">L'app estrae i prezzi automaticamente con OCR</div>
+
+    <!-- STEP 1: avvio scontrino -->
+    <div id="scontrino-step1">
+      <div class="stitle">Carica scontrino</div>
+      <div class="ssub">Guadagna punti e aiuta la community</div>
+      <div class="card" style="margin-bottom:14px;"><div class="cb2">
+        <div class="receipt-zone" onclick="inviaFoto()">
+          <div style="font-size:48px;margin-bottom:12px;">📷</div>
+          <div style="font-weight:700;font-size:16px;color:var(--text2);">Scatta foto scontrino</div>
+          <div style="font-size:13px;color:var(--text3);margin-top:6px;">L'app riconosce supermercato, prodotti e totale</div>
+        </div>
+        <div style="text-align:center;margin:14px 0;font-size:13px;color:var(--text3);">— oppure —</div>
+        <button class="btn-g" onclick="inviaManuale()">✏️ Inserisci manualmente</button>
+      </div></div>
+      <div class="card"><div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Perché caricare?</span></div><div class="cb2">
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;"><span style="font-size:28px;">⭐</span><div><div style="font-weight:600;">Punti proporzionali alla spesa</div><div style="font-size:12px;color:var(--text2);">1 punto per ogni €1 speso</div></div></div>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;"><span style="font-size:28px;">📊</span><div><div style="font-weight:600;">Prezzi più precisi per tutti</div><div style="font-size:12px;color:var(--text2);">I tuoi dati migliorano l'app</div></div></div>
+        <div style="display:flex;gap:12px;align-items:center;"><span style="font-size:28px;">🏆</span><div><div style="font-weight:600;">Scala la classifica di Milano</div><div style="font-size:12px;color:var(--text2);">Sfida gli altri utenti della città</div></div></div>
+      </div></div>
+    </div>
+
+    <!-- STEP 2: form conferma scontrino (nascosto di default) -->
+    <div id="scontrino-step2" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <button onclick="nascondiFormScontrino()" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+        <div class="stitle" style="margin:0;">Conferma scontrino</div>
       </div>
-      <div style="text-align:center;margin:14px 0;font-size:13px;color:var(--text3);">— oppure —</div>
-      <button class="btn-g" onclick="inviaManuale()">✏️ Inserisci manualmente</button>
-    </div></div>
-    <div class="card"><div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Perché caricare?</span></div><div class="cb2">
-      <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;"><span style="font-size:28px;">⭐</span><div><div style="font-weight:600;">+50 punti per scontrino</div><div style="font-size:12px;color:var(--text2);">Accumula e scala la classifica</div></div></div>
-      <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;"><span style="font-size:28px;">📊</span><div><div style="font-weight:600;">Prezzi più precisi per tutti</div><div style="font-size:12px;color:var(--text2);">I tuoi dati migliorano l'app</div></div></div>
-      <div style="display:flex;gap:12px;align-items:center;"><span style="font-size:28px;">🏆</span><div><div style="font-weight:600;">Scala la classifica di Milano</div><div style="font-size:12px;color:var(--text2);">Sfida gli altri utenti della città</div></div></div>
-    </div></div>
+      <!-- OCR loading -->
+      <div id="ocr-loading" style="display:none;text-align:center;padding:30px 0;">
+        <div style="font-size:40px;margin-bottom:10px;">🔍</div>
+        <div style="font-weight:600;margin-bottom:6px;">Riconoscimento in corso...</div>
+        <div style="font-size:13px;color:var(--text3);">Analisi OCR dello scontrino</div>
+      </div>
+      <!-- Form compilato dopo OCR (o vuoto per manuale) -->
+      <div id="ocr-result" style="display:none;">
+        <div class="card" style="margin-bottom:12px;"><div class="cb2">
+          <div style="font-weight:700;font-size:14px;margin-bottom:10px;">📍 Supermercato</div>
+          <div id="store-pills" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+        </div></div>
+        <div class="card" style="margin-bottom:12px;"><div class="cb2">
+          <div style="font-weight:700;font-size:14px;margin-bottom:10px;">💶 Totale scontrino (€)</div>
+          <input id="sc-totale" type="number" step="0.01" min="0.01" placeholder="Es. 32.50" style="width:100%;border:2px solid var(--surface2);border-radius:12px;padding:12px 16px;font-size:16px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box;"/>
+        </div></div>
+        <div class="card" style="margin-bottom:12px;"><div class="cb2">
+          <div style="font-weight:700;font-size:14px;margin-bottom:10px;">🛒 Prodotti <span id="sc-prod-badge" style="background:var(--green);color:#fff;border-radius:20px;font-size:11px;padding:2px 8px;margin-left:4px;display:none;">0</span></div>
+          <div id="sc-prod-list" style="margin-bottom:10px;"></div>
+          <div style="position:relative;">
+            <input id="sc-prod-input" type="text" placeholder="Cerca e aggiungi prodotto..." autocomplete="off" oninput="scSearchProd(this.value)" style="width:100%;border:2px solid var(--surface2);border-radius:12px;padding:10px 16px;font-size:14px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box;"/>
+            <div id="sc-autocomplete" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:2px solid var(--surface2);border-radius:12px;z-index:100;overflow:hidden;max-height:200px;overflow-y:auto;"></div>
+          </div>
+        </div></div>
+        <button class="btn-g" onclick="confermaScontrino()" style="margin-bottom:8px;">✅ Conferma e guadagna punti</button>
+        <button onclick="nascondiFormScontrino()" style="width:100%;border:none;background:transparent;color:var(--text3);font-size:14px;padding:10px;cursor:pointer;">Annulla</button>
+      </div>
+    </div>
+
     <div class="sp"></div>
   </div></div>
   <div class="bnav">
@@ -1264,14 +1304,26 @@ function apriAppleMaps(){
 
 
 
+// ── SCONTRINO: stato form ──
+var scProdotti = [];
+
+function mostraFormScontrino(){
+  document.getElementById('scontrino-step1').style.display = 'none';
+  document.getElementById('scontrino-step2').style.display = 'block';
+}
+
+function nascondiFormScontrino(){
+  document.getElementById('scontrino-step2').style.display = 'none';
+  document.getElementById('scontrino-step1').style.display = 'block';
+  document.getElementById('ocr-loading').style.display = 'none';
+  document.getElementById('ocr-result').style.display = 'none';
+  document.getElementById('sc-autocomplete').style.display = 'none';
+  scProdotti = [];
+}
+
 function inviaManuale(){
-  userData.punti += 50;
-  userData.scontrini += 1;
-  userData.risparmio += parseFloat((Math.random() * 4 + 1).toFixed(2));
-  salvaUserData();
-  aggiornaHome();
-  showToast('Scontrino salvato! +50 punti 🎉');
-  setTimeout(function(){ go('home'); }, 1500);
+  mostraFormScontrino();
+  renderFormScontrino(-1, '', []);
 }
 
 function inviaFoto(){
@@ -1282,17 +1334,167 @@ function inviaFoto(){
   input.style.display = 'none';
   input.onchange = function(e){
     if(e.target.files && e.target.files[0]){
-      userData.punti = (userData.punti||0) + 50;
-      userData.scontrini = (userData.scontrini||0) + 1;
-      userData.risparmio = (userData.risparmio||0) + parseFloat((Math.random() * 4 + 1).toFixed(2));
-      salvaUserData();
-      aggiornaHome();
-      showToast('📸 Scontrino caricato! +50 punti 🎉');
+      mostraFormScontrino();
+      eseguiOCR(e.target.files[0]);
     }
     document.body.removeChild(input);
   };
   document.body.appendChild(input);
   input.click();
+}
+
+function eseguiOCR(file){
+  document.getElementById('ocr-loading').style.display = 'block';
+  document.getElementById('ocr-result').style.display = 'none';
+  var fd = new FormData();
+  fd.append('file', file);
+  fd.append('apikey', 'helloworld');
+  fd.append('language', 'ita');
+  fd.append('isOverlayRequired', 'false');
+  fetch('https://api.ocr.space/parse/image', { method:'POST', body:fd })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var testo = '';
+      if(d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
+      popolaFormDaOCR(testo);
+    })
+    .catch(function(){ popolaFormDaOCR(''); });
+}
+
+function popolaFormDaOCR(testo){
+  var storeMap = { 'EUROSPIN':0, 'LIDL':1, 'CONAD':2, 'COOP':3, 'ESSELUNGA':4 };
+  var storeIdx = -1;
+  var testoUp = testo.toUpperCase();
+  Object.keys(storeMap).forEach(function(k){ if(testoUp.indexOf(k)>=0) storeIdx = storeMap[k]; });
+
+  var totale = '';
+  var mTot = testo.match(/TOTALE[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/TOT[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/(\d+[.,]\d{2})\s*[€E]\s*$/m);
+  if(mTot) totale = mTot[1].replace(',','.');
+
+  var prods = [];
+  testo.split('\n').forEach(function(riga){
+    var entry = cercaInDB(riga.trim());
+    if(entry && prods.indexOf(entry.k[0])===-1) prods.push(entry.k[0]);
+  });
+
+  renderFormScontrino(storeIdx, totale, prods);
+}
+
+function renderFormScontrino(storeIdx, totale, prods){
+  scProdotti = prods.map(function(n){ return {name:n, qty:1}; });
+  document.getElementById('ocr-loading').style.display = 'none';
+  document.getElementById('ocr-result').style.display = 'block';
+
+  // Store pills
+  var html = '';
+  STORES.forEach(function(s, i){
+    var sel = i===storeIdx;
+    var border = sel ? 'border:2px solid var(--green);background:var(--green);color:#fff;' : 'border:2px solid var(--surface2);background:var(--surface);color:var(--text);';
+    html += '<label style="display:block;border-radius:12px;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;'+border+'">'
+          + '<input type="radio" name="sc-store" value="'+i+'" style="display:none;"'+(sel?' checked':'')+' onchange="aggiornaPillsStore()">'
+          + s + '</label>';
+  });
+  document.getElementById('store-pills').innerHTML = html;
+
+  document.getElementById('sc-totale').value = totale;
+  aggiornaListaProdotti();
+}
+
+function aggiornaPillsStore(){
+  var sel = document.querySelector('input[name="sc-store"]:checked');
+  var idx = sel ? parseInt(sel.value) : -1;
+  document.querySelectorAll('#store-pills label').forEach(function(lbl, i){
+    if(i===idx){
+      lbl.style.border = '2px solid var(--green)';
+      lbl.style.background = 'var(--green)';
+      lbl.style.color = '#fff';
+    } else {
+      lbl.style.border = '2px solid var(--surface2)';
+      lbl.style.background = 'var(--surface)';
+      lbl.style.color = 'var(--text)';
+    }
+  });
+  aggiornaListaProdotti();
+}
+
+function aggiornaListaProdotti(){
+  var sel = document.querySelector('input[name="sc-store"]:checked');
+  var storeIdx = sel ? parseInt(sel.value) : 0;
+  var list = document.getElementById('sc-prod-list');
+  var badge = document.getElementById('sc-prod-badge');
+  if(scProdotti.length===0){
+    list.innerHTML = '<div style="font-size:13px;color:var(--text3);font-style:italic;">Nessun prodotto aggiunto</div>';
+    badge.style.display = 'none';
+    return;
+  }
+  badge.style.display = 'inline';
+  badge.textContent = scProdotti.length;
+  list.innerHTML = scProdotti.map(function(p, i){
+    var entry = cercaInDB(p.name);
+    var prezzo = entry ? '€'+(entry.p[storeIdx]*(p.qty||1)).toFixed(2) : '';
+    var prezzoHtml = prezzo ? ' <span style="color:var(--green);font-weight:700;">'+prezzo+'</span>' : '';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--surface2);">'
+         + '<span style="font-size:13px;">'+(p.qty>1?p.qty+'× ':'')+p.name+prezzoHtml+'</span>'
+         + '<button onclick="rimuoviProdotto('+i+')" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;">✕</button>'
+         + '</div>';
+  }).join('');
+}
+
+function rimuoviProdotto(idx){
+  scProdotti.splice(idx,1);
+  aggiornaListaProdotti();
+}
+
+function scSearchProd(val){
+  var drop = document.getElementById('sc-autocomplete');
+  if(val.length<2){ drop.style.display='none'; return; }
+  var q = val.toLowerCase();
+  var res = [];
+  for(var i=0; i<DB_PREZZI.length && res.length<6; i++){
+    for(var j=0; j<DB_PREZZI[i].k.length; j++){
+      if(DB_PREZZI[i].k[j].indexOf(q)>=0){
+        res.push(DB_PREZZI[i].k[0]);
+        break;
+      }
+    }
+  }
+  if(res.length===0){ drop.style.display='none'; return; }
+  drop.innerHTML = res.map(function(r){
+    return '<div onclick="scAggiungiProdotto(\''+r.replace(/'/g,"\\'")+'\')" style="padding:10px 16px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--surface2);" onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'\'">'+r+'</div>';
+  }).join('');
+  drop.style.display = 'block';
+}
+
+function scAggiungiProdotto(nome){
+  var gia = scProdotti.findIndex(function(p){ return p.name===nome; });
+  if(gia>=0){ scProdotti[gia].qty++; }
+  else { scProdotti.push({name:nome,qty:1}); }
+  document.getElementById('sc-prod-input').value = '';
+  document.getElementById('sc-autocomplete').style.display = 'none';
+  aggiornaListaProdotti();
+}
+
+function confermaScontrino(){
+  var storeEl = document.querySelector('input[name="sc-store"]:checked');
+  var totale = parseFloat(document.getElementById('sc-totale').value);
+  if(!storeEl){ showToast('Seleziona il supermercato!'); return; }
+  if(!totale || totale<=0){ showToast('Inserisci il totale speso!'); return; }
+  var storeIdx = parseInt(storeEl.value);
+  var risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
+  var punti = Math.floor(totale);
+  userData.punti = (userData.punti||0) + punti;
+  userData.scontrini = (userData.scontrini||0) + 1;
+  userData.risparmio = parseFloat(((userData.risparmio||0) + risparmio).toFixed(2));
+  salvaUserData();
+  aggiornaHome();
+  aggiornaProfiloUI();
+  nascondiFormScontrino();
+  var msg = '+'+punti+' punti! 🎉';
+  if(risparmio>0) msg += ' Potresti risparmiare €'+risparmio.toFixed(2)+' da Eurospin';
+  showToast(msg);
+  setTimeout(function(){ go('home'); }, 1800);
 }
 
 // ════════════════════════════════════════
