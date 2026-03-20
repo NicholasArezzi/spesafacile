@@ -2168,6 +2168,22 @@ function initHero() {
   window._heroRicettaId = r.id;
 }
 
+// ── FETCH JSON — products.json / recipes.json / casa.json ──
+// I JSON sono locali → risolvono in <5ms, prima della fine splash (1.5s)
+var _dbPromise = Promise.all([
+  fetch('products.json').then(function(r){ return r.json(); }),
+  fetch('recipes.json').then(function(r){ return r.json(); }),
+  fetch('casa.json').then(function(r){ return r.json(); })
+]).then(function(results){
+  var prod = results[0], rec = results[1], casa = results[2];
+  DB_PREZZI    = prod.products;
+  STORES       = prod.stores;
+  INDICI       = prod.indices;
+  CHAINS       = prod.chains;
+  DB           = rec.recipes;
+  prodottiCasa = casa.products;
+}).catch(function(e){ console.warn('Errore caricamento dati', e); });
+
 // Init
 _dbPromise.then(function(){
   try { renderGriglia(DB); } catch(e) { console.error('renderGriglia error:', e); }
@@ -2215,22 +2231,6 @@ _dbPromise.then(function(){
 
 // ── DATABASE PRODOTTI CASA (caricato da casa.json via _dbPromise) ──
 var prodottiCasa = [];
-
-// ── FETCH JSON — products.json / recipes.json / casa.json ──
-// I JSON sono locali → risolvono in <5ms, prima della fine splash (1.5s)
-var _dbPromise = Promise.all([
-  fetch('products.json').then(function(r){ return r.json(); }),
-  fetch('recipes.json').then(function(r){ return r.json(); }),
-  fetch('casa.json').then(function(r){ return r.json(); })
-]).then(function(results){
-  var prod = results[0], rec = results[1], casa = results[2];
-  DB_PREZZI    = prod.products;
-  STORES       = prod.stores;
-  INDICI       = prod.indices;
-  CHAINS       = prod.chains;
-  DB           = rec.recipes;
-  prodottiCasa = casa.products;
-}).catch(function(e){ console.warn('Errore caricamento dati', e); });
 
 function cercaInDB(nomeProd) {
   var q = nomeProd.toLowerCase().trim();
