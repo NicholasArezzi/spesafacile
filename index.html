@@ -388,6 +388,14 @@ body{
 .isp-pill:active{transform:scale(.96);}
 </style>
 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  var _supabase = (window.supabase && APP_CONFIG.SUPABASE_URL)
+    ? window.supabase.createClient(APP_CONFIG.SUPABASE_URL, APP_CONFIG.SUPABASE_ANON_KEY)
+    : null;
+</script>
+
 </head>
 <body>
 <div class="phone-frame" id="app">
