@@ -1997,6 +1997,9 @@ function aggiornaConfrontoConLista(prodotti){
       if(dbUnit==='kg') dbBase = dbRef*1000;
       else if(dbUnit==='l') dbBase = dbRef*1000;
       if(dbBase > 0) confez = Math.max(0.1, inputBase / dbBase);
+    } else if(unit && !entry) {
+      // Prodotto non in DB: non possiamo convertire i grammi, usiamo 1 confezione
+      confez = 1;
     }
     var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * confez).toFixed(2)); });
 
