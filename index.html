@@ -28,6 +28,13 @@
 <!-- Leaflet CSS – mappa interattiva senza API key -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <script src="config.js"></script>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+var _supabase = (typeof supabase !== 'undefined' && APP_CONFIG.SUPABASE_URL && APP_CONFIG.SUPABASE_ANON_KEY)
+  ? supabase.createClient(APP_CONFIG.SUPABASE_URL, APP_CONFIG.SUPABASE_ANON_KEY)
+  : null;
+</script>
 <style>
 /* Fallback font se Google Fonts non carica */
 body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -380,6 +387,14 @@ body{
 .isp-pill{flex-shrink:0;display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:100px;padding:8px 14px 8px 10px;box-shadow:var(--shadow);cursor:pointer;border:1.5px solid var(--border);transition:transform .15s;}
 .isp-pill:active{transform:scale(.96);}
 </style>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  var _supabase = (window.supabase && APP_CONFIG.SUPABASE_URL)
+    ? window.supabase.createClient(APP_CONFIG.SUPABASE_URL, APP_CONFIG.SUPABASE_ANON_KEY)
+    : null;
+</script>
 
 </head>
 <body>
@@ -1433,14 +1448,22 @@ function popolaFormDaOCR(testo){
   var prods = [];
   testo.split('\n').forEach(function(riga){
     var entry = cercaInDB(riga.trim());
-    if(entry && prods.indexOf(entry.k[0])===-1) prods.push(entry.k[0]);
+    if(entry && !prods.find(function(p){ return p.k === entry.k[0]; })){
+      var mPrezzo = riga.match(/(\d+[.,]\d{2})/g);
+      var prezzo = mPrezzo ? parseFloat(mPrezzo[mPrezzo.length-1].replace(',','.')) : null;
+      prods.push({ k: entry.k[0], u: entry.u, price: prezzo });
+    }
   });
 
   renderFormScontrino(storeIdx, totale, prods);
 }
 
 function renderFormScontrino(storeIdx, totale, prods){
-  scProdotti = prods.map(function(n){ return {name:n, qty:1}; });
+  scProdotti = prods.map(function(p){
+    return typeof p === 'string'
+      ? {name:p, qty:1, price:null, u:''}
+      : {name:p.k, qty:1, price:p.price||null, u:p.u||''};
+  });
   document.getElementById('ocr-loading').style.display = 'none';
   document.getElementById('ocr-result').style.display = 'block';
 
@@ -1548,6 +1571,21 @@ function confermaScontrino(){
   userData.scontrini = (userData.scontrini||0) + 1;
   userData.risparmio = parseFloat(((userData.risparmio||0) + risparmio).toFixed(2));
   salvaUserData();
+
+  // Invio dati a Supabase (fire-and-forget, non blocca l'UX)
+  if(_supabase && storeIdx >= 0 && scProdotti.length > 0){
+    var storeName = STORES[storeIdx] || '';
+    var citta = userData.citta || '';
+    var rows = scProdotti
+      .filter(function(p){ return p.price && p.price > 0 && p.price < 500; })
+      .map(function(p){
+        return { store_name: storeName, product_key: p.name, price: p.price, unit: p.u || '', city: citta };
+      });
+    if(rows.length > 0){
+      _supabase.from('price_reports').insert(rows).then(function(){}).catch(function(){});
+    }
+  }
+
   aggiornaHome();
   aggiornaProfiloUI();
   nascondiFormScontrino();
@@ -2184,12 +2222,33 @@ var _dbPromise = Promise.all([
   prodottiCasa = casa.products;
 }).catch(function(e){ console.warn('Errore caricamento dati', e); });
 
+// Aggiorna DB_PREZZI con i prezzi medi da Supabase (se disponibili)
+function aggiornaDBConSupabase(data){
+  if(!data || !data.length) return;
+  data.forEach(function(row){
+    var storeIdx = STORES.indexOf(row.store_name);
+    if(storeIdx < 0) return;
+    for(var i=0; i<DB_PREZZI.length; i++){
+      if(DB_PREZZI[i].k.indexOf(row.product_key) >= 0){
+        DB_PREZZI[i].p[storeIdx] = parseFloat(row.avg_price);
+        break;
+      }
+    }
+  });
+}
+
 // Init
 _dbPromise.then(function(){
   try { renderGriglia(DB); } catch(e) { console.error('renderGriglia error:', e); }
   try { initHero(); } catch(e) {}
   try { renderIspiPills(); } catch(e) {}
   try { renderCasa(); } catch(e) {}
+  // Arricchisce DB_PREZZI con prezzi reali da Supabase (fire-and-forget)
+  if(_supabase){
+    _supabase.rpc('avg_prices').then(function(res){
+      if(res && res.data) aggiornaDBConSupabase(res.data);
+    }).catch(function(){});
+  }
 });
 // ── SPLASH SCREEN ──────────────────────────────
 (function(){

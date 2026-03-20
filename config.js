@@ -44,6 +44,10 @@ const APP_CONFIG = {
   BADGE_SCONTRINI_5: 5,
   BADGE_RISPARMIO:   50,
 
+  // Supabase (inserire le credenziali del tuo progetto)
+  SUPABASE_URL:      'https://nzrelznyvzhkhbplihpg.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_GHu5VEA5YptIr_K74jw3vw_BdDrASoO',
+
   // LocalStorage
   STORAGE_USER: 'sf_user',
 
