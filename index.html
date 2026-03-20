@@ -1983,23 +1983,23 @@ function aggiornaConfrontoConLista(prodotti){
     var prezziUnitari = entry ? entry.p.slice() : stimaPrezzi(prod);
     var unita  = entry ? entry.u : '';
     var isReal = !!entry;
-    // Converti qty+unit in numero di confezioni rispetto al riferimento DB
-    var confez = qty;
+    // Converti qty+unit in numero di confezioni rispetto al riferimento DB.
+    // Se è presente un'unità di misura il default sicuro è 1 confezione;
+    // il blocco qui sotto lo sovrascrive con la conversione esatta quando possibile.
+    var confez = unit ? 1 : qty;
     if(unit && entry && unita){
       var inputBase = qty;
       if(unit==='kg') inputBase = qty*1000;
       else if(unit==='l') inputBase = qty*1000;
       else if(unit==='cl') inputBase = qty*10;
       else if(unit==='dl') inputBase = qty*100;
+      // inputBase ora in g (per solidi) o ml (per liquidi)
       var dbRef = parseFloat(unita) || 1;
       var dbUnit = unita.replace(/[\d.,]/g,'').trim().toLowerCase();
       var dbBase = dbRef;
       if(dbUnit==='kg') dbBase = dbRef*1000;
       else if(dbUnit==='l') dbBase = dbRef*1000;
       if(dbBase > 0) confez = Math.max(0.1, inputBase / dbBase);
-    } else if(unit && !entry) {
-      // Prodotto non in DB: non possiamo convertire i grammi, usiamo 1 confezione
-      confez = 1;
     }
     var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * confez).toFixed(2)); });
 
