@@ -27,6 +27,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <!-- Leaflet CSS – mappa interattiva senza API key -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="config.js"></script>
 <style>
 /* Fallback font se Google Fonts non carica */
 body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -1218,28 +1219,28 @@ function initMappa(){
   if(leafletMap){
     setTimeout(function(){
       leafletMap.invalidateSize();
-      if(userLat && userLng) leafletMap.setView([userLat,userLng],15);
+      if(userLat && userLng) leafletMap.setView([userLat,userLng], APP_CONFIG.MAP_ZOOM_USER);
     },150);
     // Aggiorna posizione GPS ad ogni riapertura mappa
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(
         function(p){
           userLat=p.coords.latitude; userLng=p.coords.longitude;
-          leafletMap.setView([userLat,userLng],15);
+          leafletMap.setView([userLat,userLng], APP_CONFIG.MAP_ZOOM_USER);
           if(userMarker) leafletMap.removeLayer(userMarker);
           var uIcon=L.divIcon({html:'<div style="width:16px;height:16px;background:#1A8C4E;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,140,78,.25);"></div>',className:'',iconSize:[16,16],iconAnchor:[8,8]});
           userMarker=L.marker([userLat,userLng],{icon:uIcon,zIndexOffset:1000}).addTo(leafletMap).bindPopup('Sei qui');
         },
         function(){},
-        {enableHighAccuracy:true,timeout:8000,maximumAge:60000}
+        {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_FAST, maximumAge: APP_CONFIG.GEO_MAX_AGE}
       );
     }
     return;
   }
   leafletMap=L.map('leaflet-map',{zoomControl:true,attributionControl:false})
-    .setView([41.9,12.5],6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(leafletMap);
-  setTimeout(function(){leafletMap.invalidateSize();},200);
+    .setView(APP_CONFIG.MAP_CENTER, APP_CONFIG.MAP_ZOOM_DEFAULT);
+  L.tileLayer(APP_CONFIG.TILE_URL, {maxZoom: APP_CONFIG.MAP_MAX_ZOOM}).addTo(leafletMap);
+  setTimeout(function(){leafletMap.invalidateSize();}, APP_CONFIG.MAP_INVALIDATE_DELAY);
 
   if(navigator.geolocation){
     document.getElementById('mappa-loading-msg').textContent='Cerco il tuo GPS...';
@@ -1247,24 +1248,24 @@ function initMappa(){
       function(p){ userLat=p.coords.latitude; userLng=p.coords.longitude; onGotPos(); },
       function(){
         // Fallback: IP geolocation invece di Genova hardcoded
-        fetch('https://ipwho.is/')
+        fetch(APP_CONFIG.IP_GEO_URL)
           .then(function(r){ return r.json(); })
           .then(function(d){
             if(d && d.latitude){ userLat=d.latitude; userLng=d.longitude; }
-            else { userLat=44.4056; userLng=8.9463; }
+            else { userLat=APP_CONFIG.FALLBACK_LAT; userLng=APP_CONFIG.FALLBACK_LNG; }
             onGotPos();
           })
-          .catch(function(){ userLat=44.4056; userLng=8.9463; onGotPos(); });
+          .catch(function(){ userLat=APP_CONFIG.FALLBACK_LAT; userLng=APP_CONFIG.FALLBACK_LNG; onGotPos(); });
       },
-      {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+      {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_SLOW, maximumAge:0}
     );
   } else {
-    userLat=44.4056; userLng=8.9463; onGotPos();
+    userLat=APP_CONFIG.FALLBACK_LAT; userLng=APP_CONFIG.FALLBACK_LNG; onGotPos();
   }
 }
 
 function onGotPos(){
-  leafletMap.setView([userLat,userLng],15);
+  leafletMap.setView([userLat,userLng], APP_CONFIG.MAP_ZOOM_USER);
   var uIcon=L.divIcon({
     html:'<div style="width:16px;height:16px;background:#1A8C4E;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,140,78,.25);"></div>',
     className:'',iconSize:[16,16],iconAnchor:[8,8]
@@ -1275,9 +1276,9 @@ function onGotPos(){
 }
 
 function loadStores(lat,lng){
-  var r=3000;
-  var q='[out:json][timeout:25];(node["shop"~"supermarket|convenience|discount"](around:'+r+','+lat+','+lng+');way["shop"~"supermarket|convenience|discount"](around:'+r+','+lat+','+lng+'););out center;';
-  fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:q})
+  var r=APP_CONFIG.SHOP_RADIUS_M;
+  var q='[out:json][timeout:'+APP_CONFIG.OVERPASS_TIMEOUT_S+'];(node["shop"~"supermarket|convenience|discount"](around:'+r+','+lat+','+lng+');way["shop"~"supermarket|convenience|discount"](around:'+r+','+lat+','+lng+'););out center;';
+  fetch(APP_CONFIG.OVERPASS_URL,{method:'POST',body:q})
   .then(function(r){return r.json();})
   .then(function(d){
     document.getElementById('mappa-loading-overlay').style.display='none';
@@ -1298,7 +1299,7 @@ function loadStores(lat,lng){
       cnt++;
     });
     document.getElementById('mappa-chip').textContent=cnt+' supermercati';
-    document.getElementById('mappa-store-count').textContent=cnt+' supermercati nel raggio di 3km';
+    document.getElementById('mappa-store-count').textContent=cnt+' supermercati nel raggio di '+(APP_CONFIG.SHOP_RADIUS_M/1000)+'km';
     if(cnt===0){
       document.getElementById('mappa-loading-overlay').style.display='flex';
       document.getElementById('mappa-loading-msg').textContent='Nessun supermercato trovato vicino a te';
@@ -1417,10 +1418,10 @@ function eseguiOCR(file){
   document.getElementById('ocr-result').style.display = 'none';
   var fd = new FormData();
   fd.append('file', file);
-  fd.append('apikey', 'helloworld');
-  fd.append('language', 'ita');
+  fd.append('apikey', APP_CONFIG.OCR_API_KEY);
+  fd.append('language', APP_CONFIG.OCR_LANGUAGE);
   fd.append('isOverlayRequired', 'false');
-  fetch('https://api.ocr.space/parse/image', { method:'POST', body:fd })
+  fetch(APP_CONFIG.OCR_API_URL, { method:'POST', body:fd })
     .then(function(r){ return r.json(); })
     .then(function(d){
       var testo = '';
@@ -1581,12 +1582,12 @@ var userData = {
 };
 
 function salvaUserData(){
-  try { localStorage.setItem('sf_user', JSON.stringify(userData)); } catch(e){}
+  try { localStorage.setItem(APP_CONFIG.STORAGE_USER, JSON.stringify(userData)); } catch(e){}
 }
 
 function caricaUserData(){
   try {
-    var s = localStorage.getItem('sf_user');
+    var s = localStorage.getItem(APP_CONFIG.STORAGE_USER);
     if(s){ var d = JSON.parse(s); Object.assign(userData, d); return true; }
   } catch(e){}
   return false;
@@ -1600,7 +1601,13 @@ function aggiornaHome(){
   if(el('stat-scontrini')) el('stat-scontrini').textContent = userData.scontrini;
   if(el('stat-liste'))     el('stat-liste').textContent     = userData.liste;
   if(el('stat-risparmio')) el('stat-risparmio').textContent = '\u20ac' + userData.risparmio.toFixed(2).replace('.',',');
-  var badges = [userData.liste>=1, userData.scontrini>=1, userData.ricette>=1, userData.scontrini>=5, userData.risparmio>=50].filter(Boolean).length + 1;
+  var badges = [
+    userData.liste     >= APP_CONFIG.BADGE_LISTE,
+    userData.scontrini >= APP_CONFIG.BADGE_SCONTRINI_1,
+    userData.ricette   >= APP_CONFIG.BADGE_RICETTE,
+    userData.scontrini >= APP_CONFIG.BADGE_SCONTRINI_5,
+    userData.risparmio >= APP_CONFIG.BADGE_RISPARMIO
+  ].filter(Boolean).length + 1;
   if(el('stat-badge')) el('stat-badge').textContent = badges;
   aggiornaProfiloUI();
   var cityEl = document.getElementById('home-city-title');
@@ -1655,24 +1662,24 @@ function aggiornaProfiloUI(){
   if(el('prof-chip-p'))   el('prof-chip-p').textContent   = '\u2b50 ' + userData.punti + ' pt';
 
   // Badge - si sbloccano in base alle azioni
-  if(userData.liste >= 1)    sbloccaBadge('badge-lista');
-  if(userData.scontrini >= 1) sbloccaBadge('badge-scontrino');
-  if(userData.ricette >= 1)  sbloccaBadge('badge-ricetta');
-  if(userData.scontrini >= 5) sbloccaBadge('badge-5sc');
-  if(userData.risparmio >= 50) sbloccaBadge('badge-50eur');
+  if(userData.liste     >= APP_CONFIG.BADGE_LISTE)       sbloccaBadge('badge-lista');
+  if(userData.scontrini >= APP_CONFIG.BADGE_SCONTRINI_1) sbloccaBadge('badge-scontrino');
+  if(userData.ricette   >= APP_CONFIG.BADGE_RICETTE)     sbloccaBadge('badge-ricetta');
+  if(userData.scontrini >= APP_CONFIG.BADGE_SCONTRINI_5) sbloccaBadge('badge-5sc');
+  if(userData.risparmio >= APP_CONFIG.BADGE_RISPARMIO)   sbloccaBadge('badge-50eur');
 
   // Obiettivi - progress bar dinamiche
-  var sc5 = Math.min(userData.scontrini, 5);
-  if(el('goal-sc-txt')) el('goal-sc-txt').textContent = sc5 + '/5';
-  if(el('goal-sc-bar')) el('goal-sc-bar').style.width = (sc5/5*100) + '%';
+  var sc5 = Math.min(userData.scontrini, APP_CONFIG.BADGE_SCONTRINI_5);
+  if(el('goal-sc-txt')) el('goal-sc-txt').textContent = sc5 + '/' + APP_CONFIG.BADGE_SCONTRINI_5;
+  if(el('goal-sc-bar')) el('goal-sc-bar').style.width = (sc5/APP_CONFIG.BADGE_SCONTRINI_5*100) + '%';
 
-  var eur50 = Math.min(userData.risparmio, 50);
-  if(el('goal-eur-txt')) el('goal-eur-txt').textContent = '\u20ac' + eur50.toFixed(2).replace('.',',') + '/\u20ac50';
-  if(el('goal-eur-bar')) el('goal-eur-bar').style.width = (eur50/50*100) + '%';
+  var eur50 = Math.min(userData.risparmio, APP_CONFIG.BADGE_RISPARMIO);
+  if(el('goal-eur-txt')) el('goal-eur-txt').textContent = '\u20ac' + eur50.toFixed(2).replace('.',',') + '/\u20ac' + APP_CONFIG.BADGE_RISPARMIO;
+  if(el('goal-eur-bar')) el('goal-eur-bar').style.width = (eur50/APP_CONFIG.BADGE_RISPARMIO*100) + '%';
 
-  var ric5 = Math.min(userData.ricette, 5);
-  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/5';
-  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/5*100) + '%';
+  var ric5 = Math.min(userData.ricette, APP_CONFIG.BADGE_SCONTRINI_5);
+  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/' + APP_CONFIG.BADGE_SCONTRINI_5;
+  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/APP_CONFIG.BADGE_SCONTRINI_5*100) + '%';
 }
 
 // ════════════════════════════════════════
@@ -2145,7 +2152,7 @@ function rilevaCitta(){
     navigator.geolocation.getCurrentPosition(function(pos){
       var lat = pos.coords.latitude;
       var lng = pos.coords.longitude;
-      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lng)
+      fetch(APP_CONFIG.NOMINATIM_URL + '?format=json&lat='+lat+'&lon='+lng)
         .then(function(r){ return r.json(); })
         .then(function(d){
           if(!d || !d.address) return;
@@ -3397,7 +3404,7 @@ function addItemCasa(nome){
 
 // -- LOGOUT --
 function logout(){
-  try { localStorage.removeItem('sf_user'); } catch(e){}
+  try { localStorage.removeItem(APP_CONFIG.STORAGE_USER); } catch(e){}
   userData.nome           = '';
   userData.punti          = 0;
   userData.scontrini      = 0;
@@ -3497,7 +3504,7 @@ function generaOfferte(){
 
   var indices = [];
   var i = 0;
-  while(indices.length < 12 && i < 200){
+  while(indices.length < APP_CONFIG.OFFERS_COUNT && i < 200){
     var idx = Math.floor(sr(seed + i*37) * DB_PREZZI.length);
     if(indices.indexOf(idx)===-1) indices.push(idx);
     i++;
@@ -3610,16 +3617,16 @@ function caricaGoogleMaps(lat,lng){ initMappa(); }
 function _mapAvviaConPosizione(){
   // Fallback IP: usato se GPS fallisce o non disponibile
   function _ipFallback(){
-    fetch('https://ipwho.is/')
+    fetch(APP_CONFIG.IP_GEO_URL)
       .then(function(r){ return r.json(); })
       .then(function(d){
         if(d && d.latitude && d.longitude){
           userLat = d.latitude; userLng = d.longitude;
           if(d.city) userData.citta = d.city;
         }
-        _mapRender(userLat || 41.9028, userLng || 12.4964);
+        _mapRender(userLat || APP_CONFIG.FALLBACK_LAT_ITALY, userLng || APP_CONFIG.FALLBACK_LNG_ITALY);
       })
-      .catch(function(){ _mapRender(41.9028, 12.4964); });
+      .catch(function(){ _mapRender(APP_CONFIG.FALLBACK_LAT_ITALY, APP_CONFIG.FALLBACK_LNG_ITALY); });
   }
 
   // Se coordinate già disponibili → renderizza subito, poi prova a raffinare con GPS
@@ -3632,7 +3639,7 @@ function _mapAvviaConPosizione(){
           _mapRender(userLat, userLng);
         },
         function(){},
-        {enableHighAccuracy:true, timeout:8000, maximumAge:60000}
+        {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_FAST, maximumAge: APP_CONFIG.GEO_MAX_AGE}
       );
     }
     return;
@@ -3667,7 +3674,7 @@ function _mapRender(lat, lng){
 
   // Se la mappa esiste già la sposto solo se coordinate cambiate
   if(_mapInstance && _mapInitialized){
-    _mapInstance.setView([lat, lng], 15);
+    _mapInstance.setView([lat, lng], APP_CONFIG.MAP_ZOOM_USER);
     if(_mapUserMarker) _mapUserMarker.setLatLng([lat, lng]);
     setTimeout(function(){ _mapInstance.invalidateSize(); }, 100);
     _mapNascondiLoading();
@@ -3685,12 +3692,12 @@ function _mapRender(lat, lng){
       attributionControl: false,
       tap: true,
       tapTolerance: 15
-    }).setView([lat, lng], 15);
+    }).setView([lat, lng], APP_CONFIG.MAP_ZOOM_USER);
 
     // Tile OpenStreetMap (gratuito, no API key)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      minZoom: 5,
+    L.tileLayer(APP_CONFIG.TILE_URL, {
+      maxZoom: APP_CONFIG.MAP_MAX_ZOOM,
+      minZoom: APP_CONFIG.MAP_MIN_ZOOM,
       crossOrigin: true
     }).addTo(_mapInstance);
 
@@ -3737,7 +3744,7 @@ function _mapCercaSupermercati(lat, lng){
   }).join('');
 
   var query = '[out:json][timeout:20];(' + filtri + ');out center;';
-  var url   = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query);
+  var url   = APP_CONFIG.OVERPASS_URL + '?data=' + encodeURIComponent(query);
 
   var fetchOpts = {};
   if(typeof AbortController !== 'undefined'){
