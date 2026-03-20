@@ -538,7 +538,7 @@ body{
             <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:17px;">✨ Ispirami oggi</div>
             <div onclick="go('ispirami')" style="font-size:12px;color:var(--green);font-weight:700;cursor:pointer;">Vedi tutte →</div>
           </div>
-          <div class="isp-scroll">
+          <div class="isp-scroll" id="isp-pills">
             <div class="isp-pill" onclick="go('ispirami')"><span style="font-size:20px;">🍝</span><div><div style="font-size:12px;font-weight:700;color:var(--text);">Carbonara</div><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;background:#FEF3C7;color:#92400E;display:block;margin-top:2px;">Media</span></div></div>
             <div class="isp-pill" onclick="go('ispirami')"><span style="font-size:20px;">🍕</span><div><div style="font-size:12px;font-weight:700;color:var(--text);">Pizza</div><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;background:#FEF3C7;color:#92400E;display:block;margin-top:2px;">Media</span></div></div>
             <div class="isp-pill" onclick="go('ispirami')"><span style="font-size:20px;">🍰</span><div><div style="font-size:12px;font-weight:700;color:var(--text);">Tiramisù</div><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;background:#D1FAE5;color:#065F46;display:block;margin-top:2px;">Facile</span></div></div>
@@ -1534,7 +1534,10 @@ function confermaScontrino(){
   if(!storeEl){ showToast('Seleziona il supermercato!'); return; }
   if(!totale || totale<=0){ showToast('Inserisci il totale speso!'); return; }
   var storeIdx = parseInt(storeEl.value);
-  var risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
+  var risparmio = 0;
+  if(INDICI.length > 0) {
+    risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
+  }
   var punti = Math.floor(totale);
   userData.punti = (userData.punti||0) + punti;
   userData.scontrini = (userData.scontrini||0) + 1;
@@ -1726,14 +1729,16 @@ function aggiornaConfrontoConLista(prodotti){
   // I JSON sono locali → risolvono in <5ms, prima della fine splash (1.5s)
   var _dbPromise = Promise.all([
     fetch('products.json').then(function(r){ return r.json(); }),
-    fetch('recipes.json').then(function(r){ return r.json(); })
+    fetch('recipes.json').then(function(r){ return r.json(); }),
+    fetch('casa.json').then(function(r){ return r.json(); })
   ]).then(function(results){
-    var prod = results[0], rec = results[1];
-    DB_PREZZI = prod.products;
-    STORES    = prod.stores;
-    INDICI    = prod.indices;
-    CHAINS    = prod.chains;
-    DB        = rec.recipes;
+    var prod = results[0], rec = results[1], casa = results[2];
+    DB_PREZZI    = prod.products;
+    STORES       = prod.stores;
+    INDICI       = prod.indices;
+    CHAINS       = prod.chains;
+    DB           = rec.recipes;
+    prodottiCasa = casa.products;
   }).catch(function(e){ console.warn('Errore caricamento dati', e); });
 
 
@@ -1755,6 +1760,7 @@ function aggiornaConfrontoConLista(prodotti){
     var seed = 0;
     for(var i=0; i<nomeProd.length; i++) seed += nomeProd.charCodeAt(i);
     var base = 0.80 + (seed % 30) * 0.08; // prezzo base 0.80-3.20
+    if(!INDICI.length) return STORES.map(function(){ return 0; });
     return INDICI.map(function(idx){ return parseFloat((base * idx).toFixed(2)); });
   }
 
@@ -2167,6 +2173,27 @@ function aggiungiLista() {
   setTimeout(function() { go('lista'); }, 1200);
 }
 
+// Popola le inspiration pills nella home con dati reali da DB
+function renderIspiPills() {
+  var el = document.getElementById('isp-pills');
+  if(!el || !DB.length) return;
+  var DIFF_COLORS = {
+    'Facile':    {bg:'#D1FAE5', fg:'#065F46'},
+    'Media':     {bg:'#FEF3C7', fg:'#92400E'},
+    'Difficile': {bg:'#FEE2E2', fg:'#991B1B'}
+  };
+  var sample = DB.slice(0, Math.min(6, DB.length));
+  el.innerHTML = sample.map(function(r){
+    var dc = DIFF_COLORS[r.diff] || DIFF_COLORS['Facile'];
+    return '<div class="isp-pill" onclick="go(\'ispirami\')">' +
+      '<span style="font-size:20px;">' + r.emoji + '</span>' +
+      '<div><div style="font-size:12px;font-weight:700;color:var(--text);">' + r.nome + '</div>' +
+      '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;' +
+      'background:' + dc.bg + ';color:' + dc.fg + ';display:block;margin-top:2px;">' +
+      r.diff + '</span></div></div>';
+  }).join('');
+}
+
 // Imposta ricetta del giorno nell hero
 function initHero() {
   if (!DB || DB.length === 0) return;
@@ -2183,6 +2210,7 @@ function initHero() {
 _dbPromise.then(function(){
   try { renderGriglia(DB); } catch(e) { console.error('renderGriglia error:', e); }
   try { initHero(); } catch(e) {}
+  try { renderIspiPills(); } catch(e) {}
 });
 // ── SPLASH SCREEN ──────────────────────────────
 (function(){
@@ -2222,44 +2250,8 @@ _dbPromise.then(function(){
 
 
 
-// ── DATABASE PRODOTTI CASA ──
-var prodottiCasa = [
-  // PULIZIA
-  {n:'Detersivo piatti',cat:'pulizia',ico:'🧴',prezzoMin:0.89,prezzoMax:2.30,bestStore:'Lidl'},
-  {n:'Detersivo lavatrice',cat:'pulizia',ico:'🫧',prezzoMin:3.50,prezzoMax:7.90,bestStore:'Eurospin'},
-  {n:'Ammorbidente',cat:'pulizia',ico:'🌸',prezzoMin:1.20,prezzoMax:3.50,bestStore:'Lidl'},
-  {n:'Candeggina',cat:'pulizia',ico:'🧼',prezzoMin:0.69,prezzoMax:1.80,bestStore:'Eurospin'},
-  {n:'Multiuso spray',cat:'pulizia',ico:'🧹',prezzoMin:1.10,prezzoMax:3.20,bestStore:'Lidl'},
-  {n:'Spugne',cat:'pulizia',ico:'🧽',prezzoMin:0.49,prezzoMax:1.50,bestStore:'Lidl'},
-  {n:'Scopa e paletta',cat:'pulizia',ico:'🧹',prezzoMin:2.50,prezzoMax:8.90,bestStore:'Eurospin'},
-  {n:'Guanti gomma',cat:'pulizia',ico:'🧤',prezzoMin:0.79,prezzoMax:2.50,bestStore:'Lidl'},
-  // IGIENE
-  {n:'Carta igienica',cat:'igiene',ico:'🧻',prezzoMin:1.99,prezzoMax:5.90,bestStore:'Eurospin'},
-  {n:'Shampoo',cat:'igiene',ico:'🧴',prezzoMin:0.99,prezzoMax:4.50,bestStore:'Lidl'},
-  {n:'Dentifricio',cat:'igiene',ico:'🪥',prezzoMin:0.79,prezzoMax:3.20,bestStore:'Eurospin'},
-  {n:'Sapone mani',cat:'igiene',ico:'🧼',prezzoMin:0.59,prezzoMax:2.80,bestStore:'Lidl'},
-  {n:'Balsamo capelli',cat:'igiene',ico:'💆',prezzoMin:1.29,prezzoMax:5.90,bestStore:'Lidl'},
-  {n:'Rasoio',cat:'igiene',ico:'🪒',prezzoMin:0.99,prezzoMax:4.50,bestStore:'Eurospin'},
-  {n:'Deodorante',cat:'igiene',ico:'🌬',prezzoMin:0.89,prezzoMax:3.80,bestStore:'Lidl'},
-  {n:'Salviette umidificate',cat:'igiene',ico:'🗒',prezzoMin:0.79,prezzoMax:2.50,bestStore:'Eurospin'},
-  {n:'Assorbenti',cat:'igiene',ico:'🌸',prezzoMin:1.29,prezzoMax:3.90,bestStore:'Lidl'},
-  {n:'Cotton fioc',cat:'igiene',ico:'🪄',prezzoMin:0.49,prezzoMax:1.50,bestStore:'Eurospin'},
-  // CUCINA
-  {n:'Carta da forno',cat:'cucina',ico:'📄',prezzoMin:0.69,prezzoMax:2.20,bestStore:'Lidl'},
-  {n:'Pellicola trasparente',cat:'cucina',ico:'🌯',prezzoMin:0.79,prezzoMax:2.50,bestStore:'Eurospin'},
-  {n:'Alluminio',cat:'cucina',ico:'🥡',prezzoMin:0.89,prezzoMax:2.80,bestStore:'Lidl'},
-  {n:'Sacchetti spazzatura',cat:'cucina',ico:'🗑',prezzoMin:0.99,prezzoMax:3.50,bestStore:'Eurospin'},
-  {n:'Sacchetti frigo',cat:'cucina',ico:'🛍',prezzoMin:0.59,prezzoMax:1.80,bestStore:'Lidl'},
-  {n:'Tovaglioli carta',cat:'cucina',ico:'🗒',prezzoMin:0.49,prezzoMax:1.90,bestStore:'Eurospin'},
-  {n:'Piatti carta',cat:'cucina',ico:'🍽',prezzoMin:0.99,prezzoMax:2.80,bestStore:'Lidl'},
-  {n:'Bicchieri plastica',cat:'cucina',ico:'🥤',prezzoMin:0.89,prezzoMax:2.50,bestStore:'Eurospin'},
-  // BUCATO
-  {n:'Detersivo bucato a mano',cat:'bucato',ico:'🤲',prezzoMin:0.79,prezzoMax:2.80,bestStore:'Eurospin'},
-  {n:'Smacchiatore',cat:'bucato',ico:'✨',prezzoMin:1.50,prezzoMax:4.90,bestStore:'Lidl'},
-  {n:'Mollette',cat:'bucato',ico:'🔒',prezzoMin:0.49,prezzoMax:1.80,bestStore:'Eurospin'},
-  {n:'Fogli asciugatrice',cat:'bucato',ico:'🌬',prezzoMin:1.29,prezzoMax:3.50,bestStore:'Lidl'},
-  {n:'Appendi abiti',cat:'bucato',ico:'👕',prezzoMin:0.99,prezzoMax:3.20,bestStore:'Eurospin'}
-];
+// ── DATABASE PRODOTTI CASA (caricato da casa.json via _dbPromise) ──
+var prodottiCasa = [];
 
 var casaCatCorrente = 'tutti';
 var casaSearchCorrente = '';
