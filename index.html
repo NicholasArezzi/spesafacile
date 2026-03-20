@@ -689,7 +689,7 @@ body{
 
       <!-- INFO MINI -->
       <div class="ispi-info-row">
-        <div class="ispi-stat"><div class="ispi-stat-v">65</div><div class="ispi-stat-l">ricette italiane</div></div>
+        <div class="ispi-stat"><div class="ispi-stat-v" id="hero-ricette-count">65</div><div class="ispi-stat-l">ricette italiane</div></div>
         <div class="ispi-stat"><div class="ispi-stat-v">1 tap</div><div class="ispi-stat-l">in lista spesa</div></div>
         <div class="ispi-stat"><div class="ispi-stat-v">0€</div><div class="ispi-stat-l">per usarla</div></div>
       </div>
@@ -1544,7 +1544,7 @@ function confermaScontrino(){
   aggiornaProfiloUI();
   nascondiFormScontrino();
   var msg = '+'+punti+' punti! 🎉';
-  if(risparmio>0) msg += ' Potresti risparmiare €'+risparmio.toFixed(2)+' da Eurospin';
+  if(risparmio>0) msg += ' Potresti risparmiare \u20ac'+risparmio.toFixed(2)+' da '+(STORES[0]||'Eurospin');
   showToast(msg);
   setTimeout(function(){ go('home'); }, 1800);
 }
@@ -1858,19 +1858,17 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
   var best  = ranked[0].tot;
   var worst = ranked[ranked.length-1].tot;
 
-  var BG   = {Eurospin:'#E8002D', Lidl:'#FFD700', Conad:'#E31E25', Coop:'#009246', Esselunga:'#F26522'};
-  var FG   = {Eurospin:'#fff',    Lidl:'#0050AA', Conad:'#fff',    Coop:'#fff',    Esselunga:'#fff'};
-  var ABBR = {Eurospin:'ESPIN',   Lidl:'lidl',    Conad:'CONAD',   Coop:'coop',    Esselunga:'ESSEN'};
-
   var out = '';
   for(var i=0; i<ranked.length; i++){
     var r        = ranked[i];
     var isWinner = (i === 0);
     var diff     = r.tot - best;
     var saving   = worst - r.tot;
-    var bg       = BG[r.store]   || '#555';
-    var fg       = FG[r.store]   || '#fff';
-    var abbr     = ABBR[r.store] || r.store.substring(0,5);
+    var chainKey = getChain(r.store);
+    var chain    = CHAINS[chainKey] || CHAINS['default'] || {bg:'#555',text:'#fff',label:r.store.substring(0,5)};
+    var bg       = chain.bg;
+    var fg       = chain.text;
+    var abbr     = chain.label;
     var diffStr  = diff   < 0.005 ? '' : ('+\u20ac' + diff.toFixed(2).replace('.',','));
     var savStr   = saving > 0.005 ? ('-\u20ac' + saving.toFixed(2).replace('.',',')) : '';
 
@@ -2177,6 +2175,7 @@ function initHero() {
   if (el('hero-nome')) el('hero-nome').textContent = r.nome;
   if (el('hero-meta')) el('hero-meta').textContent = '⏱ ' + r.tempo + ' · ' + (r.diff === 'Facile' ? 'Facile' : r.diff === 'Media' ? 'Media' : 'Difficile') + ' ' + r.diff + ' · ' + r.ingredienti.length + ' ingredienti';
   if (el('hero-emoji')) el('hero-emoji').textContent = r.emoji;
+  if (el('hero-ricette-count')) el('hero-ricette-count').textContent = DB.length;
   window._heroRicettaId = r.id;
 }
 
