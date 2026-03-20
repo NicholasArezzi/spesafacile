@@ -1133,9 +1133,8 @@ function tentaLogin(){
   }
   userData.nome = email.value.split('@')[0];
   if(!userData.dataIscrizione){
-    var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
     var ora = new Date();
-    userData.dataIscrizione = mesi[ora.getMonth()] + ' ' + ora.getFullYear();
+    userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
   }
   rilevaCitta();
   salvaUserData();
@@ -1183,7 +1182,12 @@ var leafletMap=null, userMarker=null, selectedStore=null, routeLine=null, pendin
 var userLat=null, userLng=null;
 
 // Caricato da products.json
-var CHAINS = {};
+var CHAINS    = {};
+var DB_PREZZI = [];
+var INDICI    = [];
+var STORES    = [];
+
+var MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
 function getChain(n){
   if(!n) return 'default';
@@ -1414,7 +1418,8 @@ function eseguiOCR(file){
 }
 
 function popolaFormDaOCR(testo){
-  var storeMap = { 'EUROSPIN':0, 'LIDL':1, 'CONAD':2, 'COOP':3, 'ESSELUNGA':4 };
+  var storeMap = {};
+  STORES.forEach(function(s, i){ storeMap[s.toUpperCase()] = i; });
   var storeIdx = -1;
   var testoUp = testo.toUpperCase();
   Object.keys(storeMap).forEach(function(k){ if(testoUp.indexOf(k)>=0) storeIdx = storeMap[k]; });
@@ -1720,50 +1725,6 @@ function aggiornaConfrontoConLista(prodotti){
   if(chipEl)    chipEl.textContent      = totItems + (totItems===1?' articolo':' articoli');
   if(ssubEl)    ssubEl.textContent      = nProd + ' prodott' + (nProd===1?'o':'i') + ' · 5 supermercati analizzati';
 
-  // ── DATABASE PREZZI — caricato da products.json ──
-  var DB_PREZZI = [];
-  var INDICI    = [];
-  var STORES    = [];
-
-  // Fetch dati prodotti, negozi e ricette al caricamento pagina
-  // I JSON sono locali → risolvono in <5ms, prima della fine splash (1.5s)
-  var _dbPromise = Promise.all([
-    fetch('products.json').then(function(r){ return r.json(); }),
-    fetch('recipes.json').then(function(r){ return r.json(); }),
-    fetch('casa.json').then(function(r){ return r.json(); })
-  ]).then(function(results){
-    var prod = results[0], rec = results[1], casa = results[2];
-    DB_PREZZI    = prod.products;
-    STORES       = prod.stores;
-    INDICI       = prod.indices;
-    CHAINS       = prod.chains;
-    DB           = rec.recipes;
-    prodottiCasa = casa.products;
-  }).catch(function(e){ console.warn('Errore caricamento dati', e); });
-
-
-  function cercaInDB(nomeProd) {
-    var q = nomeProd.toLowerCase().trim();
-    for(var i=0; i<DB_PREZZI.length; i++){
-      var entry = DB_PREZZI[i];
-      for(var j=0; j<entry.k.length; j++){
-        if(q.indexOf(entry.k[j]) >= 0 || entry.k[j].indexOf(q) >= 0){
-          return entry;
-        }
-      }
-    }
-    return null;
-  }
-
-  function stimaPrezzi(nomeProd) {
-    // Stima realistica basata sugli indici Altroconsumo
-    var seed = 0;
-    for(var i=0; i<nomeProd.length; i++) seed += nomeProd.charCodeAt(i);
-    var base = 0.80 + (seed % 30) * 0.08; // prezzo base 0.80-3.20
-    if(!INDICI.length) return STORES.map(function(){ return 0; });
-    return INDICI.map(function(idx){ return parseFloat((base * idx).toFixed(2)); });
-  }
-
   var tprod = document.getElementById('t-prod-content');
   var banner = document.getElementById('lista-prodotti-count');
   if(banner) banner.textContent = prodotti.length + ' prodott' + (prodotti.length===1?'o':'i') + ' nella tua lista';
@@ -1914,6 +1875,7 @@ function go(screen){ if(screen==='mappa'){setTimeout(initMappa,200);}
   if(screen==='casa'){setTimeout(renderCasa,50);}
   if(screen==='classifica'){setTimeout(renderClassifica,50);}
   if(screen==='offerte'){setTimeout(renderOfferte,50);}
+  if(screen==='ispirami'){setTimeout(function(){ renderGriglia(DB); },50);}
   document.querySelectorAll('.screen').forEach(function(s){
     s.classList.remove('active');
     s.style.display='none';
@@ -2211,6 +2173,7 @@ _dbPromise.then(function(){
   try { renderGriglia(DB); } catch(e) { console.error('renderGriglia error:', e); }
   try { initHero(); } catch(e) {}
   try { renderIspiPills(); } catch(e) {}
+  try { renderCasa(); } catch(e) {}
 });
 // ── SPLASH SCREEN ──────────────────────────────
 (function(){
@@ -2252,6 +2215,41 @@ _dbPromise.then(function(){
 
 // ── DATABASE PRODOTTI CASA (caricato da casa.json via _dbPromise) ──
 var prodottiCasa = [];
+
+// ── FETCH JSON — products.json / recipes.json / casa.json ──
+// I JSON sono locali → risolvono in <5ms, prima della fine splash (1.5s)
+var _dbPromise = Promise.all([
+  fetch('products.json').then(function(r){ return r.json(); }),
+  fetch('recipes.json').then(function(r){ return r.json(); }),
+  fetch('casa.json').then(function(r){ return r.json(); })
+]).then(function(results){
+  var prod = results[0], rec = results[1], casa = results[2];
+  DB_PREZZI    = prod.products;
+  STORES       = prod.stores;
+  INDICI       = prod.indices;
+  CHAINS       = prod.chains;
+  DB           = rec.recipes;
+  prodottiCasa = casa.products;
+}).catch(function(e){ console.warn('Errore caricamento dati', e); });
+
+function cercaInDB(nomeProd) {
+  var q = nomeProd.toLowerCase().trim();
+  for(var i=0; i<DB_PREZZI.length; i++){
+    var entry = DB_PREZZI[i];
+    for(var j=0; j<entry.k.length; j++){
+      if(q.indexOf(entry.k[j]) >= 0 || entry.k[j].indexOf(q) >= 0){ return entry; }
+    }
+  }
+  return null;
+}
+
+function stimaPrezzi(nomeProd) {
+  var seed = 0;
+  for(var i=0; i<nomeProd.length; i++) seed += nomeProd.charCodeAt(i);
+  var base = 0.80 + (seed % 30) * 0.08; // prezzo base 0.80-3.20
+  if(!INDICI.length) return STORES.map(function(){ return 0; });
+  return INDICI.map(function(idx){ return parseFloat((base * idx).toFixed(2)); });
+}
 
 var casaCatCorrente = 'tutti';
 var casaSearchCorrente = '';
