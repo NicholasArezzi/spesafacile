@@ -54,4 +54,13 @@ const APP_CONFIG = {
   // Timing UI (ms)
   MAP_INVALIDATE_DELAY: 200,
   MAP_VIEW_DELAY:       150,
+
+  // Affiliazioni supermercati online
+  // Sostituire i link con quelli ottenuti dai network (Awin, Tradedoubler, ecc.)
+  // Lasciare vuoto un negozio per nascondere il pulsante "Ordina Online"
+  AFFILIATES: {
+    'esselunga': 'https://www.esselunga.it/?ref=spesafacile',
+    'conad':     'https://spesa.conad.it/?utm_source=spesafacile&utm_medium=affiliate',
+    'carrefour': 'https://www.carrefour.it/?awc=SOSTITUISCI_CON_ID_AWIN',
+  },
 };

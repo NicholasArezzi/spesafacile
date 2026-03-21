@@ -1984,6 +1984,11 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     }
     out += '<span style="font-size:11px;color:var(--text2);">su ' + nProdotti + ' prodott' + (nProdotti===1?'o':'i') + '</span>';
     out += '</div>';
+    if(isWinner && hasAffiliate(r.store)){
+      out += '<div style="padding:10px 14px 4px;">';
+      out += '<button class="abtn" style="width:100%;background:var(--green);font-size:13px;padding:10px;border-radius:12px;" onclick="event.stopPropagation();apriNegozioOnline(\'' + r.store + '\')">🛒 Ordina Online</button>';
+      out += '</div>';
+    }
     out += '</div>';
   }
   container.innerHTML = out;
@@ -2652,6 +2657,25 @@ function generaOfferte(){
   return offerte;
 }
 
+function hasAffiliate(nomeNegozio){
+  if(!nomeNegozio || !APP_CONFIG.AFFILIATES) return false;
+  var key = nomeNegozio.toLowerCase();
+  for(var k in APP_CONFIG.AFFILIATES){ if(key.includes(k)) return true; }
+  return false;
+}
+
+function apriNegozioOnline(nomeNegozio){
+  if(!nomeNegozio) return;
+  var key = nomeNegozio.toLowerCase();
+  var url = null;
+  for(var k in APP_CONFIG.AFFILIATES){
+    if(key.includes(k)){ url = APP_CONFIG.AFFILIATES[k]; break; }
+  }
+  if(!url){ showToast('Ordine online non disponibile'); return; }
+  window.open(url, '_blank', 'noopener');
+  showToast('Apertura negozio online... 🛒');
+}
+
 function renderOfferte(){
   var tutte = generaOfferte();
   var filtrate = tutte.filter(function(o){
@@ -2671,6 +2695,7 @@ function renderOfferte(){
       + '<div style="display:inline-block;background:#FEF3C7;color:#92400E;font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;margin-top:2px;">-'+o.sconto+'%</div>'
       + '</div>'
       + '</div>'
+      + (hasAffiliate(o.store) ? '<div style="padding:0 14px 10px;"><button class="abtn" style="width:100%;background:var(--green);font-size:12px;padding:8px;border-radius:10px;" onclick="apriNegozioOnline(\'' + o.store + '\')">🛒 Acquista su ' + o.store + '</button></div>' : '')
       + '</div></div>';
   }).join('');
   document.getElementById('off-grid').innerHTML = html || '<div style="text-align:center;padding:40px 0;color:var(--text3);">Nessuna offerta</div>';
