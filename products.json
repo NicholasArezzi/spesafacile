@@ -1,198 +1,3316 @@
 {
-  "stores": ["Eurospin","Lidl","Conad","Coop","Esselunga"],
-  "indices": [1.00, 1.02, 1.09, 1.08, 1.10],
+  "stores": [
+    "Eurospin",
+    "Lidl",
+    "Conad",
+    "Coop",
+    "Esselunga",
+    "Carrefour",
+    "Penny",
+    "Aldi",
+    "MD"
+  ],
+  "indices": [
+    1,
+    1.02,
+    1.09,
+    1.08,
+    1.1,
+    1.12,
+    1.04,
+    1.02,
+    1.01
+  ],
   "chains": {
-    "lidl":      {"bg":"#FFD700","text":"#003399","label":"lidl"},
-    "eurospin":  {"bg":"#E30613","text":"#fff","label":"euro"},
-    "conad":     {"bg":"#CC0000","text":"#fff","label":"Conad"},
-    "coop":      {"bg":"#005B99","text":"#fff","label":"Coop"},
-    "esselunga": {"bg":"#009B3A","text":"#fff","label":"Esse"},
-    "carrefour": {"bg":"#003B8E","text":"#fff","label":"Carr"},
-    "penny":     {"bg":"#CC0000","text":"#fff","label":"Penny"},
-    "aldi":      {"bg":"#00529F","text":"#fff","label":"Aldi"},
-    "md":        {"bg":"#F26522","text":"#fff","label":"MD"},
-    "in's":      {"bg":"#6A1C8A","text":"#fff","label":"In's"},
-    "sigma":     {"bg":"#E8002D","text":"#fff","label":"Sigma"},
-    "famila":    {"bg":"#007A33","text":"#fff","label":"Famila"},
-    "pam":       {"bg":"#EF3E33","text":"#fff","label":"PAM"},
-    "superal":   {"bg":"#004B87","text":"#fff","label":"Superal"},
-    "bennet":    {"bg":"#FF6600","text":"#fff","label":"Bennet"},
-    "unes":      {"bg":"#E2001A","text":"#fff","label":"Unes"},
-    "pewex":     {"bg":"#009B3A","text":"#fff","label":"Pewex"},
-    "default":   {"bg":"#4A7C59","text":"#fff","label":"mercato"}
+    "lidl": {
+      "bg": "#FFD700",
+      "text": "#003399",
+      "label": "lidl"
+    },
+    "eurospin": {
+      "bg": "#E30613",
+      "text": "#fff",
+      "label": "euro"
+    },
+    "conad": {
+      "bg": "#CC0000",
+      "text": "#fff",
+      "label": "Conad"
+    },
+    "coop": {
+      "bg": "#005B99",
+      "text": "#fff",
+      "label": "Coop"
+    },
+    "esselunga": {
+      "bg": "#009B3A",
+      "text": "#fff",
+      "label": "Esse"
+    },
+    "carrefour": {
+      "bg": "#003B8E",
+      "text": "#fff",
+      "label": "Carr"
+    },
+    "penny": {
+      "bg": "#CC0000",
+      "text": "#fff",
+      "label": "Penny"
+    },
+    "aldi": {
+      "bg": "#00529F",
+      "text": "#fff",
+      "label": "Aldi"
+    },
+    "md": {
+      "bg": "#F26522",
+      "text": "#fff",
+      "label": "MD"
+    },
+    "in's": {
+      "bg": "#6A1C8A",
+      "text": "#fff",
+      "label": "In's"
+    },
+    "sigma": {
+      "bg": "#E8002D",
+      "text": "#fff",
+      "label": "Sigma"
+    },
+    "famila": {
+      "bg": "#007A33",
+      "text": "#fff",
+      "label": "Famila"
+    },
+    "pam": {
+      "bg": "#EF3E33",
+      "text": "#fff",
+      "label": "PAM"
+    },
+    "superal": {
+      "bg": "#004B87",
+      "text": "#fff",
+      "label": "Superal"
+    },
+    "bennet": {
+      "bg": "#FF6600",
+      "text": "#fff",
+      "label": "Bennet"
+    },
+    "unes": {
+      "bg": "#E2001A",
+      "text": "#fff",
+      "label": "Unes"
+    },
+    "pewex": {
+      "bg": "#009B3A",
+      "text": "#fff",
+      "label": "Pewex"
+    },
+    "default": {
+      "bg": "#4A7C59",
+      "text": "#fff",
+      "label": "mercato"
+    }
   },
   "products": [
-    {"k":["pasta","spaghetti","penne","fusilli","rigatoni","maccheroni","linguine","farfalle","tagliatelle","tortiglioni"],"u":"500g","p":[0.65,0.99,1.09,1.09,1.19]},
-    {"k":["riso","riso arborio","riso carnaroli","riso basmati","riso venere","riso parboiled"],"u":"1kg","p":[0.99,1.09,1.29,1.19,1.39]},
-    {"k":["farina","farina 00","farina integrale","farina di grano"],"u":"1kg","p":[0.49,0.55,0.59,0.59,0.77]},
-    {"k":["farina di mais","polenta","polenta istantanea"],"u":"1kg","p":[0.79,0.89,0.99,1.09,1.09]},
-    {"k":["cornflakes","cereali colazione","fiocchi di avena","muesli","fiocchi"],"u":"375g","p":[0.89,0.99,1.49,1.39,1.59]},
-    {"k":["crackers","cracker"],"u":"500g","p":[0.69,0.79,0.99,0.95,1.09]},
-    {"k":["grissini"],"u":"250g","p":[0.59,0.69,0.89,0.85,0.99]},
-    {"k":["cous cous","couscous"],"u":"500g","p":[0.79,0.89,1.19,1.09,1.29]},
-    {"k":["orzo","farro","quinoa"],"u":"400g","p":[0.89,0.99,1.29,1.19,1.39]},
-    {"k":["legumi secchi","lenticchie","ceci secchi","fagioli secchi"],"u":"500g","p":[0.69,0.79,0.99,0.99,1.09]},
-    {"k":["pane","filone","ciabatta","rosetta","baguette"],"u":"400g","p":[0.79,0.85,0.99,0.95,1.09]},
-    {"k":["panino","panini","michette"],"u":"6pz","p":[0.69,0.79,0.99,0.95,1.09]},
-    {"k":["pan carré","pancarré","pane cassetta","pane in cassetta"],"u":"400g","p":[0.79,0.89,0.99,0.99,1.09]},
-    {"k":["fette biscottate"],"u":"300g","p":[0.69,0.79,0.99,0.89,1.09]},
-    {"k":["biscotti","biscotto"],"u":"400g","p":[0.89,0.99,1.19,1.29,1.49]},
-    {"k":["merendine","merendina","brioche"],"u":"6pz","p":[1.29,1.49,1.89,1.79,1.99]},
-    {"k":["torta","plumcake","croissant"],"u":"300g","p":[1.19,1.29,1.59,1.69,1.79]},
-    {"k":["wafer","wafers"],"u":"250g","p":[0.59,0.69,0.89,0.85,0.99]},
-    {"k":["cioccolato","tavoletta di cioccolato","cioccolata"],"u":"100g","p":[0.59,0.69,0.89,0.99,0.99]},
-    {"k":["latte intero","latte fresco"],"u":"1L","p":[1.09,1.15,1.39,1.22,1.35]},
-    {"k":["latte scremato","latte parzialmente scremato","latte uht"],"u":"1L","p":[0.99,1.09,1.29,1.15,1.25]},
-    {"k":["latte di soia","latte vegetale","latte di avena"],"u":"1L","p":[0.99,1.09,1.49,1.39,1.59]},
-    {"k":["burro"],"u":"250g","p":[0.89,0.99,1.19,1.29,1.39]},
-    {"k":["mozzarella","fior di latte"],"u":"125g","p":[0.69,0.79,0.89,0.99,1.09]},
-    {"k":["parmigiano","grana","grana padano","reggiano","parmigiano reggiano"],"u":"100g","p":[0.99,1.09,1.29,1.39,1.19]},
-    {"k":["pecorino","pecorino romano"],"u":"100g","p":[1.09,1.19,1.49,1.59,1.39]},
-    {"k":["ricotta"],"u":"250g","p":[0.79,0.89,1.09,1.19,1.19]},
-    {"k":["yogurt","yogurt greco","yogurt bianco"],"u":"4x125g","p":[0.69,0.79,0.99,1.09,1.19]},
-    {"k":["panna","panna da cucina","panna fresca"],"u":"200ml","p":[0.49,0.59,0.79,0.75,0.89]},
-    {"k":["formaggio","scamorza","asiago","fontina","taleggio","edamer"],"u":"200g","p":[1.49,1.69,1.99,2.09,1.89]},
-    {"k":["stracchino","certosino","crescenza"],"u":"100g","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["mascarpone"],"u":"250g","p":[1.29,1.39,1.69,1.79,1.69]},
-    {"k":["uova","uovo","uova fresche"],"u":"6pz","p":[1.49,1.99,1.79,2.29,2.39]},
-    {"k":["uova bio","uova biologiche"],"u":"6pz","p":[2.29,2.49,2.89,2.99,2.79]},
-    {"k":["petto di pollo","fettine di pollo","pollo","fesa di pollo"],"u":"500g","p":[2.99,3.49,4.29,4.99,3.99]},
-    {"k":["cosce di pollo","ali di pollo","pollo intero"],"u":"1kg","p":[2.49,2.79,3.49,3.89,3.29]},
-    {"k":["tacchino","fesa di tacchino"],"u":"500g","p":[2.79,3.19,3.99,4.49,3.79]},
-    {"k":["macinato","carne macinata","manzo macinato"],"u":"500g","p":[2.49,2.99,3.49,3.79,3.29]},
-    {"k":["bistecca","fettine di manzo","manzo","vitello"],"u":"500g","p":[3.49,3.99,4.99,5.49,4.79]},
-    {"k":["lonza","lonza di maiale","maiale","suino","costine"],"u":"500g","p":[2.29,2.69,3.29,3.59,2.99]},
-    {"k":["salsiccia","salsicce"],"u":"300g","p":[1.29,1.49,1.89,1.99,1.79]},
-    {"k":["würstel","wurstel","hot dog"],"u":"4pz","p":[0.89,0.99,1.29,1.39,1.19]},
-    {"k":["prosciutto cotto"],"u":"100g","p":[0.99,1.19,1.49,1.59,1.39]},
-    {"k":["prosciutto crudo","crudo di parma","crudo"],"u":"100g","p":[1.29,1.49,1.89,1.99,1.79]},
-    {"k":["salame","salamino","salame milano","salame napoli"],"u":"100g","p":[1.09,1.29,1.59,1.69,1.49]},
-    {"k":["pancetta","pancetta tesa","pancetta affumicata"],"u":"100g","p":[0.99,1.09,1.39,1.49,1.29]},
-    {"k":["mortadella"],"u":"100g","p":[0.79,0.89,1.09,1.19,0.99]},
-    {"k":["bresaola"],"u":"100g","p":[1.69,1.89,2.29,2.49,2.19]},
-    {"k":["coppa","capicola","speck"],"u":"100g","p":[1.39,1.59,1.99,2.09,1.89]},
-    {"k":["nduja","soppressata","porchetta"],"u":"100g","p":[1.19,1.39,1.79,1.89,1.69]},
-    {"k":["tonno","tonno in scatola","tonno al naturale"],"u":"80g","p":[0.79,0.89,0.99,1.09,0.99]},
-    {"k":["salmone affumicato","salmone"],"u":"100g","p":[1.99,2.19,2.79,2.99,2.69]},
-    {"k":["merluzzo","filetti di merluzzo","baccalà"],"u":"400g","p":[2.49,2.79,3.29,3.49,3.09]},
-    {"k":["acciughe","alice","alici sott'olio"],"u":"80g","p":[0.69,0.79,0.99,1.09,0.99]},
-    {"k":["gamberi","gamberetti surgelati"],"u":"300g","p":[2.49,2.79,3.49,3.79,3.29]},
-    {"k":["calamari","seppie"],"u":"400g","p":[2.29,2.59,3.19,3.49,2.99]},
-    {"k":["cozze","vongole"],"u":"500g","p":[1.99,2.29,2.89,3.09,2.79]},
-    {"k":["orata","branzino","spigola"],"u":"400g","p":[3.49,3.99,4.99,5.29,4.69]},
-    {"k":["pomodori","pomodoro","pomodorini ciliegino"],"u":"500g","p":[0.79,1.29,1.19,2.28,1.98]},
-    {"k":["pelati","pomodori pelati","pomodori in scatola"],"u":"400g","p":[0.39,0.45,0.59,0.55,0.69]},
-    {"k":["passata","passata di pomodoro","polpa di pomodoro"],"u":"700g","p":[0.49,0.59,0.79,0.75,0.89]},
-    {"k":["patate","patata","patate novelle"],"u":"1kg","p":[0.79,0.89,0.99,1.09,0.99]},
-    {"k":["patate dolci","yam"],"u":"500g","p":[0.99,1.09,1.39,1.49,1.29]},
-    {"k":["cipolla","cipolle","scalogno"],"u":"1kg","p":[0.59,0.69,0.89,0.89,0.79]},
-    {"k":["carote","carota"],"u":"1kg","p":[0.59,0.69,0.79,0.89,0.79]},
-    {"k":["zucchine","zucchina"],"u":"500g","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["peperoni","peperone","peperoni rossi"],"u":"500g","p":[0.99,1.09,1.49,1.59,1.39]},
-    {"k":["melanzane","melanzana"],"u":"500g","p":[0.89,0.99,1.29,1.39,1.19]},
-    {"k":["insalata","lattuga","radicchio","rucola","misticanza"],"u":"300g","p":[0.79,0.99,1.19,1.29,1.09]},
-    {"k":["spinaci freschi","erbette","bietola"],"u":"300g","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["broccoli","cavolfiore","cavolo","cavolo cappuccio"],"u":"500g","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["finocchio","finocchi"],"u":"500g","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["asparagi"],"u":"500g","p":[1.29,1.49,1.89,1.99,1.79]},
-    {"k":["funghi","funghi champignon"],"u":"300g","p":[0.99,1.09,1.39,1.49,1.29]},
-    {"k":["aglio","testa d'aglio"],"u":"3 bulbi","p":[0.49,0.59,0.79,0.85,0.69]},
-    {"k":["sedano"],"u":"500g","p":[0.49,0.59,0.79,0.89,0.79]},
-    {"k":["porri"],"u":"500g","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["carciofi"],"u":"4pz","p":[0.99,1.09,1.49,1.59,1.39]},
-    {"k":["mele","mela golden","mela renetta"],"u":"1kg","p":[0.99,1.30,1.15,1.19,0.98]},
-    {"k":["banane","banana"],"u":"1kg","p":[0.99,1.39,1.39,1.38,1.98]},
-    {"k":["arance","arancia","mandarini"],"u":"1kg","p":[0.89,0.99,1.19,1.29,1.09]},
-    {"k":["pere","pera"],"u":"1kg","p":[0.99,1.09,1.29,1.39,1.19]},
-    {"k":["kiwi"],"u":"6pz","p":[0.99,1.09,1.49,1.59,1.39]},
-    {"k":["fragole"],"u":"500g","p":[1.49,1.99,2.29,2.49,2.09]},
-    {"k":["uva bianca","uva nera","uva"],"u":"500g","p":[0.99,1.09,1.49,1.59,1.39]},
-    {"k":["limoni","limone"],"u":"3pz","p":[0.49,0.59,0.79,0.85,0.69]},
-    {"k":["pesche","nettarine","pesca"],"u":"1kg","p":[1.29,1.39,1.79,1.89,1.69]},
-    {"k":["albicocche"],"u":"500g","p":[1.09,1.19,1.59,1.69,1.49]},
-    {"k":["melone","anguria"],"u":"1kg","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["ananas"],"u":"1pz","p":[1.49,1.69,1.99,2.19,1.99]},
-    {"k":["mango","avocado"],"u":"1pz","p":[0.99,1.09,1.49,1.59,1.39]},
-    {"k":["olio extravergine","extravergine","olio di oliva","evo"],"u":"750ml","p":[3.99,4.49,5.29,5.49,5.99]},
-    {"k":["olio di semi","olio di girasole"],"u":"1L","p":[1.29,1.49,1.79,1.89,1.99]},
-    {"k":["aceto","aceto di vino bianco","aceto balsamico"],"u":"500ml","p":[0.49,0.55,0.69,0.75,0.79]},
-    {"k":["sale","sale fino","sale grosso"],"u":"1kg","p":[0.29,0.35,0.45,0.49,0.49]},
-    {"k":["pepe","pepe nero"],"u":"50g","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["zucchero","zucchero semolato"],"u":"1kg","p":[0.99,1.15,1.15,1.48,1.29]},
-    {"k":["miele"],"u":"400g","p":[1.99,2.19,2.79,2.99,2.89]},
-    {"k":["nutella","crema di nocciole","crema nocciole"],"u":"400g","p":[2.49,2.69,2.99,3.09,2.89]},
-    {"k":["marmellata","confettura","marmellata di fragole"],"u":"350g","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["cacao","cacao amaro"],"u":"75g","p":[0.79,0.95,0.99,0.99,1.41]},
-    {"k":["dado","dadi da brodo","dado vegetale","dado knorr","dado per brodo"],"u":"6pz","p":[0.59,0.69,0.89,0.99,0.89]},
-    {"k":["brodo vegetale","brodo di carne","brodo pronto","brodo brick","brodo liquido"],"u":"1L","p":[1.29,1.39,1.59,1.49,1.69]},
-    {"k":["maionese"],"u":"250ml","p":[0.89,0.99,1.29,1.39,1.19]},
-    {"k":["ketchup"],"u":"560g","p":[0.89,0.99,1.29,1.39,1.19]},
-    {"k":["senape"],"u":"200ml","p":[0.69,0.79,0.99,1.09,0.99]},
-    {"k":["salsa di soia"],"u":"150ml","p":[0.89,0.99,1.29,1.39,1.29]},
-    {"k":["lievito","lievito per dolci","lievito di birra"],"u":"3 bust","p":[0.39,0.45,0.59,0.65,0.69]},
-    {"k":["conserva","concentrato di pomodoro"],"u":"200g","p":[0.39,0.45,0.59,0.65,0.69]},
-    {"k":["olive","olive verdi","olive nere"],"u":"180g","p":[0.69,0.79,0.99,1.09,0.99]},
-    {"k":["capperi"],"u":"100g","p":[0.49,0.59,0.79,0.89,0.79]},
-    {"k":["caffè macinato","caffè","caffe","espresso macinato"],"u":"250g","p":[1.49,2.35,2.19,1.99,1.94]},
-    {"k":["caffè in capsule","cialde","nespresso","lavazza"],"u":"16 caps","p":[2.49,2.69,3.49,3.79,3.29]},
-    {"k":["tè","te","tè nero","tè verde","camomilla"],"u":"25 bust","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["acqua naturale","acqua minerale","acqua"],"u":"1.5L","p":[0.19,0.22,0.28,0.22,0.36]},
-    {"k":["acqua frizzante","acqua gassata"],"u":"1.5L","p":[0.19,0.22,0.28,0.25,0.36]},
-    {"k":["succo di frutta","succo arancia","succo di pesca"],"u":"1L","p":[0.89,0.99,1.29,1.19,1.39]},
-    {"k":["aranciata","limonata","chinotto","bibita","sprite"],"u":"1.5L","p":[0.69,0.79,0.99,0.99,1.09]},
-    {"k":["coca cola","pepsi","cola","fanta"],"u":"1.5L","p":[1.09,1.19,1.49,1.59,1.49]},
-    {"k":["energy drink","red bull"],"u":"25cl","p":[0.79,0.89,1.29,1.39,1.29]},
-    {"k":["vino rosso","vino bianco","vino rosato","vino"],"u":"750ml","p":[1.99,2.29,2.99,2.89,3.19]},
-    {"k":["vino prosecco","prosecco","spumante","cava"],"u":"750ml","p":[2.99,3.49,4.49,4.79,4.29]},
-    {"k":["birra","birra lager","birra chiara"],"u":"33cl","p":[0.49,0.55,0.79,0.75,0.85]},
-    {"k":["birra artigianale","birra ipa","birra speciale"],"u":"33cl","p":[1.29,1.49,1.89,1.99,1.79]},
-    {"k":["piselli surgelati","piselli"],"u":"450g","p":[0.89,0.99,1.19,1.29,1.19]},
-    {"k":["spinaci surgelati"],"u":"450g","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["bastoncini di pesce","bastoncini"],"u":"400g","p":[1.49,1.69,2.09,2.19,1.99]},
-    {"k":["pizza surgelata","pizza margherita"],"u":"350g","p":[1.29,1.49,1.89,1.99,1.79]},
-    {"k":["gelato","gelato vaschetta"],"u":"500ml","p":[1.49,1.69,2.19,2.29,2.09]},
-    {"k":["patate surgelate","patatine fritte surgelate"],"u":"600g","p":[0.99,1.09,1.39,1.49,1.39]},
-    {"k":["minestrone surgelato","verdure miste surgelate"],"u":"450g","p":[0.89,0.99,1.29,1.39,1.29]},
-    {"k":["petto di pollo surgelato","pollo surgelato"],"u":"400g","p":[2.29,2.59,3.19,3.49,2.99]},
-    {"k":["ceci in scatola","ceci"],"u":"400g","p":[0.49,0.55,0.69,0.75,0.79]},
-    {"k":["lenticchie in scatola","lenticchie"],"u":"400g","p":[0.49,0.55,0.69,0.75,0.79]},
-    {"k":["fagioli","fagioli borlotti","fagioli cannellini"],"u":"400g","p":[0.49,0.55,0.69,0.75,0.79]},
-    {"k":["pasta bio","pasta biologica"],"u":"500g","p":[1.29,1.49,1.79,1.89,1.89]},
-    {"k":["riso bio","riso biologico"],"u":"1kg","p":[1.49,1.69,1.99,2.09,1.99]},
-    {"k":["yogurt bio","yogurt biologico"],"u":"4x125g","p":[1.29,1.49,1.79,1.89,1.89]},
-    {"k":["integratore","vitamine","vitamina c","omega 3"],"u":"30 cps","p":[2.99,3.29,4.49,4.79,4.29]},
-    {"k":["barretta proteica","barrette proteiche","proteica"],"u":"60g","p":[0.99,1.09,1.49,1.59,1.39]},
-    {"k":["curry","curcuma","paprika"],"u":"50g","p":[0.79,0.89,1.19,1.29,1.09]},
-    {"k":["riso per sushi","nori","wasabi"],"u":"500g","p":[1.49,1.69,2.19,2.29,2.09]},
-    {"k":["tortillas","piadina","wraps"],"u":"6pz","p":[0.99,1.09,1.39,1.49,1.39]},
-    {"k":["hummus"],"u":"200g","p":[1.29,1.49,1.89,1.99,1.79]},
-    {"k":["cibo per gatti","gatto","crocchette gatto"],"u":"400g","p":[0.79,0.89,1.19,1.29,1.09]},
-    {"k":["cibo per cani","cane","crocchette cane"],"u":"1kg","p":[2.49,2.79,3.49,3.79,3.29]},
-    {"k":["lettiera gatto","lettiera"],"u":"5kg","p":[2.99,3.29,4.49,4.79,4.29]},
-    {"k":["detersivo piatti","detersivo per piatti"],"u":"750ml","p":[0.89,0.99,1.29,1.49,1.39]},
-    {"k":["detersivo lavatrice","detersivo per lavatrice"],"u":"18 mis","p":[3.49,3.99,4.99,5.49,4.99]},
-    {"k":["detersivo lavastoviglie","pastiglie lavastoviglie"],"u":"30 past","p":[2.99,3.29,4.29,4.79,4.49]},
-    {"k":["ammorbidente"],"u":"1L","p":[0.99,1.19,1.59,1.79,1.59]},
-    {"k":["candeggina","varechina"],"u":"1L","p":[0.49,0.59,0.79,0.85,0.79]},
-    {"k":["carta igienica","rotoli di carta","carta bagno"],"u":"6 rot","p":[1.49,1.59,1.99,2.19,2.29]},
-    {"k":["carta cucina","carta assorbente"],"u":"3 rot","p":[0.89,0.99,1.29,1.39,1.29]},
-    {"k":["sacchetti","sacchetti spazzatura","sacchi neri","buste"],"u":"30pz","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["detersivo pavimenti","sgrassatore","multiuso"],"u":"1L","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["spugne","spugnette"],"u":"3pz","p":[0.59,0.69,0.89,0.99,0.89]},
-    {"k":["carta alluminio","carta da forno","pellicola"],"u":"10m","p":[0.79,0.89,1.09,1.19,1.09]},
-    {"k":["shampoo"],"u":"250ml","p":[0.99,1.09,1.49,1.59,1.39]},
-    {"k":["balsamo","conditioner"],"u":"250ml","p":[0.99,1.09,1.49,1.59,1.39]},
-    {"k":["dentifricio"],"u":"75ml","p":[0.69,0.79,1.09,1.19,0.99]},
-    {"k":["spazzolino","spazzolino da denti"],"u":"2pz","p":[0.89,0.99,1.29,1.39,1.19]},
-    {"k":["sapone liquido","sapone mani"],"u":"300ml","p":[0.69,0.79,0.99,1.09,0.99]},
-    {"k":["gel doccia","bagnoschiuma","docciaschiuma"],"u":"250ml","p":[0.79,0.89,1.19,1.29,1.09]},
-    {"k":["deodorante"],"u":"150ml","p":[1.49,1.69,2.19,2.39,2.09]},
-    {"k":["rasoio","rasoi usa e getta"],"u":"3pz","p":[0.89,0.99,1.29,1.39,1.19]},
-    {"k":["assorbenti"],"u":"14pz","p":[0.89,0.99,1.29,1.39,1.19]},
-    {"k":["pannolini","pannolino"],"u":"24pz","p":[3.99,4.49,5.49,5.79,5.29]},
-    {"k":["salviette umide","fazzoletti umidi"],"u":"64pz","p":[0.99,1.09,1.39,1.49,1.29]},
-    {"k":["fazzoletti","kleenex","fazzolettini di carta"],"u":"10x10","p":[0.89,0.99,1.19,1.29,1.19]},
-    {"k":["crema viso","crema idratante","crema corpo"],"u":"150ml","p":[1.49,1.69,2.29,2.49,2.19]},
-    {"k":["cotone idrofilo","batuffoli","cotton fioc"],"u":"100pz","p":[0.69,0.79,0.99,1.09,0.99]}
+    {
+      "k": [
+        "pasta",
+        "spaghetti",
+        "penne",
+        "fusilli",
+        "rigatoni",
+        "maccheroni",
+        "linguine",
+        "farfalle",
+        "tagliatelle",
+        "tortiglioni"
+      ],
+      "u": "500g",
+      "p": [
+        0.65,
+        0.99,
+        1.09,
+        1.09,
+        1.19,
+        0.73,
+        0.68,
+        0.66,
+        0.66
+      ]
+    },
+    {
+      "k": [
+        "riso",
+        "riso arborio",
+        "riso carnaroli",
+        "riso basmati",
+        "riso venere",
+        "riso parboiled"
+      ],
+      "u": "1kg",
+      "p": [
+        0.99,
+        1.09,
+        1.29,
+        1.19,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "farina",
+        "farina 00",
+        "farina integrale",
+        "farina di grano"
+      ],
+      "u": "1kg",
+      "p": [
+        0.49,
+        0.55,
+        0.59,
+        0.59,
+        0.77,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "farina di mais",
+        "polenta",
+        "polenta istantanea"
+      ],
+      "u": "1kg",
+      "p": [
+        0.79,
+        0.89,
+        0.99,
+        1.09,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "cornflakes",
+        "cereali colazione",
+        "fiocchi di avena",
+        "muesli",
+        "fiocchi"
+      ],
+      "u": "375g",
+      "p": [
+        0.89,
+        0.99,
+        1.49,
+        1.39,
+        1.59,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "crackers",
+        "cracker"
+      ],
+      "u": "500g",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        0.95,
+        1.09,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "grissini"
+      ],
+      "u": "250g",
+      "p": [
+        0.59,
+        0.69,
+        0.89,
+        0.85,
+        0.99,
+        0.66,
+        0.61,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "k": [
+        "cous cous",
+        "couscous"
+      ],
+      "u": "500g",
+      "p": [
+        0.79,
+        0.89,
+        1.19,
+        1.09,
+        1.29,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "orzo",
+        "farro",
+        "quinoa"
+      ],
+      "u": "400g",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.19,
+        1.39,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "legumi secchi",
+        "lenticchie",
+        "ceci secchi",
+        "fagioli secchi"
+      ],
+      "u": "500g",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        0.99,
+        1.09,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "pane",
+        "filone",
+        "ciabatta",
+        "rosetta",
+        "baguette"
+      ],
+      "u": "400g",
+      "p": [
+        0.79,
+        0.85,
+        0.99,
+        0.95,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "panino",
+        "panini",
+        "michette"
+      ],
+      "u": "6pz",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        0.95,
+        1.09,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "pan carré",
+        "pancarré",
+        "pane cassetta",
+        "pane in cassetta"
+      ],
+      "u": "400g",
+      "p": [
+        0.79,
+        0.89,
+        0.99,
+        0.99,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "fette biscottate"
+      ],
+      "u": "300g",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        0.89,
+        1.09,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "biscotti",
+        "biscotto"
+      ],
+      "u": "400g",
+      "p": [
+        0.89,
+        0.99,
+        1.19,
+        1.29,
+        1.49,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "merendine",
+        "merendina",
+        "brioche"
+      ],
+      "u": "6pz",
+      "p": [
+        1.29,
+        1.49,
+        1.89,
+        1.79,
+        1.99,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "torta",
+        "plumcake",
+        "croissant"
+      ],
+      "u": "300g",
+      "p": [
+        1.19,
+        1.29,
+        1.59,
+        1.69,
+        1.79,
+        1.33,
+        1.24,
+        1.21,
+        1.2
+      ]
+    },
+    {
+      "k": [
+        "wafer",
+        "wafers"
+      ],
+      "u": "250g",
+      "p": [
+        0.59,
+        0.69,
+        0.89,
+        0.85,
+        0.99,
+        0.66,
+        0.61,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "k": [
+        "cioccolato",
+        "tavoletta di cioccolato",
+        "cioccolata"
+      ],
+      "u": "100g",
+      "p": [
+        0.59,
+        0.69,
+        0.89,
+        0.99,
+        0.99,
+        0.66,
+        0.61,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "k": [
+        "latte intero",
+        "latte fresco"
+      ],
+      "u": "1L",
+      "p": [
+        1.09,
+        1.15,
+        1.39,
+        1.22,
+        1.35,
+        1.22,
+        1.13,
+        1.11,
+        1.1
+      ]
+    },
+    {
+      "k": [
+        "latte scremato",
+        "latte parzialmente scremato",
+        "latte uht"
+      ],
+      "u": "1L",
+      "p": [
+        0.99,
+        1.09,
+        1.29,
+        1.15,
+        1.25,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "latte di soia",
+        "latte vegetale",
+        "latte di avena"
+      ],
+      "u": "1L",
+      "p": [
+        0.99,
+        1.09,
+        1.49,
+        1.39,
+        1.59,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "burro"
+      ],
+      "u": "250g",
+      "p": [
+        0.89,
+        0.99,
+        1.19,
+        1.29,
+        1.39,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "mozzarella",
+        "fior di latte"
+      ],
+      "u": "125g",
+      "p": [
+        0.69,
+        0.79,
+        0.89,
+        0.99,
+        1.09,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "parmigiano",
+        "grana",
+        "grana padano",
+        "reggiano",
+        "parmigiano reggiano"
+      ],
+      "u": "100g",
+      "p": [
+        0.99,
+        1.09,
+        1.29,
+        1.39,
+        1.19,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "pecorino",
+        "pecorino romano"
+      ],
+      "u": "100g",
+      "p": [
+        1.09,
+        1.19,
+        1.49,
+        1.59,
+        1.39,
+        1.22,
+        1.13,
+        1.11,
+        1.1
+      ]
+    },
+    {
+      "k": [
+        "ricotta"
+      ],
+      "u": "250g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.19,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "yogurt",
+        "yogurt greco",
+        "yogurt bianco"
+      ],
+      "u": "4x125g",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        1.09,
+        1.19,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "panna",
+        "panna da cucina",
+        "panna fresca"
+      ],
+      "u": "200ml",
+      "p": [
+        0.49,
+        0.59,
+        0.79,
+        0.75,
+        0.89,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "formaggio",
+        "scamorza",
+        "asiago",
+        "fontina",
+        "taleggio",
+        "edamer"
+      ],
+      "u": "200g",
+      "p": [
+        1.49,
+        1.69,
+        1.99,
+        2.09,
+        1.89,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "stracchino",
+        "certosino",
+        "crescenza"
+      ],
+      "u": "100g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "mascarpone"
+      ],
+      "u": "250g",
+      "p": [
+        1.29,
+        1.39,
+        1.69,
+        1.79,
+        1.69,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "uova",
+        "uovo",
+        "uova fresche"
+      ],
+      "u": "6pz",
+      "p": [
+        1.49,
+        1.99,
+        1.79,
+        2.29,
+        2.39,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "uova bio",
+        "uova biologiche"
+      ],
+      "u": "6pz",
+      "p": [
+        2.29,
+        2.49,
+        2.89,
+        2.99,
+        2.79,
+        2.56,
+        2.38,
+        2.34,
+        2.31
+      ]
+    },
+    {
+      "k": [
+        "petto di pollo",
+        "fettine di pollo",
+        "pollo",
+        "fesa di pollo"
+      ],
+      "u": "500g",
+      "p": [
+        2.99,
+        3.49,
+        4.29,
+        4.99,
+        3.99,
+        3.35,
+        3.11,
+        3.05,
+        3.02
+      ]
+    },
+    {
+      "k": [
+        "cosce di pollo",
+        "ali di pollo",
+        "pollo intero"
+      ],
+      "u": "1kg",
+      "p": [
+        2.49,
+        2.79,
+        3.49,
+        3.89,
+        3.29,
+        2.79,
+        2.59,
+        2.54,
+        2.51
+      ]
+    },
+    {
+      "k": [
+        "tacchino",
+        "fesa di tacchino"
+      ],
+      "u": "500g",
+      "p": [
+        2.79,
+        3.19,
+        3.99,
+        4.49,
+        3.79,
+        3.12,
+        2.9,
+        2.85,
+        2.82
+      ]
+    },
+    {
+      "k": [
+        "macinato",
+        "carne macinata",
+        "manzo macinato"
+      ],
+      "u": "500g",
+      "p": [
+        2.49,
+        2.99,
+        3.49,
+        3.79,
+        3.29,
+        2.79,
+        2.59,
+        2.54,
+        2.51
+      ]
+    },
+    {
+      "k": [
+        "bistecca",
+        "fettine di manzo",
+        "manzo",
+        "vitello"
+      ],
+      "u": "500g",
+      "p": [
+        3.49,
+        3.99,
+        4.99,
+        5.49,
+        4.79,
+        3.91,
+        3.63,
+        3.56,
+        3.52
+      ]
+    },
+    {
+      "k": [
+        "lonza",
+        "lonza di maiale",
+        "maiale",
+        "suino",
+        "costine"
+      ],
+      "u": "500g",
+      "p": [
+        2.29,
+        2.69,
+        3.29,
+        3.59,
+        2.99,
+        2.56,
+        2.38,
+        2.34,
+        2.31
+      ]
+    },
+    {
+      "k": [
+        "salsiccia",
+        "salsicce"
+      ],
+      "u": "300g",
+      "p": [
+        1.29,
+        1.49,
+        1.89,
+        1.99,
+        1.79,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "würstel",
+        "wurstel",
+        "hot dog"
+      ],
+      "u": "4pz",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.39,
+        1.19,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "prosciutto cotto"
+      ],
+      "u": "100g",
+      "p": [
+        0.99,
+        1.19,
+        1.49,
+        1.59,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "prosciutto crudo",
+        "crudo di parma",
+        "crudo"
+      ],
+      "u": "100g",
+      "p": [
+        1.29,
+        1.49,
+        1.89,
+        1.99,
+        1.79,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "salame",
+        "salamino",
+        "salame milano",
+        "salame napoli"
+      ],
+      "u": "100g",
+      "p": [
+        1.09,
+        1.29,
+        1.59,
+        1.69,
+        1.49,
+        1.22,
+        1.13,
+        1.11,
+        1.1
+      ]
+    },
+    {
+      "k": [
+        "pancetta",
+        "pancetta tesa",
+        "pancetta affumicata"
+      ],
+      "u": "100g",
+      "p": [
+        0.99,
+        1.09,
+        1.39,
+        1.49,
+        1.29,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "mortadella"
+      ],
+      "u": "100g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        0.99,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "bresaola"
+      ],
+      "u": "100g",
+      "p": [
+        1.69,
+        1.89,
+        2.29,
+        2.49,
+        2.19,
+        1.89,
+        1.76,
+        1.72,
+        1.71
+      ]
+    },
+    {
+      "k": [
+        "coppa",
+        "capicola",
+        "speck"
+      ],
+      "u": "100g",
+      "p": [
+        1.39,
+        1.59,
+        1.99,
+        2.09,
+        1.89,
+        1.56,
+        1.45,
+        1.42,
+        1.4
+      ]
+    },
+    {
+      "k": [
+        "nduja",
+        "soppressata",
+        "porchetta"
+      ],
+      "u": "100g",
+      "p": [
+        1.19,
+        1.39,
+        1.79,
+        1.89,
+        1.69,
+        1.33,
+        1.24,
+        1.21,
+        1.2
+      ]
+    },
+    {
+      "k": [
+        "tonno",
+        "tonno in scatola",
+        "tonno al naturale"
+      ],
+      "u": "80g",
+      "p": [
+        0.79,
+        0.89,
+        0.99,
+        1.09,
+        0.99,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "salmone affumicato",
+        "salmone"
+      ],
+      "u": "100g",
+      "p": [
+        1.99,
+        2.19,
+        2.79,
+        2.99,
+        2.69,
+        2.23,
+        2.07,
+        2.03,
+        2.01
+      ]
+    },
+    {
+      "k": [
+        "merluzzo",
+        "filetti di merluzzo",
+        "baccalà"
+      ],
+      "u": "400g",
+      "p": [
+        2.49,
+        2.79,
+        3.29,
+        3.49,
+        3.09,
+        2.79,
+        2.59,
+        2.54,
+        2.51
+      ]
+    },
+    {
+      "k": [
+        "acciughe",
+        "alice",
+        "alici sott'olio"
+      ],
+      "u": "80g",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        1.09,
+        0.99,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "gamberi",
+        "gamberetti surgelati"
+      ],
+      "u": "300g",
+      "p": [
+        2.49,
+        2.79,
+        3.49,
+        3.79,
+        3.29,
+        2.79,
+        2.59,
+        2.54,
+        2.51
+      ]
+    },
+    {
+      "k": [
+        "calamari",
+        "seppie"
+      ],
+      "u": "400g",
+      "p": [
+        2.29,
+        2.59,
+        3.19,
+        3.49,
+        2.99,
+        2.56,
+        2.38,
+        2.34,
+        2.31
+      ]
+    },
+    {
+      "k": [
+        "cozze",
+        "vongole"
+      ],
+      "u": "500g",
+      "p": [
+        1.99,
+        2.29,
+        2.89,
+        3.09,
+        2.79,
+        2.23,
+        2.07,
+        2.03,
+        2.01
+      ]
+    },
+    {
+      "k": [
+        "orata",
+        "branzino",
+        "spigola"
+      ],
+      "u": "400g",
+      "p": [
+        3.49,
+        3.99,
+        4.99,
+        5.29,
+        4.69,
+        3.91,
+        3.63,
+        3.56,
+        3.52
+      ]
+    },
+    {
+      "k": [
+        "pomodori",
+        "pomodoro",
+        "pomodorini ciliegino"
+      ],
+      "u": "500g",
+      "p": [
+        0.79,
+        1.29,
+        1.19,
+        2.28,
+        1.98,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "pelati",
+        "pomodori pelati",
+        "pomodori in scatola"
+      ],
+      "u": "400g",
+      "p": [
+        0.39,
+        0.45,
+        0.59,
+        0.55,
+        0.69,
+        0.44,
+        0.41,
+        0.4,
+        0.39
+      ]
+    },
+    {
+      "k": [
+        "passata",
+        "passata di pomodoro",
+        "polpa di pomodoro"
+      ],
+      "u": "700g",
+      "p": [
+        0.49,
+        0.59,
+        0.79,
+        0.75,
+        0.89,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "patate",
+        "patata",
+        "patate novelle"
+      ],
+      "u": "1kg",
+      "p": [
+        0.79,
+        0.89,
+        0.99,
+        1.09,
+        0.99,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "patate dolci",
+        "yam"
+      ],
+      "u": "500g",
+      "p": [
+        0.99,
+        1.09,
+        1.39,
+        1.49,
+        1.29,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "cipolla",
+        "cipolle",
+        "scalogno"
+      ],
+      "u": "1kg",
+      "p": [
+        0.59,
+        0.69,
+        0.89,
+        0.89,
+        0.79,
+        0.66,
+        0.61,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "k": [
+        "carote",
+        "carota"
+      ],
+      "u": "1kg",
+      "p": [
+        0.59,
+        0.69,
+        0.79,
+        0.89,
+        0.79,
+        0.66,
+        0.61,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "k": [
+        "zucchine",
+        "zucchina"
+      ],
+      "u": "500g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "peperoni",
+        "peperone",
+        "peperoni rossi"
+      ],
+      "u": "500g",
+      "p": [
+        0.99,
+        1.09,
+        1.49,
+        1.59,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "melanzane",
+        "melanzana"
+      ],
+      "u": "500g",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.39,
+        1.19,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "insalata",
+        "lattuga",
+        "radicchio",
+        "rucola",
+        "misticanza"
+      ],
+      "u": "300g",
+      "p": [
+        0.79,
+        0.99,
+        1.19,
+        1.29,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "spinaci freschi",
+        "erbette",
+        "bietola"
+      ],
+      "u": "300g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "broccoli",
+        "cavolfiore",
+        "cavolo",
+        "cavolo cappuccio"
+      ],
+      "u": "500g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "finocchio",
+        "finocchi"
+      ],
+      "u": "500g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "asparagi"
+      ],
+      "u": "500g",
+      "p": [
+        1.29,
+        1.49,
+        1.89,
+        1.99,
+        1.79,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "funghi",
+        "funghi champignon"
+      ],
+      "u": "300g",
+      "p": [
+        0.99,
+        1.09,
+        1.39,
+        1.49,
+        1.29,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "aglio",
+        "testa d'aglio"
+      ],
+      "u": "3 bulbi",
+      "p": [
+        0.49,
+        0.59,
+        0.79,
+        0.85,
+        0.69,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "sedano"
+      ],
+      "u": "500g",
+      "p": [
+        0.49,
+        0.59,
+        0.79,
+        0.89,
+        0.79,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "porri"
+      ],
+      "u": "500g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "carciofi"
+      ],
+      "u": "4pz",
+      "p": [
+        0.99,
+        1.09,
+        1.49,
+        1.59,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "mele",
+        "mela golden",
+        "mela renetta"
+      ],
+      "u": "1kg",
+      "p": [
+        0.99,
+        1.3,
+        1.15,
+        1.19,
+        0.98,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "banane",
+        "banana"
+      ],
+      "u": "1kg",
+      "p": [
+        0.99,
+        1.39,
+        1.39,
+        1.38,
+        1.98,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "arance",
+        "arancia",
+        "mandarini"
+      ],
+      "u": "1kg",
+      "p": [
+        0.89,
+        0.99,
+        1.19,
+        1.29,
+        1.09,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "pere",
+        "pera"
+      ],
+      "u": "1kg",
+      "p": [
+        0.99,
+        1.09,
+        1.29,
+        1.39,
+        1.19,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "kiwi"
+      ],
+      "u": "6pz",
+      "p": [
+        0.99,
+        1.09,
+        1.49,
+        1.59,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "fragole"
+      ],
+      "u": "500g",
+      "p": [
+        1.49,
+        1.99,
+        2.29,
+        2.49,
+        2.09,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "uva bianca",
+        "uva nera",
+        "uva"
+      ],
+      "u": "500g",
+      "p": [
+        0.99,
+        1.09,
+        1.49,
+        1.59,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "limoni",
+        "limone"
+      ],
+      "u": "3pz",
+      "p": [
+        0.49,
+        0.59,
+        0.79,
+        0.85,
+        0.69,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "pesche",
+        "nettarine",
+        "pesca"
+      ],
+      "u": "1kg",
+      "p": [
+        1.29,
+        1.39,
+        1.79,
+        1.89,
+        1.69,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "albicocche"
+      ],
+      "u": "500g",
+      "p": [
+        1.09,
+        1.19,
+        1.59,
+        1.69,
+        1.49,
+        1.22,
+        1.13,
+        1.11,
+        1.1
+      ]
+    },
+    {
+      "k": [
+        "melone",
+        "anguria"
+      ],
+      "u": "1kg",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "ananas"
+      ],
+      "u": "1pz",
+      "p": [
+        1.49,
+        1.69,
+        1.99,
+        2.19,
+        1.99,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "mango",
+        "avocado"
+      ],
+      "u": "1pz",
+      "p": [
+        0.99,
+        1.09,
+        1.49,
+        1.59,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "olio extravergine",
+        "extravergine",
+        "olio di oliva",
+        "evo"
+      ],
+      "u": "750ml",
+      "p": [
+        3.99,
+        4.49,
+        5.29,
+        5.49,
+        5.99,
+        4.47,
+        4.15,
+        4.07,
+        4.03
+      ]
+    },
+    {
+      "k": [
+        "olio di semi",
+        "olio di girasole"
+      ],
+      "u": "1L",
+      "p": [
+        1.29,
+        1.49,
+        1.79,
+        1.89,
+        1.99,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "aceto",
+        "aceto di vino bianco",
+        "aceto balsamico"
+      ],
+      "u": "500ml",
+      "p": [
+        0.49,
+        0.55,
+        0.69,
+        0.75,
+        0.79,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "sale",
+        "sale fino",
+        "sale grosso"
+      ],
+      "u": "1kg",
+      "p": [
+        0.29,
+        0.35,
+        0.45,
+        0.49,
+        0.49,
+        0.32,
+        0.3,
+        0.3,
+        0.29
+      ]
+    },
+    {
+      "k": [
+        "pepe",
+        "pepe nero"
+      ],
+      "u": "50g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "zucchero",
+        "zucchero semolato"
+      ],
+      "u": "1kg",
+      "p": [
+        0.99,
+        1.15,
+        1.15,
+        1.48,
+        1.29,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "miele"
+      ],
+      "u": "400g",
+      "p": [
+        1.99,
+        2.19,
+        2.79,
+        2.99,
+        2.89,
+        2.23,
+        2.07,
+        2.03,
+        2.01
+      ]
+    },
+    {
+      "k": [
+        "nutella",
+        "crema di nocciole",
+        "crema nocciole"
+      ],
+      "u": "400g",
+      "p": [
+        2.49,
+        2.69,
+        2.99,
+        3.09,
+        2.89,
+        2.79,
+        2.59,
+        2.54,
+        2.51
+      ]
+    },
+    {
+      "k": [
+        "marmellata",
+        "confettura",
+        "marmellata di fragole"
+      ],
+      "u": "350g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "cacao",
+        "cacao amaro"
+      ],
+      "u": "75g",
+      "p": [
+        0.79,
+        0.95,
+        0.99,
+        0.99,
+        1.41,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "dado",
+        "dadi da brodo",
+        "dado vegetale",
+        "dado knorr",
+        "dado per brodo"
+      ],
+      "u": "6pz",
+      "p": [
+        0.59,
+        0.69,
+        0.89,
+        0.99,
+        0.89,
+        0.66,
+        0.61,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "k": [
+        "brodo vegetale",
+        "brodo di carne",
+        "brodo pronto",
+        "brodo brick",
+        "brodo liquido"
+      ],
+      "u": "1L",
+      "p": [
+        1.29,
+        1.39,
+        1.59,
+        1.49,
+        1.69,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "maionese"
+      ],
+      "u": "250ml",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.39,
+        1.19,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "ketchup"
+      ],
+      "u": "560g",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.39,
+        1.19,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "senape"
+      ],
+      "u": "200ml",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        1.09,
+        0.99,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "salsa di soia"
+      ],
+      "u": "150ml",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.39,
+        1.29,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "lievito",
+        "lievito per dolci",
+        "lievito di birra"
+      ],
+      "u": "3 bust",
+      "p": [
+        0.39,
+        0.45,
+        0.59,
+        0.65,
+        0.69,
+        0.44,
+        0.41,
+        0.4,
+        0.39
+      ]
+    },
+    {
+      "k": [
+        "conserva",
+        "concentrato di pomodoro"
+      ],
+      "u": "200g",
+      "p": [
+        0.39,
+        0.45,
+        0.59,
+        0.65,
+        0.69,
+        0.44,
+        0.41,
+        0.4,
+        0.39
+      ]
+    },
+    {
+      "k": [
+        "olive",
+        "olive verdi",
+        "olive nere"
+      ],
+      "u": "180g",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        1.09,
+        0.99,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "capperi"
+      ],
+      "u": "100g",
+      "p": [
+        0.49,
+        0.59,
+        0.79,
+        0.89,
+        0.79,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "caffè macinato",
+        "caffè",
+        "caffe",
+        "espresso macinato"
+      ],
+      "u": "250g",
+      "p": [
+        1.49,
+        2.35,
+        2.19,
+        1.99,
+        1.94,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "caffè in capsule",
+        "cialde",
+        "nespresso",
+        "lavazza"
+      ],
+      "u": "16 caps",
+      "p": [
+        2.49,
+        2.69,
+        3.49,
+        3.79,
+        3.29,
+        2.79,
+        2.59,
+        2.54,
+        2.51
+      ]
+    },
+    {
+      "k": [
+        "tè",
+        "te",
+        "tè nero",
+        "tè verde",
+        "camomilla"
+      ],
+      "u": "25 bust",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "acqua naturale",
+        "acqua minerale",
+        "acqua"
+      ],
+      "u": "1.5L",
+      "p": [
+        0.19,
+        0.22,
+        0.28,
+        0.22,
+        0.36,
+        0.21,
+        0.2,
+        0.19,
+        0.19
+      ]
+    },
+    {
+      "k": [
+        "acqua frizzante",
+        "acqua gassata"
+      ],
+      "u": "1.5L",
+      "p": [
+        0.19,
+        0.22,
+        0.28,
+        0.25,
+        0.36,
+        0.21,
+        0.2,
+        0.19,
+        0.19
+      ]
+    },
+    {
+      "k": [
+        "succo di frutta",
+        "succo arancia",
+        "succo di pesca"
+      ],
+      "u": "1L",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.19,
+        1.39,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "aranciata",
+        "limonata",
+        "chinotto",
+        "bibita",
+        "sprite"
+      ],
+      "u": "1.5L",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        0.99,
+        1.09,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "coca cola",
+        "pepsi",
+        "cola",
+        "fanta"
+      ],
+      "u": "1.5L",
+      "p": [
+        1.09,
+        1.19,
+        1.49,
+        1.59,
+        1.49,
+        1.22,
+        1.13,
+        1.11,
+        1.1
+      ]
+    },
+    {
+      "k": [
+        "energy drink",
+        "red bull"
+      ],
+      "u": "25cl",
+      "p": [
+        0.79,
+        0.89,
+        1.29,
+        1.39,
+        1.29,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "vino rosso",
+        "vino bianco",
+        "vino rosato",
+        "vino"
+      ],
+      "u": "750ml",
+      "p": [
+        1.99,
+        2.29,
+        2.99,
+        2.89,
+        3.19,
+        2.23,
+        2.07,
+        2.03,
+        2.01
+      ]
+    },
+    {
+      "k": [
+        "vino prosecco",
+        "prosecco",
+        "spumante",
+        "cava"
+      ],
+      "u": "750ml",
+      "p": [
+        2.99,
+        3.49,
+        4.49,
+        4.79,
+        4.29,
+        3.35,
+        3.11,
+        3.05,
+        3.02
+      ]
+    },
+    {
+      "k": [
+        "birra",
+        "birra lager",
+        "birra chiara"
+      ],
+      "u": "33cl",
+      "p": [
+        0.49,
+        0.55,
+        0.79,
+        0.75,
+        0.85,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "birra artigianale",
+        "birra ipa",
+        "birra speciale"
+      ],
+      "u": "33cl",
+      "p": [
+        1.29,
+        1.49,
+        1.89,
+        1.99,
+        1.79,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "piselli surgelati",
+        "piselli"
+      ],
+      "u": "450g",
+      "p": [
+        0.89,
+        0.99,
+        1.19,
+        1.29,
+        1.19,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "spinaci surgelati"
+      ],
+      "u": "450g",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "bastoncini di pesce",
+        "bastoncini"
+      ],
+      "u": "400g",
+      "p": [
+        1.49,
+        1.69,
+        2.09,
+        2.19,
+        1.99,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "pizza surgelata",
+        "pizza margherita"
+      ],
+      "u": "350g",
+      "p": [
+        1.29,
+        1.49,
+        1.89,
+        1.99,
+        1.79,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "gelato",
+        "gelato vaschetta"
+      ],
+      "u": "500ml",
+      "p": [
+        1.49,
+        1.69,
+        2.19,
+        2.29,
+        2.09,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "patate surgelate",
+        "patatine fritte surgelate"
+      ],
+      "u": "600g",
+      "p": [
+        0.99,
+        1.09,
+        1.39,
+        1.49,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "minestrone surgelato",
+        "verdure miste surgelate"
+      ],
+      "u": "450g",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.39,
+        1.29,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "petto di pollo surgelato",
+        "pollo surgelato"
+      ],
+      "u": "400g",
+      "p": [
+        2.29,
+        2.59,
+        3.19,
+        3.49,
+        2.99,
+        2.56,
+        2.38,
+        2.34,
+        2.31
+      ]
+    },
+    {
+      "k": [
+        "ceci in scatola",
+        "ceci"
+      ],
+      "u": "400g",
+      "p": [
+        0.49,
+        0.55,
+        0.69,
+        0.75,
+        0.79,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "lenticchie in scatola",
+        "lenticchie"
+      ],
+      "u": "400g",
+      "p": [
+        0.49,
+        0.55,
+        0.69,
+        0.75,
+        0.79,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "fagioli",
+        "fagioli borlotti",
+        "fagioli cannellini"
+      ],
+      "u": "400g",
+      "p": [
+        0.49,
+        0.55,
+        0.69,
+        0.75,
+        0.79,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "pasta bio",
+        "pasta biologica"
+      ],
+      "u": "500g",
+      "p": [
+        1.29,
+        1.49,
+        1.79,
+        1.89,
+        1.89,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "riso bio",
+        "riso biologico"
+      ],
+      "u": "1kg",
+      "p": [
+        1.49,
+        1.69,
+        1.99,
+        2.09,
+        1.99,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "yogurt bio",
+        "yogurt biologico"
+      ],
+      "u": "4x125g",
+      "p": [
+        1.29,
+        1.49,
+        1.79,
+        1.89,
+        1.89,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "integratore",
+        "vitamine",
+        "vitamina c",
+        "omega 3"
+      ],
+      "u": "30 cps",
+      "p": [
+        2.99,
+        3.29,
+        4.49,
+        4.79,
+        4.29,
+        3.35,
+        3.11,
+        3.05,
+        3.02
+      ]
+    },
+    {
+      "k": [
+        "barretta proteica",
+        "barrette proteiche",
+        "proteica"
+      ],
+      "u": "60g",
+      "p": [
+        0.99,
+        1.09,
+        1.49,
+        1.59,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "curry",
+        "curcuma",
+        "paprika"
+      ],
+      "u": "50g",
+      "p": [
+        0.79,
+        0.89,
+        1.19,
+        1.29,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "riso per sushi",
+        "nori",
+        "wasabi"
+      ],
+      "u": "500g",
+      "p": [
+        1.49,
+        1.69,
+        2.19,
+        2.29,
+        2.09,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "tortillas",
+        "piadina",
+        "wraps"
+      ],
+      "u": "6pz",
+      "p": [
+        0.99,
+        1.09,
+        1.39,
+        1.49,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "hummus"
+      ],
+      "u": "200g",
+      "p": [
+        1.29,
+        1.49,
+        1.89,
+        1.99,
+        1.79,
+        1.44,
+        1.34,
+        1.32,
+        1.3
+      ]
+    },
+    {
+      "k": [
+        "cibo per gatti",
+        "gatto",
+        "crocchette gatto"
+      ],
+      "u": "400g",
+      "p": [
+        0.79,
+        0.89,
+        1.19,
+        1.29,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "cibo per cani",
+        "cane",
+        "crocchette cane"
+      ],
+      "u": "1kg",
+      "p": [
+        2.49,
+        2.79,
+        3.49,
+        3.79,
+        3.29,
+        2.79,
+        2.59,
+        2.54,
+        2.51
+      ]
+    },
+    {
+      "k": [
+        "lettiera gatto",
+        "lettiera"
+      ],
+      "u": "5kg",
+      "p": [
+        2.99,
+        3.29,
+        4.49,
+        4.79,
+        4.29,
+        3.35,
+        3.11,
+        3.05,
+        3.02
+      ]
+    },
+    {
+      "k": [
+        "detersivo piatti",
+        "detersivo per piatti"
+      ],
+      "u": "750ml",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.49,
+        1.39,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "detersivo lavatrice",
+        "detersivo per lavatrice"
+      ],
+      "u": "18 mis",
+      "p": [
+        3.49,
+        3.99,
+        4.99,
+        5.49,
+        4.99,
+        3.91,
+        3.63,
+        3.56,
+        3.52
+      ]
+    },
+    {
+      "k": [
+        "detersivo lavastoviglie",
+        "pastiglie lavastoviglie"
+      ],
+      "u": "30 past",
+      "p": [
+        2.99,
+        3.29,
+        4.29,
+        4.79,
+        4.49,
+        3.35,
+        3.11,
+        3.05,
+        3.02
+      ]
+    },
+    {
+      "k": [
+        "ammorbidente"
+      ],
+      "u": "1L",
+      "p": [
+        0.99,
+        1.19,
+        1.59,
+        1.79,
+        1.59,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "candeggina",
+        "varechina"
+      ],
+      "u": "1L",
+      "p": [
+        0.49,
+        0.59,
+        0.79,
+        0.85,
+        0.79,
+        0.55,
+        0.51,
+        0.5,
+        0.49
+      ]
+    },
+    {
+      "k": [
+        "carta igienica",
+        "rotoli di carta",
+        "carta bagno"
+      ],
+      "u": "6 rot",
+      "p": [
+        1.49,
+        1.59,
+        1.99,
+        2.19,
+        2.29,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "carta cucina",
+        "carta assorbente"
+      ],
+      "u": "3 rot",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.39,
+        1.29,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "sacchetti",
+        "sacchetti spazzatura",
+        "sacchi neri",
+        "buste"
+      ],
+      "u": "30pz",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "detersivo pavimenti",
+        "sgrassatore",
+        "multiuso"
+      ],
+      "u": "1L",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "spugne",
+        "spugnette"
+      ],
+      "u": "3pz",
+      "p": [
+        0.59,
+        0.69,
+        0.89,
+        0.99,
+        0.89,
+        0.66,
+        0.61,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "k": [
+        "carta alluminio",
+        "carta da forno",
+        "pellicola"
+      ],
+      "u": "10m",
+      "p": [
+        0.79,
+        0.89,
+        1.09,
+        1.19,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "shampoo"
+      ],
+      "u": "250ml",
+      "p": [
+        0.99,
+        1.09,
+        1.49,
+        1.59,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "balsamo",
+        "conditioner"
+      ],
+      "u": "250ml",
+      "p": [
+        0.99,
+        1.09,
+        1.49,
+        1.59,
+        1.39,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "dentifricio"
+      ],
+      "u": "75ml",
+      "p": [
+        0.69,
+        0.79,
+        1.09,
+        1.19,
+        0.99,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "spazzolino",
+        "spazzolino da denti"
+      ],
+      "u": "2pz",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.39,
+        1.19,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "sapone liquido",
+        "sapone mani"
+      ],
+      "u": "300ml",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        1.09,
+        0.99,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    },
+    {
+      "k": [
+        "gel doccia",
+        "bagnoschiuma",
+        "docciaschiuma"
+      ],
+      "u": "250ml",
+      "p": [
+        0.79,
+        0.89,
+        1.19,
+        1.29,
+        1.09,
+        0.88,
+        0.82,
+        0.81,
+        0.8
+      ]
+    },
+    {
+      "k": [
+        "deodorante"
+      ],
+      "u": "150ml",
+      "p": [
+        1.49,
+        1.69,
+        2.19,
+        2.39,
+        2.09,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "rasoio",
+        "rasoi usa e getta"
+      ],
+      "u": "3pz",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.39,
+        1.19,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "assorbenti"
+      ],
+      "u": "14pz",
+      "p": [
+        0.89,
+        0.99,
+        1.29,
+        1.39,
+        1.19,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "pannolini",
+        "pannolino"
+      ],
+      "u": "24pz",
+      "p": [
+        3.99,
+        4.49,
+        5.49,
+        5.79,
+        5.29,
+        4.47,
+        4.15,
+        4.07,
+        4.03
+      ]
+    },
+    {
+      "k": [
+        "salviette umide",
+        "fazzoletti umidi"
+      ],
+      "u": "64pz",
+      "p": [
+        0.99,
+        1.09,
+        1.39,
+        1.49,
+        1.29,
+        1.11,
+        1.03,
+        1.01,
+        1
+      ]
+    },
+    {
+      "k": [
+        "fazzoletti",
+        "kleenex",
+        "fazzolettini di carta"
+      ],
+      "u": "10x10",
+      "p": [
+        0.89,
+        0.99,
+        1.19,
+        1.29,
+        1.19,
+        1,
+        0.93,
+        0.91,
+        0.9
+      ]
+    },
+    {
+      "k": [
+        "crema viso",
+        "crema idratante",
+        "crema corpo"
+      ],
+      "u": "150ml",
+      "p": [
+        1.49,
+        1.69,
+        2.29,
+        2.49,
+        2.19,
+        1.67,
+        1.55,
+        1.52,
+        1.5
+      ]
+    },
+    {
+      "k": [
+        "cotone idrofilo",
+        "batuffoli",
+        "cotton fioc"
+      ],
+      "u": "100pz",
+      "p": [
+        0.69,
+        0.79,
+        0.99,
+        1.09,
+        0.99,
+        0.77,
+        0.72,
+        0.7,
+        0.7
+      ]
+    }
   ]
 }

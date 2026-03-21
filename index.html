@@ -490,6 +490,20 @@ body{
   </div>
 </div>
 
+<div class="screen" id="s-nuova-password">
+  <div class="splash">
+    <div class="orb1"></div><div class="orb2"></div>
+    <div style="font-size:50px;position:relative;z-index:1;">🔐</div>
+    <div class="splash-logo">Nuova<em> Password</em></div>
+    <div class="acard">
+      <div class="atitle">Scegli la tua nuova password</div>
+      <input class="ainput" id="nuova-pass1" type="password" placeholder="Nuova password" autocomplete="new-password">
+      <input class="ainput" id="nuova-pass2" type="password" placeholder="Ripeti la password" autocomplete="new-password" style="margin-top:8px;">
+      <button class="abtn" onclick="aggiornaPassword()">Salva password →</button>
+    </div>
+  </div>
+</div>
+
 <div class="screen" id="s-register">
   <div class="splash">
     <div class="orb1"></div><div class="orb2"></div>
@@ -1119,7 +1133,7 @@ body{
   <div class="scroll-area"><div class="page">
     <div class="card"><div class="cb2" style="font-size:14px;line-height:1.6;color:var(--text);">
       <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Titolare del trattamento</h3>
-      <p style="margin:0 0 14px;color:var(--text2);">SpesaFacile — per contatti privacy: <em style="color:var(--green);">[inserire email]</em></p>
+      <p style="margin:0 0 14px;color:var(--text2);">SpesaFacile — per contatti privacy: <em style="color:var(--green);">arezzinicholas@gmail.com</em></p>
 
       <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Dati raccolti</h3>
       <ul style="margin:0 0 14px;padding-left:18px;color:var(--text2);">
@@ -1146,7 +1160,7 @@ body{
         <li>Portabilità dei dati (Art. 20)</li>
         <li>Opposizione al trattamento (Art. 21)</li>
       </ul>
-      <p style="margin:0 0 14px;color:var(--text2);">Per esercitare questi diritti: <em style="color:var(--green);">[inserire email contatto]</em></p>
+      <p style="margin:0 0 14px;color:var(--text2);">Per esercitare questi diritti: <em style="color:var(--green);">arezzinicholas@gmail.com</em></p>
 
       <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Terze parti coinvolte</h3>
       <ul style="margin:0 0 14px;padding-left:18px;color:var(--text2);">
@@ -1283,24 +1297,27 @@ async function tentaLogin(){
   btns.forEach(function(b){ b.disabled = true; });
   btns[0].textContent = 'Accesso in corso...';
 
-  var r = await _supabase.auth.signInWithPassword({ email: email, password: pass });
-
-  btns.forEach(function(b){ b.disabled = false; });
-  btns[0].textContent = 'Entra \u2192';
-
-  if(r.error){ showToast('Credenziali errate. Riprova.'); return; }
-
-  userData.userId   = r.data.user.id;
-  userData.isOspite = false;
-  userData.nome     = (r.data.user.user_metadata && r.data.user.user_metadata.nome)
-                      || email.split('@')[0];
-  if(!userData.dataIscrizione){
-    var ora = new Date();
-    userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
+  try {
+    var r = await _supabase.auth.signInWithPassword({ email: email, password: pass });
+    btns.forEach(function(b){ b.disabled = false; });
+    btns[0].textContent = 'Entra \u2192';
+    if(r.error){ showToast('Credenziali errate. Riprova.'); return; }
+    userData.userId   = r.data.user.id;
+    userData.isOspite = false;
+    userData.nome     = (r.data.user.user_metadata && r.data.user.user_metadata.nome)
+                        || email.split('@')[0];
+    if(!userData.dataIscrizione){
+      var ora = new Date();
+      userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
+    }
+    await sincronizzaProfiloDaSupabase(r.data.user.id);
+    salvaUserData();
+    go('home');
+  } catch(e) {
+    btns.forEach(function(b){ b.disabled = false; });
+    btns[0].textContent = 'Entra \u2192';
+    showToast('Errore di connessione. Riprova.');
   }
-  await sincronizzaProfiloDaSupabase(r.data.user.id);
-  salvaUserData();
-  go('home');
 }
 
 function entraComeOspite(){
@@ -1331,29 +1348,29 @@ async function registrati(){
   var btn = document.querySelector('#s-register .abtn');
   if(btn){ btn.disabled = true; btn.textContent = 'Creazione account...'; }
 
-  var r = await _supabase.auth.signUp({
-    email: email, password: pass, options: { data: { nome: nome } }
-  });
-
-  if(btn){ btn.disabled = false; btn.textContent = 'Crea account'; }
-
-  if(r.error){ showToast('Errore: ' + r.error.message); return; }
-
-  userData.userId   = r.data.user.id;
-  userData.isOspite = false;
-  userData.nome     = nome;
-  var ora = new Date();
-  userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
-
-  _supabase.from('user_profiles').insert({
-    user_id: r.data.user.id, nome: nome,
-    punti: 0, scontrini: 0, risparmio: 0, liste: 0, ricette: 0, citta: ''
-  }).then(function(){}).catch(function(){});
-
-  rilevaCitta();
-  salvaUserData();
-  showToast('Controlla la tua email per attivare l\'account 📬');
-  setTimeout(function(){ go('email-verifica'); }, 800);
+  try {
+    var r = await _supabase.auth.signUp({
+      email: email, password: pass, options: { data: { nome: nome } }
+    });
+    if(btn){ btn.disabled = false; btn.textContent = 'Crea account'; }
+    if(r.error){ showToast('Errore: ' + r.error.message); return; }
+    userData.userId   = r.data.user.id;
+    userData.isOspite = false;
+    userData.nome     = nome;
+    var ora = new Date();
+    userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
+    _supabase.from('user_profiles').insert({
+      user_id: r.data.user.id, nome: nome,
+      punti: 0, scontrini: 0, risparmio: 0, liste: 0, ricette: 0, citta: ''
+    }).then(function(){}).catch(function(){});
+    rilevaCitta();
+    salvaUserData();
+    showToast('Controlla la tua email per attivare l\'account 📬');
+    setTimeout(function(){ go('email-verifica'); }, 800);
+  } catch(e) {
+    if(btn){ btn.disabled = false; btn.textContent = 'Crea account'; }
+    showToast('Errore di connessione. Riprova.');
+  }
 }
 
 </script>
@@ -1363,7 +1380,6 @@ async function registrati(){
 
 
 // ── MAPPA LEAFLET + OVERPASS API ──
-var leafletMap=null, userMarker=null, selectedStore=null, routeLine=null, pendingStoreName=null;
 var userLat=null, userLng=null;
 
 // Caricato da products.json
@@ -1381,164 +1397,6 @@ function getChain(n){
   return 'default';
 }
 
-function initMappa(){
-  if(typeof L === 'undefined'){
-    var lm = document.getElementById('mappa-loading-msg');
-    if(lm) lm.textContent = 'Serve connessione internet per la mappa';
-    return;
-  }
-  if(leafletMap){
-    setTimeout(function(){
-      leafletMap.invalidateSize();
-      if(userLat && userLng) leafletMap.setView([userLat,userLng], APP_CONFIG.MAP_ZOOM_USER);
-    },150);
-    // Aggiorna posizione GPS ad ogni riapertura mappa
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(
-        function(p){
-          userLat=p.coords.latitude; userLng=p.coords.longitude;
-          leafletMap.setView([userLat,userLng], APP_CONFIG.MAP_ZOOM_USER);
-          if(userMarker) leafletMap.removeLayer(userMarker);
-          var uIcon=L.divIcon({html:'<div style="width:16px;height:16px;background:#1A8C4E;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,140,78,.25);"></div>',className:'',iconSize:[16,16],iconAnchor:[8,8]});
-          userMarker=L.marker([userLat,userLng],{icon:uIcon,zIndexOffset:1000}).addTo(leafletMap).bindPopup('Sei qui');
-        },
-        function(){},
-        {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_FAST, maximumAge: APP_CONFIG.GEO_MAX_AGE}
-      );
-    }
-    return;
-  }
-  leafletMap=L.map('leaflet-map',{zoomControl:true,attributionControl:false})
-    .setView(APP_CONFIG.MAP_CENTER, APP_CONFIG.MAP_ZOOM_DEFAULT);
-  L.tileLayer(APP_CONFIG.TILE_URL, {maxZoom: APP_CONFIG.MAP_MAX_ZOOM}).addTo(leafletMap);
-  setTimeout(function(){leafletMap.invalidateSize();}, APP_CONFIG.MAP_INVALIDATE_DELAY);
-
-  if(navigator.geolocation){
-    document.getElementById('mappa-loading-msg').textContent='Cerco il tuo GPS...';
-    navigator.geolocation.getCurrentPosition(
-      function(p){ userLat=p.coords.latitude; userLng=p.coords.longitude; onGotPos(); },
-      function(){
-        // Fallback: IP geolocation invece di Genova hardcoded
-        fetch(APP_CONFIG.IP_GEO_URL)
-          .then(function(r){ return r.json(); })
-          .then(function(d){
-            if(d && d.latitude){ userLat=d.latitude; userLng=d.longitude; }
-            else { userLat=APP_CONFIG.FALLBACK_LAT; userLng=APP_CONFIG.FALLBACK_LNG; }
-            onGotPos();
-          })
-          .catch(function(){ userLat=APP_CONFIG.FALLBACK_LAT; userLng=APP_CONFIG.FALLBACK_LNG; onGotPos(); });
-      },
-      {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_SLOW, maximumAge:0}
-    );
-  } else {
-    userLat=APP_CONFIG.FALLBACK_LAT; userLng=APP_CONFIG.FALLBACK_LNG; onGotPos();
-  }
-}
-
-function onGotPos(){
-  leafletMap.setView([userLat,userLng], APP_CONFIG.MAP_ZOOM_USER);
-  var uIcon=L.divIcon({
-    html:'<div style="width:16px;height:16px;background:#1A8C4E;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,140,78,.25);"></div>',
-    className:'',iconSize:[16,16],iconAnchor:[8,8]
-  });
-  userMarker=L.marker([userLat,userLng],{icon:uIcon,zIndexOffset:1000}).addTo(leafletMap).bindPopup('Sei qui');
-  document.getElementById('mappa-loading-msg').textContent='Carico supermercati vicini...';
-  loadStores(userLat,userLng);
-}
-
-function loadStores(lat,lng){
-  var r=APP_CONFIG.SHOP_RADIUS_M;
-  var q='[out:json][timeout:'+APP_CONFIG.OVERPASS_TIMEOUT_S+'];(node["shop"~"supermarket|convenience|discount"](around:'+r+','+lat+','+lng+');way["shop"~"supermarket|convenience|discount"](around:'+r+','+lat+','+lng+'););out center;';
-  fetch(APP_CONFIG.OVERPASS_URL,{method:'POST',body:q})
-  .then(function(r){return r.json();})
-  .then(function(d){
-    document.getElementById('mappa-loading-overlay').style.display='none';
-    var els=d.elements||[], cnt=0;
-    els.forEach(function(el){
-      var lt=el.lat||(el.center&&el.center.lat);
-      var ln=el.lon||(el.center&&el.center.lon);
-      if(!lt||!ln) return;
-      var nm=(el.tags&&el.tags.name)||'Supermercato';
-      var ad='';
-      if(el.tags){
-        var st=el.tags['addr:street']||'';
-        var nu=el.tags['addr:housenumber']||'';
-        ad=st+(nu?' '+nu:'');
-      }
-      var oh=(el.tags&&el.tags['opening_hours'])||'';
-      addMarker(lt,ln,nm,ad,oh);
-      cnt++;
-    });
-    document.getElementById('mappa-chip').textContent=cnt+' supermercati';
-    document.getElementById('mappa-store-count').textContent=cnt+' supermercati nel raggio di '+(APP_CONFIG.SHOP_RADIUS_M/1000)+'km';
-    if(cnt===0){
-      document.getElementById('mappa-loading-overlay').style.display='flex';
-      document.getElementById('mappa-loading-msg').textContent='Nessun supermercato trovato vicino a te';
-    }
-  })
-  .catch(function(){
-    document.getElementById('mappa-loading-overlay').style.display='none';
-    document.getElementById('mappa-chip').textContent='Errore connessione';
-    showToast('Errore caricamento supermercati — riprova');
-  });
-}
-
-function addMarker(lat,lng,name,addr,orari){
-  var ch=getChain(name), c=CHAINS[ch];
-  var ic=L.divIcon({
-    html:'<div style="background:'+c.bg+';color:'+c.text+';border:2px solid rgba(0,0,0,.15);border-radius:8px;padding:3px 7px;font-size:10px;font-weight:900;font-family:DM Sans,sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.2);">'+c.label+'</div>',
-    className:'',iconAnchor:[20,12]
-  });
-  var mk = L.marker([lat,lng],{icon:ic}).addTo(leafletMap).on('click',function(){selectStore(lat,lng,name,addr,orari,c);});
-  // Auto-apri se è il supermercato richiesto da Confronta
-  if(pendingStoreName && name.toLowerCase().indexOf(pendingStoreName.toLowerCase())>=0){
-    pendingStoreName=null;
-    setTimeout(function(){ selectStore(lat,lng,name,addr,orari,c); },300);
-  }
-}
-
-function selectStore(lat,lng,name,addr,orari,c){
-  selectedStore={lat:lat,lng:lng};
-  var dist=calcDist(userLat,userLng,lat,lng);
-  var km=dist<1?Math.round(dist*1000)+' m':dist.toFixed(1)+' km';
-  var min=Math.round(dist/0.083);
-  document.getElementById('sp-logo').style.background=c.bg;
-  document.getElementById('sp-logo').style.color=c.text;
-  document.getElementById('sp-logo').textContent=c.label;
-  document.getElementById('sp-name').textContent=name;
-  document.getElementById('sp-addr').textContent=addr||"Tocca Google Maps per l'indirizzo";
-  document.getElementById('sp-dist').textContent=km;
-  document.getElementById('sp-min').textContent=min+' min a piedi';
-  document.getElementById('sp-orari').textContent=orari?orari:'';
-  if(routeLine) leafletMap.removeLayer(routeLine);
-  if(userLat&&userLng){
-    routeLine=L.polyline([[userLat,userLng],[lat,lng]],{color:'#1A73E8',weight:4,dashArray:'10,8',opacity:.8}).addTo(leafletMap);
-    leafletMap.fitBounds(L.latLngBounds([[userLat,userLng],[lat,lng]]),{padding:[60,60]});
-  }
-  document.getElementById('default-panel').style.display='none';
-  document.getElementById('store-panel').style.display='block';
-}
-
-function calcDist(la1,lo1,la2,lo2){
-  var R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;
-  var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-
-function closeStorePanel(){
-  document.getElementById('store-panel').style.display = 'none';
-  document.getElementById('default-panel').style.display = 'block';
-  if(routeLine){ leafletMap.removeLayer(routeLine); routeLine=null; }
-}
-function apriGoogleMaps(){
-  if(!selectedStore) return;
-  window.open('https://www.google.com/maps/dir/?api=1&destination='+selectedStore.lat+','+selectedStore.lng+'&travelmode=walking','_blank');
-}
-
-function apriAppleMaps(){
-  if(!selectedStore) return;
-  window.open('https://maps.apple.com/?daddr='+selectedStore.lat+','+selectedStore.lng+'&dirflg=w','_blank');
-}
 
 
 // ── NAVIGAZIONE ──
@@ -1674,6 +1532,7 @@ function aggiornaListaProdotti(){
   var storeIdx = sel ? parseInt(sel.value) : 0;
   var list = document.getElementById('sc-prod-list');
   var badge = document.getElementById('sc-prod-badge');
+  if(!list || !badge) return;
   if(scProdotti.length===0){
     list.innerHTML = '<div style="font-size:13px;color:var(--text3);font-style:italic;">Nessun prodotto aggiunto</div>';
     badge.style.display = 'none';
@@ -1699,6 +1558,7 @@ function rimuoviProdotto(idx){
 
 function scSearchProd(val){
   var drop = document.getElementById('sc-autocomplete');
+  if(!drop) return;
   if(val.length<2){ drop.style.display='none'; return; }
   var q = val.toLowerCase();
   var res = [];
@@ -1711,9 +1571,16 @@ function scSearchProd(val){
     }
   }
   if(res.length===0){ drop.style.display='none'; return; }
-  drop.innerHTML = res.map(function(r){
-    return '<div onclick="scAggiungiProdotto(\''+r.replace(/'/g,"\\'")+'\')" style="padding:10px 16px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--surface2);" onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'\'">'+r+'</div>';
-  }).join('');
+  drop.innerHTML = '';
+  res.forEach(function(r){
+    var div = document.createElement('div');
+    div.textContent = r;
+    div.style.cssText = 'padding:10px 16px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--surface2);';
+    div.addEventListener('mouseover', function(){ this.style.background='var(--surface2)'; });
+    div.addEventListener('mouseout',  function(){ this.style.background=''; });
+    div.addEventListener('click',     function(){ scAggiungiProdotto(r); });
+    drop.appendChild(div);
+  });
   drop.style.display = 'block';
 }
 
@@ -1727,10 +1594,13 @@ function scAggiungiProdotto(nome){
 }
 
 function confermaScontrino(){
+  var _confBtn = document.querySelector('#s-scontrino .btn-g');
+  if(_confBtn && _confBtn.disabled) return;
   var storeEl = document.querySelector('input[name="sc-store"]:checked');
   var totale = parseFloat(document.getElementById('sc-totale').value);
   if(!storeEl){ showToast('Seleziona il supermercato!'); return; }
   if(!totale || totale<=0){ showToast('Inserisci il totale speso!'); return; }
+  if(_confBtn) _confBtn.disabled = true;
   var storeIdx = parseInt(storeEl.value);
   var risparmio = 0;
   if(INDICI.length > 0) {
@@ -1767,6 +1637,7 @@ function confermaScontrino(){
   // Sync punti/scontrini a Supabase per utenti registrati
   pushProfiloASupabase();
 
+  if(_confBtn) _confBtn.disabled = false;
   aggiornaHome();
   aggiornaProfiloUI();
   nascondiFormScontrino();
@@ -1982,7 +1853,7 @@ function aggiornaConfrontoConLista(prodotti){
   if(banner) banner.textContent = prodotti.length + ' prodott' + (prodotti.length===1?'o':'i') + ' nella tua lista';
   if(!tprod) return;
 
-  var totali = [0,0,0,0,0];
+  var totali = new Array(STORES.length).fill(0);
   var out = '';
 
   for(var p=0; p<prodotti.length; p++){
@@ -2023,7 +1894,7 @@ function aggiornaConfrontoConLista(prodotti){
     }
     var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * confez).toFixed(2)); });
 
-    for(var s=0; s<5; s++) totali[s] += prezzi[s];
+    for(var s=0; s<STORES.length; s++) totali[s] += prezzi[s];
 
     var minP = Math.min.apply(null, prezzi);
     var bestIdx = prezzi.indexOf(minP);
@@ -2043,7 +1914,7 @@ function aggiornaConfrontoConLista(prodotti){
     out += '</div></div>';
     // Mostra tutti i prezzi
     out += '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">';
-    for(var s=0; s<5; s++){
+    for(var s=0; s<STORES.length; s++){
       var isBest = (s === bestIdx);
       out += '<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:' +
         (isBest ? 'var(--green)' : 'var(--surface2)') +
@@ -2157,7 +2028,9 @@ function switchTab(btn,tabId){
   document.getElementById('t-prod').style.display=tabId==='t-prod'?'block':'none';
 }
 function updateCount(){
-  var lines=document.getElementById('notepad').value.split('\n').filter(function(l){return l.trim().length>0;});
+  var notepad=document.getElementById('notepad');
+  if(!notepad) return;
+  var lines=notepad.value.split('\n').filter(function(l){return l.trim().length>0;});
   var n=lines.length;
   var el1=document.getElementById('nota-count');
   var el2=document.getElementById('lista-count');
@@ -2205,6 +2078,9 @@ function addItem(item){
   ta.value=v+(v.length>0&&!v.endsWith('\n')?'\n':'')+item;
   updateCount();
   showToast(item+' aggiunto!');
+}
+function _escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function showToast(msg){
   var existing=document.querySelector('.toast');
@@ -2332,7 +2208,7 @@ function renderIngredienti() {
     var qty = ing.q ? (Math.round(ing.q * mult * 10) / 10) + (ing.u ? ' ' + ing.u : '') : '';
     out += '<div class="ingr-row" onclick="toggleIngr(this.querySelector(\'.ingr-check\'))">';
     out += '<div class="ingr-check"></div>';
-    out += '<span style="flex:1;font-size:13px;">' + ing.n + '</span>';
+    out += '<span style="flex:1;font-size:13px;">' + _escHtml(ing.n) + '</span>';
     if (qty) out += '<span style="font-size:12px;font-weight:700;color:var(--green);">' + qty + '</span>';
     out += '</div>';
   }
@@ -2346,7 +2222,7 @@ function renderPrep() {
   el.innerHTML = (ricettaAperta.prep || []).map(function(step, i) {
     return '<div style="display:flex;gap:10px;margin-bottom:12px;">'
       + '<div style="width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + (i+1) + '</div>'
-      + '<div style="font-size:13px;line-height:1.5;color:var(--text);padding-top:3px;">' + step + '</div>'
+      + '<div style="font-size:13px;line-height:1.5;color:var(--text);padding-top:3px;">' + _escHtml(step) + '</div>'
       + '</div>';
   }).join('');
 }
@@ -2497,6 +2373,7 @@ _dbPromise.then(function(){
 })();
 
 // Init schermata iniziale — inline style per priorità assoluta su qualsiasi CSS
+var _inRecoveryMode = false;
 (function(){
   document.querySelectorAll('.screen').forEach(function(s){
     s.classList.remove('active');
@@ -2512,7 +2389,26 @@ _dbPromise.then(function(){
 
   // Verifica sessione Supabase in background
   if(_supabase){
+    _supabase.auth.onAuthStateChange(function(event, session){
+      if(event === 'PASSWORD_RECOVERY'){
+        _inRecoveryMode = true;
+        go('nuova-password');
+      } else if(event === 'SIGNED_IN' && session){
+        if(_inRecoveryMode) return;
+        userData.userId   = session.user.id;
+        userData.isOspite = false;
+        if(!userData.nome)
+          userData.nome = (session.user.user_metadata && session.user.user_metadata.nome)
+                          || session.user.email.split('@')[0];
+        sincronizzaProfiloDaSupabase(session.user.id).then(function(){
+          if(!document.getElementById('s-home').classList.contains('active')) go('home');
+          else try{ aggiornaHome(); } catch(e){}
+        });
+      }
+    });
+
     _supabase.auth.getSession().then(function(r){
+      if(_inRecoveryMode) return;
       if(r.data && r.data.session){
         var session = r.data.session;
         userData.userId   = session.user.id;
@@ -2576,18 +2472,37 @@ function renderCasa(){
     var okSearch = !q || p.n.toLowerCase().includes(q);
     return okCat && okSearch;
   });
-  grid.innerHTML = filtrati.map(function(p){
-    var risparmio = (p.prezzoMax - p.prezzoMin).toFixed(2).replace('.',',');
-    return '<div style="background:var(--surface);border-radius:16px;padding:14px;box-shadow:var(--shadow);cursor:pointer;" onclick="addItemCasa(\'' + p.n + '\')">' +
-      '<div style="font-size:28px;margin-bottom:6px;">' + p.ico + '</div>' +
-      '<div style="font-family:\'Syne\',sans-serif;font-size:13px;font-weight:800;margin-bottom:4px;line-height:1.3;">' + p.n + '</div>' +
-      '<div style="font-size:11px;color:var(--text2);margin-bottom:6px;">da <strong style="color:var(--green);">\u20ac' + p.prezzoMin.toFixed(2).replace('.',',') + '</strong></div>' +
-      '<div style="font-size:10px;color:var(--text3);background:var(--surface2);border-radius:100px;padding:3px 8px;display:inline-block;">-\u20ac' + risparmio + ' con ' + p.bestStore + '</div>' +
-      '<div style="margin-top:8px;background:var(--green);color:#fff;border-radius:8px;padding:5px;text-align:center;font-size:11px;font-weight:700;">+ Aggiungi lista</div>' +
-    '</div>';
-  }).join('');
+  grid.innerHTML = '';
   if(filtrati.length===0){
     grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px 0;color:var(--text2);font-size:14px;">Nessun prodotto trovato</div>';
+  } else {
+    filtrati.forEach(function(p){
+      var risparmio = (p.prezzoMax - p.prezzoMin).toFixed(2).replace('.',',');
+      var card = document.createElement('div');
+      card.style.cssText = 'background:var(--surface);border-radius:16px;padding:14px;box-shadow:var(--shadow);cursor:pointer;';
+      card.addEventListener('click', function(){ addItemCasa(p.n); });
+      var icoEl = document.createElement('div');
+      icoEl.style.cssText = 'font-size:28px;margin-bottom:6px;';
+      icoEl.textContent = p.ico;
+      var nameEl = document.createElement('div');
+      nameEl.style.cssText = "font-family:'Syne',sans-serif;font-size:13px;font-weight:800;margin-bottom:4px;line-height:1.3;";
+      nameEl.textContent = p.n;
+      var priceEl = document.createElement('div');
+      priceEl.style.cssText = 'font-size:11px;color:var(--text2);margin-bottom:6px;';
+      priceEl.innerHTML = 'da <strong style="color:var(--green);">\u20ac' + p.prezzoMin.toFixed(2).replace('.',',') + '</strong>';
+      var saveEl = document.createElement('div');
+      saveEl.style.cssText = 'font-size:10px;color:var(--text3);background:var(--surface2);border-radius:100px;padding:3px 8px;display:inline-block;';
+      saveEl.textContent = '-\u20ac' + risparmio + ' con ' + p.bestStore;
+      var btnEl = document.createElement('div');
+      btnEl.style.cssText = 'margin-top:8px;background:var(--green);color:#fff;border-radius:8px;padding:5px;text-align:center;font-size:11px;font-weight:700;';
+      btnEl.textContent = '+ Aggiungi lista';
+      card.appendChild(icoEl);
+      card.appendChild(nameEl);
+      card.appendChild(priceEl);
+      card.appendChild(saveEl);
+      card.appendChild(btnEl);
+      grid.appendChild(card);
+    });
   }
 }
 
@@ -2667,7 +2582,7 @@ function _renderClassificaPodio(utenti){
     var colBg = pos===1 ? 'var(--amber)' : pos===2 ? '#9CA3AF' : '#B45309';
     if(u.isMe) colBg = 'var(--green)';
     podioHTML += '<div style="flex:1;max-width:110px;text-align:center;">'
-      + '<div style="font-size:11px;font-weight:700;color:'+(u.isMe?'var(--green)':'var(--text2)')+';margin-bottom:4px;word-break:break-all;">'+u.nome+'</div>'
+      + '<div style="font-size:11px;font-weight:700;color:'+(u.isMe?'var(--green)':'var(--text2)')+';margin-bottom:4px;word-break:break-all;">'+_escHtml(u.nome)+'</div>'
       + '<div style="font-size:11px;font-weight:800;color:var(--text3);margin-bottom:4px;">'+u.punti+' pt</div>'
       + '<div style="background:'+colBg+';border-radius:8px 8px 0 0;height:'+altezza+';display:flex;align-items:flex-start;justify-content:center;padding-top:8px;">'
       + '<span style="font-size:22px;">'+medal+'</span></div>'
@@ -2683,7 +2598,7 @@ function _renderClassificaPodio(utenti){
     var medaglia = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
     listaHTML += '<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--surface2);'+(me?'background:rgba(74,222,128,.1);':'')+'\">'
       + '<div style="width:28px;text-align:center;font-size:'+(i<3?'18':'12')+'px;font-weight:800;color:'+(i<3?'var(--amber)':'var(--text3)')+'">'+( i<3 ? medaglia : (i+1))+'</div>'
-      + '<div style="flex:1;font-size:13px;font-weight:'+(me?'800':'600')+';color:'+(me?'var(--green)':'var(--text)')+'">'+(me?'⭐ ':'')+u.nome+'</div>'
+      + '<div style="flex:1;font-size:13px;font-weight:'+(me?'800':'600')+';color:'+(me?'var(--green)':'var(--text)')+'">'+(me?'⭐ ':'')+_escHtml(u.nome)+'</div>'
       + '<div style="font-size:13px;font-weight:700;color:var(--amber);">'+u.punti+' pt</div>'
       + '</div>';
   });
@@ -2802,9 +2717,13 @@ function generaOfferte(){
 async function rinviaEmailVerifica(){
   var email = (document.getElementById('reg-email').value || '').trim();
   if(!email || !_supabase){ showToast('Email non disponibile, riprova la registrazione'); return; }
-  var r = await _supabase.auth.resend({ type: 'signup', email: email });
-  if(r.error){ showToast('Errore: ' + r.error.message); return; }
-  showToast('Email inviata di nuovo!');
+  try {
+    var r = await _supabase.auth.resend({ type: 'signup', email: email });
+    if(r.error){ showToast('Errore: ' + r.error.message); return; }
+    showToast('Email inviata di nuovo!');
+  } catch(e) {
+    showToast('Errore di connessione. Riprova.');
+  }
 }
 
 async function richiestaResetPassword(){
@@ -2814,14 +2733,41 @@ async function richiestaResetPassword(){
   var btns = document.querySelectorAll('#s-reset-password .abtn');
   btns.forEach(function(b){ b.disabled = true; });
   btns[0].textContent = 'Invio in corso...';
-  var r = await _supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + window.location.pathname
-  });
-  btns.forEach(function(b){ b.disabled = false; });
-  btns[0].textContent = 'Invia link \u2192';
-  if(r.error){ showToast('Errore: ' + r.error.message); return; }
-  showToast('Email inviata! Controlla la posta \uD83D\uDCEC');
-  setTimeout(function(){ go('login'); }, 2500);
+  try {
+    var r = await _supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    btns.forEach(function(b){ b.disabled = false; });
+    btns[0].textContent = 'Invia link \u2192';
+    if(r.error){ showToast('Errore: ' + r.error.message); return; }
+    showToast('Email inviata! Controlla la posta \uD83D\uDCEC');
+    setTimeout(function(){ go('login'); }, 2500);
+  } catch(e) {
+    btns.forEach(function(b){ b.disabled = false; });
+    btns[0].textContent = 'Invia link \u2192';
+    showToast('Errore di connessione. Riprova.');
+  }
+}
+
+async function aggiornaPassword(){
+  var p1 = (document.getElementById('nuova-pass1').value || '').trim();
+  var p2 = (document.getElementById('nuova-pass2').value || '').trim();
+  if(!p1 || p1.length < 6){ showToast('La password deve essere di almeno 6 caratteri'); return; }
+  if(p1 !== p2){ showToast('Le password non coincidono'); return; }
+  if(!_supabase){ showToast('Servizio non disponibile'); return; }
+  var btn = document.querySelector('#s-nuova-password .abtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Salvataggio...'; }
+  try {
+    var r = await _supabase.auth.updateUser({ password: p1 });
+    if(btn){ btn.disabled = false; btn.textContent = 'Salva password \u2192'; }
+    if(r.error){ showToast('Errore: ' + r.error.message); return; }
+    _inRecoveryMode = false;
+    showToast('Password aggiornata! Bentornato/a \uD83C\uDF89');
+    setTimeout(function(){ go('home'); }, 1500);
+  } catch(e) {
+    if(btn){ btn.disabled = false; btn.textContent = 'Salva password \u2192'; }
+    showToast('Errore di connessione. Riprova.');
+  }
 }
 
 function confermaEliminaAccount(){
@@ -2832,10 +2778,14 @@ function confermaEliminaAccount(){
 async function eliminaAccount(){
   if(!_supabase || !userData.userId){ showToast('Nessun account registrato da eliminare'); return; }
   showToast('Eliminazione in corso...');
-  var r = await _supabase.rpc('delete_user');
-  if(r.error){ showToast('Errore durante l\'eliminazione. Contatta il supporto.'); return; }
-  logout();
-  showToast('Account eliminato. Ci dispiace vederti andar via.');
+  try {
+    var r = await _supabase.rpc('delete_user');
+    if(r.error){ showToast('Errore durante l\'eliminazione. Contatta il supporto.'); return; }
+    logout();
+    showToast('Account eliminato. Ci dispiace vederti andar via.');
+  } catch(e) {
+    showToast('Errore di connessione. Riprova.');
+  }
 }
 
 function hasAffiliate(nomeNegozio){
@@ -2906,7 +2856,8 @@ function filtraOffCat(cat){
 var _mapInstance        = null;   // istanza Leaflet L.map
 var _mapInitialized     = false;  // true dopo primo render
 var _mapUserMarker      = null;   // marker posizione utente
-var _overpassController = null;  // AbortController per Overpass
+var _overpassController = null;   // AbortController per Overpass
+var _mapStoreMarkers    = [];     // marker supermercati (per pulizia tra ricerche)
 
 // ─── Entry point – chiamata da go() ──────────────────────────────────────
 function initMappa(){
@@ -2972,7 +2923,7 @@ function _mapAvviaConPosizione(){
         _mapSetLoading('Rilevo posizione tramite rete...', 40);
         _ipFallback();
       },
-      {enableHighAccuracy:true, timeout:10000, maximumAge:0}
+      {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_FAST, maximumAge:0}
     );
   } else {
     // 3. GPS non disponibile → IP geolocation diretta
@@ -2999,7 +2950,7 @@ function rilevaGPSManuale(){
       else
         showToast('GPS non disponibile. Prova ad abilitarlo nelle impostazioni.');
     },
-    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+    {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_SLOW, maximumAge:0}
   );
 }
 
@@ -3072,14 +3023,14 @@ function _mapCercaSupermercati(lat, lng){
     try { _overpassController.abort(); } catch(e){}
   }
 
-  var r = 2500; // raggio 2,5 km
+  var r = APP_CONFIG.SHOP_RADIUS_M;
   var tipi = ['supermarket','convenience','discount','grocery'];
   var filtri = tipi.map(function(t){
     return 'node["shop"="' + t + '"](around:' + r + ',' + lat + ',' + lng + ');'
          + 'way["shop"="'  + t + '"](around:' + r + ',' + lat + ',' + lng + ');';
   }).join('');
 
-  var query = '[out:json][timeout:20];(' + filtri + ');out center;';
+  var query = '[out:json][timeout:' + APP_CONFIG.OVERPASS_TIMEOUT_S + '];(' + filtri + ');out center;';
   var url   = APP_CONFIG.OVERPASS_URL + '?data=' + encodeURIComponent(query);
 
   var fetchOpts = {};
@@ -3095,6 +3046,10 @@ function _mapCercaSupermercati(lat, lng){
 
       var elementi = data.elements;
       var count    = elementi.length;
+
+      // Rimuovi marker precedenti prima di aggiungerne di nuovi
+      _mapStoreMarkers.forEach(function(m){ if(_mapInstance) _mapInstance.removeLayer(m); });
+      _mapStoreMarkers = [];
 
       elementi.forEach(function(el){
         var elLat = el.lat  || (el.center && el.center.lat);
@@ -3143,18 +3098,20 @@ function _mapCercaSupermercati(lat, lng){
           + ' style="display:inline-block;margin-top:8px;padding:7px 14px;background:#22C55E;color:#fff;border-radius:20px;text-decoration:none;font-size:12px;font-weight:700;">Portami qui →</a>'
           + '</div>';
 
-        L.marker([elLat, elLng], { icon: icon })
+        var mk = L.marker([elLat, elLng], { icon: icon })
           .addTo(_mapInstance)
           .bindPopup(popup, { maxWidth: 230 });
+        _mapStoreMarkers.push(mk);
       });
 
       if(countEl){
         countEl.textContent = count > 0
-          ? '🏪 ' + count + ' supermercati entro 2,5 km'
+          ? '🏪 ' + count + ' supermercati entro ' + (APP_CONFIG.SHOP_RADIUS_M/1000).toFixed(1).replace('.',',') + ' km'
           : '🏪 Nessun supermercato trovato nelle vicinanze';
       }
     })
     .catch(function(e){
+      _mapNascondiLoading();
       if(e && e.name === 'AbortError') return;
       console.warn('[Overpass]', e);
       if(countEl) countEl.textContent = '🏪 Supermercati visibili sulla mappa';
