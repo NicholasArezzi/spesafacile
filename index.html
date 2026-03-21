@@ -867,6 +867,10 @@ body{
       <div id="mappa-store-count" style="font-size:13px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🔍 Cerco supermercati...</div>
       <div id="mappa-city-bar" style="font-size:11px;color:var(--text2);margin-top:1px;">Rilevamento posizione...</div>
     </div>
+    <button id="btn-gps-retry" onclick="rilevaGPSManuale()"
+      style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:100px;padding:9px 14px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;cursor:pointer;">
+      📍 GPS
+    </button>
     <a id="link-gmaps-open" href="https://www.google.com/maps/search/supermercati/" target="_blank" rel="noopener"
       style="background:var(--green);color:#fff;border-radius:100px;padding:9px 16px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">
       Google Maps →
@@ -1797,7 +1801,15 @@ function aggiornaConfrontoConLista(prodotti){
       var dbBase = dbRef;
       if(dbUnit==='kg') dbBase = dbRef*1000;
       else if(dbUnit==='l') dbBase = dbRef*1000;
-      if(dbBase > 0) confez = Math.max(0.1, inputBase / dbBase);
+      // Converti solo se le unità sono dello stesso tipo (evita ml÷pz, g÷l ecc.)
+      var volUnits = ['ml','l','cl','dl'];
+      var wtUnits  = ['g','kg'];
+      var inputIsVol    = volUnits.indexOf(unit)   >= 0;
+      var inputIsWeight = wtUnits.indexOf(unit)    >= 0;
+      var dbIsVol       = volUnits.indexOf(dbUnit) >= 0;
+      var dbIsWeight    = wtUnits.indexOf(dbUnit)  >= 0;
+      var compatible    = (inputIsVol && dbIsVol) || (inputIsWeight && dbIsWeight);
+      if(compatible && dbBase > 0) confez = Math.max(0.1, inputBase / dbBase);
     }
     var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * confez).toFixed(2)); });
 
@@ -2581,8 +2593,12 @@ function _mapAvviaConPosizione(){
           if(d.city) userData.citta = d.city;
         }
         _mapRender(userLat || APP_CONFIG.FALLBACK_LAT_ITALY, userLng || APP_CONFIG.FALLBACK_LNG_ITALY);
+        showToast('Posizione approssimativa. Tocca 📍 GPS per usare il tuo GPS reale.');
       })
-      .catch(function(){ _mapRender(APP_CONFIG.FALLBACK_LAT_ITALY, APP_CONFIG.FALLBACK_LNG_ITALY); });
+      .catch(function(){
+        _mapRender(APP_CONFIG.FALLBACK_LAT_ITALY, APP_CONFIG.FALLBACK_LNG_ITALY);
+        showToast('Posizione approssimativa. Tocca 📍 GPS per usare il tuo GPS reale.');
+      });
   }
 
   // Se coordinate già disponibili → renderizza subito, poi prova a raffinare con GPS
@@ -2621,6 +2637,29 @@ function _mapAvviaConPosizione(){
     // 3. GPS non disponibile → IP geolocation diretta
     _ipFallback();
   }
+}
+
+// ─── GPS manuale (bottone 📍 GPS) ────────────────────────────────────────
+function rilevaGPSManuale(){
+  if(!navigator.geolocation){
+    showToast('GPS non disponibile su questo dispositivo.');
+    return;
+  }
+  showToast('Rilevamento GPS in corso...');
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      userLat = pos.coords.latitude; userLng = pos.coords.longitude;
+      _mapRender(userLat, userLng);
+      showToast('Posizione aggiornata con GPS!');
+    },
+    function(err){
+      if(err.code === 1)
+        showToast('Permesso GPS negato. Abilitalo nelle impostazioni del browser.');
+      else
+        showToast('GPS non disponibile. Prova ad abilitarlo nelle impostazioni.');
+    },
+    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+  );
 }
 
 // ─── Render mappa Leaflet ────────────────────────────────────────────────
