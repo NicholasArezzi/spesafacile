@@ -1353,7 +1353,15 @@ async function registrati(){
       email: email, password: pass, options: { data: { nome: nome } }
     });
     if(btn){ btn.disabled = false; btn.textContent = 'Crea account'; }
-    if(r.error){ showToast('Errore: ' + r.error.message); return; }
+    if(r.error){
+      var errMsg = r.error.message || '';
+      if(errMsg.toLowerCase().includes('rate') || errMsg.toLowerCase().includes('limit') || errMsg.toLowerCase().includes('exceeded') || errMsg.toLowerCase().includes('quota')){
+        showToast('Troppe registrazioni in corso. Attendi qualche minuto e riprova 🕐');
+      } else {
+        showToast('Errore: ' + errMsg);
+      }
+      return;
+    }
     userData.userId   = r.data.user.id;
     userData.isOspite = false;
     userData.nome     = nome;
@@ -1405,6 +1413,7 @@ function getChain(n){
 
 // ── SCONTRINO: stato form ──
 var scProdotti = [];
+var _scDaFoto = false; // true solo se l'utente ha scattato una foto (anti-frode punti)
 
 function mostraFormScontrino(){
   document.getElementById('scontrino-step1').style.display = 'none';
@@ -1421,11 +1430,13 @@ function nascondiFormScontrino(){
 }
 
 function inviaManuale(){
+  _scDaFoto = false;
   mostraFormScontrino();
   renderFormScontrino(-1, '', []);
 }
 
 function inviaFoto(){
+  _scDaFoto = true;
   var input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
@@ -1606,8 +1617,8 @@ function confermaScontrino(){
   if(INDICI.length > 0) {
     risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
   }
-  var punti = Math.floor(totale);
-  userData.punti = (userData.punti||0) + punti;
+  var punti = _scDaFoto ? Math.floor(totale) : 0;
+  if(punti > 0) userData.punti = (userData.punti||0) + punti;
   userData.scontrini = (userData.scontrini||0) + 1;
   userData.risparmio = parseFloat(((userData.risparmio||0) + risparmio).toFixed(2));
   salvaUserData();
@@ -1641,8 +1652,10 @@ function confermaScontrino(){
   aggiornaHome();
   aggiornaProfiloUI();
   nascondiFormScontrino();
-  var msg = '+'+punti+' punti! 🎉';
-  if(risparmio>0) msg += ' Potresti risparmiare \u20ac'+risparmio.toFixed(2)+' da '+(STORES[0]||'Eurospin');
+  var msg = punti > 0
+    ? '+'+punti+' punti! 🎉'
+    : 'Scontrino registrato! (punti solo con foto 📷)';
+  if(risparmio>0 && punti>0) msg += ' Potresti risparmiare \u20ac'+risparmio.toFixed(2)+' da '+(STORES[0]||'Eurospin');
   showToast(msg);
   setTimeout(function(){ go('home'); }, 1800);
 }
@@ -2723,7 +2736,15 @@ async function rinviaEmailVerifica(){
   if(!email || !_supabase){ showToast('Email non disponibile, riprova la registrazione'); return; }
   try {
     var r = await _supabase.auth.resend({ type: 'signup', email: email });
-    if(r.error){ showToast('Errore: ' + r.error.message); return; }
+    if(r.error){
+      var errMsg = r.error.message || '';
+      if(errMsg.toLowerCase().includes('rate') || errMsg.toLowerCase().includes('limit') || errMsg.toLowerCase().includes('exceeded') || errMsg.toLowerCase().includes('quota')){
+        showToast('Limite email raggiunto. Attendi qualche minuto e riprova 🕐');
+      } else {
+        showToast('Errore: ' + errMsg);
+      }
+      return;
+    }
     showToast('Email inviata di nuovo!');
   } catch(e) {
     showToast('Errore di connessione. Riprova.');
