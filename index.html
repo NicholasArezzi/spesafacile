@@ -1380,7 +1380,6 @@ async function registrati(){
 
 
 // ── MAPPA LEAFLET + OVERPASS API ──
-var leafletMap=null, userMarker=null, selectedStore=null, routeLine=null, pendingStoreName=null;
 var userLat=null, userLng=null;
 
 // Caricato da products.json
@@ -1398,164 +1397,6 @@ function getChain(n){
   return 'default';
 }
 
-function initMappa(){
-  if(typeof L === 'undefined'){
-    var lm = document.getElementById('mappa-loading-msg');
-    if(lm) lm.textContent = 'Serve connessione internet per la mappa';
-    return;
-  }
-  if(leafletMap){
-    setTimeout(function(){
-      leafletMap.invalidateSize();
-      if(userLat && userLng) leafletMap.setView([userLat,userLng], APP_CONFIG.MAP_ZOOM_USER);
-    },150);
-    // Aggiorna posizione GPS ad ogni riapertura mappa
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(
-        function(p){
-          userLat=p.coords.latitude; userLng=p.coords.longitude;
-          leafletMap.setView([userLat,userLng], APP_CONFIG.MAP_ZOOM_USER);
-          if(userMarker) leafletMap.removeLayer(userMarker);
-          var uIcon=L.divIcon({html:'<div style="width:16px;height:16px;background:#1A8C4E;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,140,78,.25);"></div>',className:'',iconSize:[16,16],iconAnchor:[8,8]});
-          userMarker=L.marker([userLat,userLng],{icon:uIcon,zIndexOffset:1000}).addTo(leafletMap).bindPopup('Sei qui');
-        },
-        function(){},
-        {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_FAST, maximumAge: APP_CONFIG.GEO_MAX_AGE}
-      );
-    }
-    return;
-  }
-  leafletMap=L.map('leaflet-map',{zoomControl:true,attributionControl:false})
-    .setView(APP_CONFIG.MAP_CENTER, APP_CONFIG.MAP_ZOOM_DEFAULT);
-  L.tileLayer(APP_CONFIG.TILE_URL, {maxZoom: APP_CONFIG.MAP_MAX_ZOOM}).addTo(leafletMap);
-  setTimeout(function(){leafletMap.invalidateSize();}, APP_CONFIG.MAP_INVALIDATE_DELAY);
-
-  if(navigator.geolocation){
-    document.getElementById('mappa-loading-msg').textContent='Cerco il tuo GPS...';
-    navigator.geolocation.getCurrentPosition(
-      function(p){ userLat=p.coords.latitude; userLng=p.coords.longitude; onGotPos(); },
-      function(){
-        // Fallback: IP geolocation invece di Genova hardcoded
-        fetch(APP_CONFIG.IP_GEO_URL)
-          .then(function(r){ return r.json(); })
-          .then(function(d){
-            if(d && d.latitude){ userLat=d.latitude; userLng=d.longitude; }
-            else { userLat=APP_CONFIG.FALLBACK_LAT; userLng=APP_CONFIG.FALLBACK_LNG; }
-            onGotPos();
-          })
-          .catch(function(){ userLat=APP_CONFIG.FALLBACK_LAT; userLng=APP_CONFIG.FALLBACK_LNG; onGotPos(); });
-      },
-      {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_SLOW, maximumAge:0}
-    );
-  } else {
-    userLat=APP_CONFIG.FALLBACK_LAT; userLng=APP_CONFIG.FALLBACK_LNG; onGotPos();
-  }
-}
-
-function onGotPos(){
-  leafletMap.setView([userLat,userLng], APP_CONFIG.MAP_ZOOM_USER);
-  var uIcon=L.divIcon({
-    html:'<div style="width:16px;height:16px;background:#1A8C4E;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,140,78,.25);"></div>',
-    className:'',iconSize:[16,16],iconAnchor:[8,8]
-  });
-  userMarker=L.marker([userLat,userLng],{icon:uIcon,zIndexOffset:1000}).addTo(leafletMap).bindPopup('Sei qui');
-  document.getElementById('mappa-loading-msg').textContent='Carico supermercati vicini...';
-  loadStores(userLat,userLng);
-}
-
-function loadStores(lat,lng){
-  var r=APP_CONFIG.SHOP_RADIUS_M;
-  var q='[out:json][timeout:'+APP_CONFIG.OVERPASS_TIMEOUT_S+'];(node["shop"~"supermarket|convenience|discount"](around:'+r+','+lat+','+lng+');way["shop"~"supermarket|convenience|discount"](around:'+r+','+lat+','+lng+'););out center;';
-  fetch(APP_CONFIG.OVERPASS_URL,{method:'POST',body:q})
-  .then(function(r){return r.json();})
-  .then(function(d){
-    document.getElementById('mappa-loading-overlay').style.display='none';
-    var els=d.elements||[], cnt=0;
-    els.forEach(function(el){
-      var lt=el.lat||(el.center&&el.center.lat);
-      var ln=el.lon||(el.center&&el.center.lon);
-      if(!lt||!ln) return;
-      var nm=(el.tags&&el.tags.name)||'Supermercato';
-      var ad='';
-      if(el.tags){
-        var st=el.tags['addr:street']||'';
-        var nu=el.tags['addr:housenumber']||'';
-        ad=st+(nu?' '+nu:'');
-      }
-      var oh=(el.tags&&el.tags['opening_hours'])||'';
-      addMarker(lt,ln,nm,ad,oh);
-      cnt++;
-    });
-    document.getElementById('mappa-chip').textContent=cnt+' supermercati';
-    document.getElementById('mappa-store-count').textContent=cnt+' supermercati nel raggio di '+(APP_CONFIG.SHOP_RADIUS_M/1000)+'km';
-    if(cnt===0){
-      document.getElementById('mappa-loading-overlay').style.display='flex';
-      document.getElementById('mappa-loading-msg').textContent='Nessun supermercato trovato vicino a te';
-    }
-  })
-  .catch(function(){
-    document.getElementById('mappa-loading-overlay').style.display='none';
-    document.getElementById('mappa-chip').textContent='Errore connessione';
-    showToast('Errore caricamento supermercati — riprova');
-  });
-}
-
-function addMarker(lat,lng,name,addr,orari){
-  var ch=getChain(name), c=CHAINS[ch];
-  var ic=L.divIcon({
-    html:'<div style="background:'+c.bg+';color:'+c.text+';border:2px solid rgba(0,0,0,.15);border-radius:8px;padding:3px 7px;font-size:10px;font-weight:900;font-family:DM Sans,sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.2);">'+c.label+'</div>',
-    className:'',iconAnchor:[20,12]
-  });
-  var mk = L.marker([lat,lng],{icon:ic}).addTo(leafletMap).on('click',function(){selectStore(lat,lng,name,addr,orari,c);});
-  // Auto-apri se è il supermercato richiesto da Confronta
-  if(pendingStoreName && name.toLowerCase().indexOf(pendingStoreName.toLowerCase())>=0){
-    pendingStoreName=null;
-    setTimeout(function(){ selectStore(lat,lng,name,addr,orari,c); },300);
-  }
-}
-
-function selectStore(lat,lng,name,addr,orari,c){
-  selectedStore={lat:lat,lng:lng};
-  var dist=calcDist(userLat,userLng,lat,lng);
-  var km=dist<1?Math.round(dist*1000)+' m':dist.toFixed(1)+' km';
-  var min=Math.round(dist/0.083);
-  document.getElementById('sp-logo').style.background=c.bg;
-  document.getElementById('sp-logo').style.color=c.text;
-  document.getElementById('sp-logo').textContent=c.label;
-  document.getElementById('sp-name').textContent=name;
-  document.getElementById('sp-addr').textContent=addr||"Tocca Google Maps per l'indirizzo";
-  document.getElementById('sp-dist').textContent=km;
-  document.getElementById('sp-min').textContent=min+' min a piedi';
-  document.getElementById('sp-orari').textContent=orari?orari:'';
-  if(routeLine) leafletMap.removeLayer(routeLine);
-  if(userLat&&userLng){
-    routeLine=L.polyline([[userLat,userLng],[lat,lng]],{color:'#1A73E8',weight:4,dashArray:'10,8',opacity:.8}).addTo(leafletMap);
-    leafletMap.fitBounds(L.latLngBounds([[userLat,userLng],[lat,lng]]),{padding:[60,60]});
-  }
-  document.getElementById('default-panel').style.display='none';
-  document.getElementById('store-panel').style.display='block';
-}
-
-function calcDist(la1,lo1,la2,lo2){
-  var R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;
-  var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-
-function closeStorePanel(){
-  document.getElementById('store-panel').style.display = 'none';
-  document.getElementById('default-panel').style.display = 'block';
-  if(routeLine){ leafletMap.removeLayer(routeLine); routeLine=null; }
-}
-function apriGoogleMaps(){
-  if(!selectedStore) return;
-  window.open('https://www.google.com/maps/dir/?api=1&destination='+selectedStore.lat+','+selectedStore.lng+'&travelmode=walking','_blank');
-}
-
-function apriAppleMaps(){
-  if(!selectedStore) return;
-  window.open('https://maps.apple.com/?daddr='+selectedStore.lat+','+selectedStore.lng+'&dirflg=w','_blank');
-}
 
 
 // ── NAVIGAZIONE ──
@@ -3009,7 +2850,8 @@ function filtraOffCat(cat){
 var _mapInstance        = null;   // istanza Leaflet L.map
 var _mapInitialized     = false;  // true dopo primo render
 var _mapUserMarker      = null;   // marker posizione utente
-var _overpassController = null;  // AbortController per Overpass
+var _overpassController = null;   // AbortController per Overpass
+var _mapStoreMarkers    = [];     // marker supermercati (per pulizia tra ricerche)
 
 // ─── Entry point – chiamata da go() ──────────────────────────────────────
 function initMappa(){
@@ -3175,14 +3017,14 @@ function _mapCercaSupermercati(lat, lng){
     try { _overpassController.abort(); } catch(e){}
   }
 
-  var r = 2500; // raggio 2,5 km
+  var r = APP_CONFIG.SHOP_RADIUS_M;
   var tipi = ['supermarket','convenience','discount','grocery'];
   var filtri = tipi.map(function(t){
     return 'node["shop"="' + t + '"](around:' + r + ',' + lat + ',' + lng + ');'
          + 'way["shop"="'  + t + '"](around:' + r + ',' + lat + ',' + lng + ');';
   }).join('');
 
-  var query = '[out:json][timeout:20];(' + filtri + ');out center;';
+  var query = '[out:json][timeout:' + APP_CONFIG.OVERPASS_TIMEOUT_S + '];(' + filtri + ');out center;';
   var url   = APP_CONFIG.OVERPASS_URL + '?data=' + encodeURIComponent(query);
 
   var fetchOpts = {};
@@ -3198,6 +3040,10 @@ function _mapCercaSupermercati(lat, lng){
 
       var elementi = data.elements;
       var count    = elementi.length;
+
+      // Rimuovi marker precedenti prima di aggiungerne di nuovi
+      _mapStoreMarkers.forEach(function(m){ if(_mapInstance) _mapInstance.removeLayer(m); });
+      _mapStoreMarkers = [];
 
       elementi.forEach(function(el){
         var elLat = el.lat  || (el.center && el.center.lat);
@@ -3246,14 +3092,15 @@ function _mapCercaSupermercati(lat, lng){
           + ' style="display:inline-block;margin-top:8px;padding:7px 14px;background:#22C55E;color:#fff;border-radius:20px;text-decoration:none;font-size:12px;font-weight:700;">Portami qui →</a>'
           + '</div>';
 
-        L.marker([elLat, elLng], { icon: icon })
+        var mk = L.marker([elLat, elLng], { icon: icon })
           .addTo(_mapInstance)
           .bindPopup(popup, { maxWidth: 230 });
+        _mapStoreMarkers.push(mk);
       });
 
       if(countEl){
         countEl.textContent = count > 0
-          ? '🏪 ' + count + ' supermercati entro 2,5 km'
+          ? '🏪 ' + count + ' supermercati entro ' + (APP_CONFIG.SHOP_RADIUS_M/1000).toFixed(1).replace('.',',') + ' km'
           : '🏪 Nessun supermercato trovato nelle vicinanze';
       }
     })
