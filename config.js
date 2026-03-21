@@ -46,7 +46,7 @@ const APP_CONFIG = {
 
   // Supabase (inserire le credenziali del tuo progetto)
   SUPABASE_URL:      'https://nzrelznyvzhkhbplihpg.supabase.co',
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5td2xyZm51eWRjZW95bGhuaXRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMjk4NjAsImV4cCI6MjA4ODgwNTg2MH0.2cyjvtAB4taMmu3GEFZt6fMLRh2FB1FRgmVGM29b_QY',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56cmVsem55dnpoa2hicGxpaHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMzE2MzUsImV4cCI6MjA4ODgwNzYzNX0.R1g2Pjqxlpv9d08OZ5eAzjd5zk_WxbwbDANxLOS-nRk',
 
   // LocalStorage
   STORAGE_USER: 'sf_user',
