@@ -1532,6 +1532,7 @@ function aggiornaListaProdotti(){
   var storeIdx = sel ? parseInt(sel.value) : 0;
   var list = document.getElementById('sc-prod-list');
   var badge = document.getElementById('sc-prod-badge');
+  if(!list || !badge) return;
   if(scProdotti.length===0){
     list.innerHTML = '<div style="font-size:13px;color:var(--text3);font-style:italic;">Nessun prodotto aggiunto</div>';
     badge.style.display = 'none';
@@ -1557,6 +1558,7 @@ function rimuoviProdotto(idx){
 
 function scSearchProd(val){
   var drop = document.getElementById('sc-autocomplete');
+  if(!drop) return;
   if(val.length<2){ drop.style.display='none'; return; }
   var q = val.toLowerCase();
   var res = [];
@@ -2715,9 +2717,13 @@ function generaOfferte(){
 async function rinviaEmailVerifica(){
   var email = (document.getElementById('reg-email').value || '').trim();
   if(!email || !_supabase){ showToast('Email non disponibile, riprova la registrazione'); return; }
-  var r = await _supabase.auth.resend({ type: 'signup', email: email });
-  if(r.error){ showToast('Errore: ' + r.error.message); return; }
-  showToast('Email inviata di nuovo!');
+  try {
+    var r = await _supabase.auth.resend({ type: 'signup', email: email });
+    if(r.error){ showToast('Errore: ' + r.error.message); return; }
+    showToast('Email inviata di nuovo!');
+  } catch(e) {
+    showToast('Errore di connessione. Riprova.');
+  }
 }
 
 async function richiestaResetPassword(){
@@ -2917,7 +2923,7 @@ function _mapAvviaConPosizione(){
         _mapSetLoading('Rilevo posizione tramite rete...', 40);
         _ipFallback();
       },
-      {enableHighAccuracy:true, timeout:10000, maximumAge:0}
+      {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_FAST, maximumAge:0}
     );
   } else {
     // 3. GPS non disponibile → IP geolocation diretta
@@ -2944,7 +2950,7 @@ function rilevaGPSManuale(){
       else
         showToast('GPS non disponibile. Prova ad abilitarlo nelle impostazioni.');
     },
-    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+    {enableHighAccuracy:true, timeout: APP_CONFIG.GEO_TIMEOUT_SLOW, maximumAge:0}
   );
 }
 
