@@ -388,13 +388,6 @@ body{
 .isp-pill:active{transform:scale(.96);}
 </style>
 
-<!-- Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
-  var _supabase = (window.supabase && APP_CONFIG.SUPABASE_URL)
-    ? window.supabase.createClient(APP_CONFIG.SUPABASE_URL, APP_CONFIG.SUPABASE_ANON_KEY)
-    : null;
-</script>
 
 </head>
 <body>
@@ -493,7 +486,7 @@ body{
     </div>
     <div class="acard">
       <div class="atitle">Accedi al tuo account</div>
-      <input class="ainput" id="login-email" type="text" placeholder="Email o username" autocomplete="email">
+      <input class="ainput" id="login-email" type="email" placeholder="Email" autocomplete="email">
       <input class="ainput" id="login-pass" type="password" placeholder="Password" autocomplete="current-password">
       <button class="abtn" onclick="tentaLogin()">Entra &rarr;</button>
       <button class="abtn" onclick="entraComeOspite()" style="background:transparent;border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);margin-top:6px;">Prova senza registrarti</button>
@@ -1141,52 +1134,85 @@ setInterval(aggiornaOrologio, 30000);
 
 // Navigazione sicura - indipendente dal resto
 
-function tentaLogin(){
-  var email = document.getElementById('login-email');
-  var pass  = document.getElementById('login-pass');
-  if(!email || !email.value.trim()){
-    showToast('Inserisci email o username'); return;
-  }
-  if(!pass || !pass.value.trim()){
-    showToast('Inserisci la password'); return;
-  }
-  userData.nome = email.value.split('@')[0];
+async function tentaLogin(){
+  var email = (document.getElementById('login-email').value || '').trim();
+  var pass  = (document.getElementById('login-pass').value  || '').trim();
+  if(!email){ showToast('Inserisci la email'); return; }
+  if(!pass){  showToast('Inserisci la password'); return; }
+  if(!_supabase){ showToast('Servizio non disponibile'); return; }
+
+  var btns = document.querySelectorAll('#s-login .abtn');
+  btns.forEach(function(b){ b.disabled = true; });
+  btns[0].textContent = 'Accesso in corso...';
+
+  var r = await _supabase.auth.signInWithPassword({ email: email, password: pass });
+
+  btns.forEach(function(b){ b.disabled = false; });
+  btns[0].textContent = 'Entra \u2192';
+
+  if(r.error){ showToast('Credenziali errate. Riprova.'); return; }
+
+  userData.userId   = r.data.user.id;
+  userData.isOspite = false;
+  userData.nome     = (r.data.user.user_metadata && r.data.user.user_metadata.nome)
+                      || email.split('@')[0];
   if(!userData.dataIscrizione){
     var ora = new Date();
     userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
   }
-  rilevaCitta();
+  await sincronizzaProfiloDaSupabase(r.data.user.id);
   salvaUserData();
   go('home');
 }
 
 function entraComeOspite(){
-  userData.nome = 'Ospite';
-  var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  userData.nome     = 'Ospite';
+  userData.isOspite = true;
+  userData.userId   = null;
   var ora = new Date();
-  userData.dataIscrizione = mesi[ora.getMonth()] + ' ' + ora.getFullYear();
+  userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
   rilevaCitta();
   salvaUserData();
   showToast('Benvenuto ospite! Esplora liberamente.');
   setTimeout(function(){ go('home'); }, 600);
 }
 
-function registrati(){
-  var nome  = document.getElementById('reg-nome');
-  var email = document.getElementById('reg-email');
-  var pass  = document.getElementById('reg-pass');
-  var pass2 = document.getElementById('reg-pass2');
-  if(!nome || !nome.value.trim()){ showToast('Inserisci il tuo nome'); return; }
-  if(!email || !email.value.includes('@')){ showToast('Inserisci una email valida'); return; }
-  if(!pass || pass.value.length < 6){ showToast('La password deve avere almeno 6 caratteri'); return; }
-  if(!pass2 || pass.value !== pass2.value){ showToast('Le password non coincidono'); return; }
-  userData.nome = nome.value.trim();
-  var mesi = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+async function registrati(){
+  var nome  = (document.getElementById('reg-nome').value  || '').trim();
+  var email = (document.getElementById('reg-email').value || '').trim();
+  var pass  = document.getElementById('reg-pass').value   || '';
+  var pass2 = document.getElementById('reg-pass2').value  || '';
+  if(!nome)                { showToast('Inserisci il tuo nome'); return; }
+  if(!email.includes('@')) { showToast('Inserisci una email valida'); return; }
+  if(pass.length < 6)      { showToast('La password deve avere almeno 6 caratteri'); return; }
+  if(pass !== pass2)       { showToast('Le password non coincidono'); return; }
+  if(!_supabase)           { showToast('Servizio non disponibile'); return; }
+
+  var btn = document.querySelector('#s-register .abtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Creazione account...'; }
+
+  var r = await _supabase.auth.signUp({
+    email: email, password: pass, options: { data: { nome: nome } }
+  });
+
+  if(btn){ btn.disabled = false; btn.textContent = 'Crea account'; }
+
+  if(r.error){ showToast('Errore: ' + r.error.message); return; }
+
+  userData.userId   = r.data.user.id;
+  userData.isOspite = false;
+  userData.nome     = nome;
   var ora = new Date();
-  userData.dataIscrizione = mesi[ora.getMonth()] + ' ' + ora.getFullYear();
+  userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
+
+  _supabase.from('user_profiles').insert({
+    user_id: r.data.user.id, nome: nome,
+    punti: 0, scontrini: 0, risparmio: 0, liste: 0, ricette: 0, citta: ''
+  }).then(function(){}).catch(function(){});
+
   rilevaCitta();
   salvaUserData();
-  showToast('Benvenuto, ' + userData.nome + '!');
+  showToast('Benvenuto, ' + nome + '! \uD83C\uDF89');
   setTimeout(function(){ go('home'); }, 800);
 }
 
@@ -1583,12 +1609,23 @@ function confermaScontrino(){
     var rows = scProdotti
       .filter(function(p){ return p.price && p.price > 0 && p.price < 500; })
       .map(function(p){
-        return { store_name: storeName, product_key: p.name, price: p.price, unit: p.u || '', city: citta };
+        return {
+          store_name:   storeName,
+          product_key:  p.name,
+          price:        p.price,
+          unit:         p.u || '',
+          city:         citta,
+          user_id:      userData.userId   || null,
+          is_anonymous: userData.isOspite || !userData.userId
+        };
       });
     if(rows.length > 0){
       _supabase.from('price_reports').insert(rows).then(function(){}).catch(function(){});
     }
   }
+
+  // Sync punti/scontrini a Supabase per utenti registrati
+  pushProfiloASupabase();
 
   aggiornaHome();
   aggiornaProfiloUI();
@@ -1610,7 +1647,9 @@ var userData = {
   nome: '',
   ricette: 0,
   dataIscrizione: '',
-  citta: ''
+  citta: '',
+  userId: null,
+  isOspite: false
 };
 
 function salvaUserData(){
@@ -1623,6 +1662,37 @@ function caricaUserData(){
     if(s){ var d = JSON.parse(s); Object.assign(userData, d); return true; }
   } catch(e){}
   return false;
+}
+
+function sincronizzaProfiloDaSupabase(userId){
+  if(!_supabase) return Promise.resolve();
+  return _supabase.from('user_profiles').select('*').eq('user_id', userId).single()
+    .then(function(r){
+      if(r.data){
+        userData.punti     = r.data.punti     || 0;
+        userData.scontrini = r.data.scontrini || 0;
+        userData.risparmio = parseFloat(r.data.risparmio) || 0;
+        userData.liste     = r.data.liste     || 0;
+        userData.ricette   = r.data.ricette   || 0;
+        if(r.data.citta) userData.citta = r.data.citta;
+        salvaUserData();
+      }
+    }).catch(function(){});
+}
+
+function pushProfiloASupabase(){
+  if(!_supabase || !userData.userId || userData.isOspite) return;
+  _supabase.from('user_profiles').upsert({
+    user_id:    userData.userId,
+    nome:       userData.nome,
+    punti:      userData.punti      || 0,
+    scontrini:  userData.scontrini  || 0,
+    risparmio:  userData.risparmio  || 0,
+    liste:      userData.liste      || 0,
+    ricette:    userData.ricette    || 0,
+    citta:      userData.citta      || '',
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'user_id' }).then(function(){}).catch(function(){});
 }
 
 function aggiornaHome(){
@@ -2287,12 +2357,39 @@ _dbPromise.then(function(){
     s.classList.remove('active');
     s.style.display='none';
   });
-  var startId = (caricaUserData() && userData.nome) ? 's-home' : 's-login';
+
+  caricaUserData();
+
+  // Mostra subito la schermata adeguata (evita flash bianco)
+  var startId = userData.nome ? 's-home' : 's-login';
   var startEl = document.getElementById(startId);
   if(startEl){ startEl.classList.add('active'); startEl.style.display='flex'; }
-  // Aspetta che products.json sia caricato prima di aggiornare la home
+
+  // Verifica sessione Supabase in background
+  if(_supabase){
+    _supabase.auth.getSession().then(function(r){
+      if(r.data && r.data.session){
+        var session = r.data.session;
+        userData.userId   = session.user.id;
+        userData.isOspite = false;
+        if(!userData.nome)
+          userData.nome = (session.user.user_metadata && session.user.user_metadata.nome)
+                          || session.user.email.split('@')[0];
+        sincronizzaProfiloDaSupabase(session.user.id).then(function(){
+          if(!document.getElementById('s-home').classList.contains('active')) go('home');
+          else try{ aggiornaHome(); } catch(e){}
+        });
+      } else if(!userData.nome || (!userData.isOspite && !userData.userId)){
+        go('login');
+      }
+    }).catch(function(){
+      if(!userData.nome) go('login');
+    });
+  }
+
   (_dbPromise || Promise.resolve()).then(function(){
-    if(startId==='s-home'){ try { aggiornaHome(); } catch(e){} }
+    if(document.getElementById('s-home').classList.contains('active'))
+      try{ aggiornaHome(); } catch(e){}
   });
 })();
 
@@ -2372,6 +2469,7 @@ function addItemCasa(nome){
 
 // -- LOGOUT --
 function logout(){
+  if(_supabase) _supabase.auth.signOut().catch(function(){});
   try { localStorage.removeItem(APP_CONFIG.STORAGE_USER); } catch(e){}
   userData.nome           = '';
   userData.punti          = 0;
@@ -2381,6 +2479,8 @@ function logout(){
   userData.dataIscrizione = '';
   userData.citta          = '';
   userData.ricette        = 0;
+  userData.userId         = null;
+  userData.isOspite       = false;
   listaCorrente = [];
   var notepad = document.getElementById('notepad');
   if(notepad) notepad.value = '';
@@ -2410,18 +2510,7 @@ function aggiornaContatori(){
 // ════════════════════════════════════════
 var NOMI_IT = ['Giulia R.','Marco B.','Sofia T.','Luca M.','Anna V.','Francesco P.','Chiara G.','Alessandro N.','Valentina C.','Matteo F.','Elena D.','Davide L.','Martina S.','Andrea B.','Sara C.','Riccardo M.','Federica A.','Simone T.','Elisa R.','Lorenzo G.','Giorgia V.','Emanuele P.','Alice N.','Nicola D.','Beatrice F.','Tommaso A.','Irene M.','Stefano C.','Laura B.','Roberto T.'];
 
-function renderClassifica(){
-  var oggi = new Date();
-  var seed = oggi.getFullYear() * 10000 + (oggi.getMonth()+1) * 100 + oggi.getDate();
-  function sr(s){ var x = Math.sin(s+1) * 10000; return x - Math.floor(x); }
-
-  var utenti = NOMI_IT.map(function(nome, i){
-    return { nome: nome, punti: Math.floor(sr(seed + i*17) * 480 + 20) };
-  });
-  var mioNome = ((userData.nome||'Tu').split(' ')[0]) + ' (tu)';
-  utenti.push({ nome: mioNome, punti: userData.punti||0, isMe: true });
-  utenti.sort(function(a,b){ return b.punti - a.punti; });
-
+function _renderClassificaPodio(utenti){
   // Podio top 3
   var ordine = [utenti[1], utenti[0], utenti[2]]; // sinistra=2°, centro=1°, destra=3°
   var podioHTML = '<div style="display:flex;align-items:flex-end;justify-content:center;gap:6px;margin-bottom:16px;">';
@@ -2448,12 +2537,58 @@ function renderClassifica(){
     var me = u.isMe;
     var medaglia = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
     listaHTML += '<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--surface2);'+(me?'background:rgba(74,222,128,.1);':'')+'\">'
-      + '<div style="width:28px;text-align:center;font-size:'+(i<3?'18':'12')+'px;font-weight:800;color:'+(i<3?'var(--amber)':'var(--text3)');'">'+( i<3 ? medaglia : (i+1))+'</div>'
+      + '<div style="width:28px;text-align:center;font-size:'+(i<3?'18':'12')+'px;font-weight:800;color:'+(i<3?'var(--amber)':'var(--text3)')+'">'+( i<3 ? medaglia : (i+1))+'</div>'
       + '<div style="flex:1;font-size:13px;font-weight:'+(me?'800':'600')+';color:'+(me?'var(--green)':'var(--text)')+'">'+(me?'⭐ ':'')+u.nome+'</div>'
       + '<div style="font-size:13px;font-weight:700;color:var(--amber);">'+u.punti+' pt</div>'
       + '</div>';
   });
   document.getElementById('class-lista').innerHTML = listaHTML;
+}
+
+function renderClassifica(){
+  document.getElementById('class-podio').innerHTML = '';
+  document.getElementById('class-lista').innerHTML =
+    '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">Carico classifica...</div>';
+
+  // Ospiti: solo se stessi + banner registrazione
+  if(userData.isOspite){
+    _renderClassificaPodio([{ nome: 'Tu (ospite)', punti: userData.punti||0, isMe: true }]);
+    document.getElementById('class-lista').insertAdjacentHTML('afterbegin',
+      '<div style="background:rgba(74,222,128,.1);border-radius:12px;padding:14px 16px;margin:10px 0;text-align:center;font-size:13px;">'
+      + '🏆 <strong>Registrati</strong> per salvare i tuoi punti e entrare in classifica!'
+      + '</div>');
+    return;
+  }
+
+  if(!_supabase){
+    _renderClassificaPodio([{ nome: (userData.nome||'Tu')+' (tu)', punti: userData.punti||0, isMe: true }]);
+    return;
+  }
+
+  _supabase.from('user_profiles')
+    .select('user_id, nome, punti')
+    .order('punti', { ascending: false })
+    .limit(50)
+    .then(function(r){
+      if(r.error || !r.data || r.data.length === 0){
+        _renderClassificaPodio([{ nome: (userData.nome||'Tu')+' (tu)', punti: userData.punti||0, isMe: true }]);
+        return;
+      }
+      var utenti = r.data.map(function(u){
+        var isMe = userData.userId
+          ? (u.user_id === userData.userId)
+          : (u.nome === userData.nome);
+        return { nome: isMe ? u.nome+' (tu)' : u.nome, punti: u.punti||0, isMe: isMe };
+      });
+      if(!utenti.some(function(u){ return u.isMe; }) && (userData.punti||0) > 0){
+        utenti.push({ nome: (userData.nome||'Tu')+' (tu)', punti: userData.punti||0, isMe: true });
+        utenti.sort(function(a,b){ return b.punti - a.punti; });
+      }
+      _renderClassificaPodio(utenti);
+    })
+    .catch(function(){
+      _renderClassificaPodio([{ nome: (userData.nome||'Tu')+' (tu)', punti: userData.punti||0, isMe: true }]);
+    });
 }
 
 // ════════════════════════════════════════
