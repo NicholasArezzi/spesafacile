@@ -490,6 +490,20 @@ body{
   </div>
 </div>
 
+<div class="screen" id="s-nuova-password">
+  <div class="splash">
+    <div class="orb1"></div><div class="orb2"></div>
+    <div style="font-size:50px;position:relative;z-index:1;">🔐</div>
+    <div class="splash-logo">Nuova<em> Password</em></div>
+    <div class="acard">
+      <div class="atitle">Scegli la tua nuova password</div>
+      <input class="ainput" id="nuova-pass1" type="password" placeholder="Nuova password" autocomplete="new-password">
+      <input class="ainput" id="nuova-pass2" type="password" placeholder="Ripeti la password" autocomplete="new-password" style="margin-top:8px;">
+      <button class="abtn" onclick="aggiornaPassword()">Salva password →</button>
+    </div>
+  </div>
+</div>
+
 <div class="screen" id="s-register">
   <div class="splash">
     <div class="orb1"></div><div class="orb2"></div>
@@ -2512,6 +2526,21 @@ _dbPromise.then(function(){
 
   // Verifica sessione Supabase in background
   if(_supabase){
+    _supabase.auth.onAuthStateChange(function(event, session){
+      if(event === 'PASSWORD_RECOVERY'){
+        go('nuova-password');
+      } else if(event === 'SIGNED_IN' && session){
+        userData.userId   = session.user.id;
+        userData.isOspite = false;
+        if(!userData.nome)
+          userData.nome = (session.user.user_metadata && session.user.user_metadata.nome)
+                          || session.user.email.split('@')[0];
+        sincronizzaProfiloDaSupabase(session.user.id).then(function(){
+          go('home');
+        });
+      }
+    });
+
     _supabase.auth.getSession().then(function(r){
       if(r.data && r.data.session){
         var session = r.data.session;
@@ -2822,6 +2851,21 @@ async function richiestaResetPassword(){
   if(r.error){ showToast('Errore: ' + r.error.message); return; }
   showToast('Email inviata! Controlla la posta \uD83D\uDCEC');
   setTimeout(function(){ go('login'); }, 2500);
+}
+
+async function aggiornaPassword(){
+  var p1 = (document.getElementById('nuova-pass1').value || '').trim();
+  var p2 = (document.getElementById('nuova-pass2').value || '').trim();
+  if(!p1 || p1.length < 6){ showToast('La password deve essere di almeno 6 caratteri'); return; }
+  if(p1 !== p2){ showToast('Le password non coincidono'); return; }
+  if(!_supabase){ showToast('Servizio non disponibile'); return; }
+  var btn = document.querySelector('#s-nuova-password .abtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Salvataggio...'; }
+  var r = await _supabase.auth.updateUser({ password: p1 });
+  if(btn){ btn.disabled = false; btn.textContent = 'Salva password \u2192'; }
+  if(r.error){ showToast('Errore: ' + r.error.message); return; }
+  showToast('Password aggiornata! Bentornato/a \uD83C\uDF89');
+  setTimeout(function(){ go('home'); }, 1500);
 }
 
 function confermaEliminaAccount(){
