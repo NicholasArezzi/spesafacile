@@ -45,8 +45,8 @@ const APP_CONFIG = {
   BADGE_RISPARMIO:   50,
 
   // Supabase (inserire le credenziali del tuo progetto)
-  SUPABASE_URL:      'https://nzrelznyvzhkhbplihpg.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_GHu5VEA5YptIr_K74jw3vw_BdDrASoO',
+  SUPABASE_URL:      'https://nmwlrfnuydceoylhnite.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5td2xyZm51eWRjZW95bGhuaXRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMjk4NjAsImV4cCI6MjA4ODgwNTg2MH0.2cyjvtAB4taMmu3GEFZt6fMLRh2FB1FRgmVGM29b_QY',
 
   // LocalStorage
   STORAGE_USER: 'sf_user',
