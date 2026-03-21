@@ -2185,7 +2185,9 @@ function switchTab(btn,tabId){
   document.getElementById('t-prod').style.display=tabId==='t-prod'?'block':'none';
 }
 function updateCount(){
-  var lines=document.getElementById('notepad').value.split('\n').filter(function(l){return l.trim().length>0;});
+  var notepad=document.getElementById('notepad');
+  if(!notepad) return;
+  var lines=notepad.value.split('\n').filter(function(l){return l.trim().length>0;});
   var n=lines.length;
   var el1=document.getElementById('nota-count');
   var el2=document.getElementById('lista-count');
@@ -2233,6 +2235,9 @@ function addItem(item){
   ta.value=v+(v.length>0&&!v.endsWith('\n')?'\n':'')+item;
   updateCount();
   showToast(item+' aggiunto!');
+}
+function _escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function showToast(msg){
   var existing=document.querySelector('.toast');
@@ -2360,7 +2365,7 @@ function renderIngredienti() {
     var qty = ing.q ? (Math.round(ing.q * mult * 10) / 10) + (ing.u ? ' ' + ing.u : '') : '';
     out += '<div class="ingr-row" onclick="toggleIngr(this.querySelector(\'.ingr-check\'))">';
     out += '<div class="ingr-check"></div>';
-    out += '<span style="flex:1;font-size:13px;">' + ing.n + '</span>';
+    out += '<span style="flex:1;font-size:13px;">' + _escHtml(ing.n) + '</span>';
     if (qty) out += '<span style="font-size:12px;font-weight:700;color:var(--green);">' + qty + '</span>';
     out += '</div>';
   }
@@ -2374,7 +2379,7 @@ function renderPrep() {
   el.innerHTML = (ricettaAperta.prep || []).map(function(step, i) {
     return '<div style="display:flex;gap:10px;margin-bottom:12px;">'
       + '<div style="width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">' + (i+1) + '</div>'
-      + '<div style="font-size:13px;line-height:1.5;color:var(--text);padding-top:3px;">' + step + '</div>'
+      + '<div style="font-size:13px;line-height:1.5;color:var(--text);padding-top:3px;">' + _escHtml(step) + '</div>'
       + '</div>';
   }).join('');
 }
@@ -2734,7 +2739,7 @@ function _renderClassificaPodio(utenti){
     var colBg = pos===1 ? 'var(--amber)' : pos===2 ? '#9CA3AF' : '#B45309';
     if(u.isMe) colBg = 'var(--green)';
     podioHTML += '<div style="flex:1;max-width:110px;text-align:center;">'
-      + '<div style="font-size:11px;font-weight:700;color:'+(u.isMe?'var(--green)':'var(--text2)')+';margin-bottom:4px;word-break:break-all;">'+u.nome+'</div>'
+      + '<div style="font-size:11px;font-weight:700;color:'+(u.isMe?'var(--green)':'var(--text2)')+';margin-bottom:4px;word-break:break-all;">'+_escHtml(u.nome)+'</div>'
       + '<div style="font-size:11px;font-weight:800;color:var(--text3);margin-bottom:4px;">'+u.punti+' pt</div>'
       + '<div style="background:'+colBg+';border-radius:8px 8px 0 0;height:'+altezza+';display:flex;align-items:flex-start;justify-content:center;padding-top:8px;">'
       + '<span style="font-size:22px;">'+medal+'</span></div>'
@@ -2750,7 +2755,7 @@ function _renderClassificaPodio(utenti){
     var medaglia = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
     listaHTML += '<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--surface2);'+(me?'background:rgba(74,222,128,.1);':'')+'\">'
       + '<div style="width:28px;text-align:center;font-size:'+(i<3?'18':'12')+'px;font-weight:800;color:'+(i<3?'var(--amber)':'var(--text3)')+'">'+( i<3 ? medaglia : (i+1))+'</div>'
-      + '<div style="flex:1;font-size:13px;font-weight:'+(me?'800':'600')+';color:'+(me?'var(--green)':'var(--text)')+'">'+(me?'⭐ ':'')+u.nome+'</div>'
+      + '<div style="flex:1;font-size:13px;font-weight:'+(me?'800':'600')+';color:'+(me?'var(--green)':'var(--text)')+'">'+(me?'⭐ ':'')+_escHtml(u.nome)+'</div>'
       + '<div style="font-size:13px;font-weight:700;color:var(--amber);">'+u.punti+' pt</div>'
       + '</div>';
   });
@@ -2881,14 +2886,20 @@ async function richiestaResetPassword(){
   var btns = document.querySelectorAll('#s-reset-password .abtn');
   btns.forEach(function(b){ b.disabled = true; });
   btns[0].textContent = 'Invio in corso...';
-  var r = await _supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + window.location.pathname
-  });
-  btns.forEach(function(b){ b.disabled = false; });
-  btns[0].textContent = 'Invia link \u2192';
-  if(r.error){ showToast('Errore: ' + r.error.message); return; }
-  showToast('Email inviata! Controlla la posta \uD83D\uDCEC');
-  setTimeout(function(){ go('login'); }, 2500);
+  try {
+    var r = await _supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    btns.forEach(function(b){ b.disabled = false; });
+    btns[0].textContent = 'Invia link \u2192';
+    if(r.error){ showToast('Errore: ' + r.error.message); return; }
+    showToast('Email inviata! Controlla la posta \uD83D\uDCEC');
+    setTimeout(function(){ go('login'); }, 2500);
+  } catch(e) {
+    btns.forEach(function(b){ b.disabled = false; });
+    btns[0].textContent = 'Invia link \u2192';
+    showToast('Errore di connessione. Riprova.');
+  }
 }
 
 async function aggiornaPassword(){
@@ -2899,12 +2910,17 @@ async function aggiornaPassword(){
   if(!_supabase){ showToast('Servizio non disponibile'); return; }
   var btn = document.querySelector('#s-nuova-password .abtn');
   if(btn){ btn.disabled = true; btn.textContent = 'Salvataggio...'; }
-  var r = await _supabase.auth.updateUser({ password: p1 });
-  if(btn){ btn.disabled = false; btn.textContent = 'Salva password \u2192'; }
-  if(r.error){ showToast('Errore: ' + r.error.message); return; }
-  _inRecoveryMode = false;
-  showToast('Password aggiornata! Bentornato/a \uD83C\uDF89');
-  setTimeout(function(){ go('home'); }, 1500);
+  try {
+    var r = await _supabase.auth.updateUser({ password: p1 });
+    if(btn){ btn.disabled = false; btn.textContent = 'Salva password \u2192'; }
+    if(r.error){ showToast('Errore: ' + r.error.message); return; }
+    _inRecoveryMode = false;
+    showToast('Password aggiornata! Bentornato/a \uD83C\uDF89');
+    setTimeout(function(){ go('home'); }, 1500);
+  } catch(e) {
+    if(btn){ btn.disabled = false; btn.textContent = 'Salva password \u2192'; }
+    showToast('Errore di connessione. Riprova.');
+  }
 }
 
 function confermaEliminaAccount(){
@@ -2915,10 +2931,14 @@ function confermaEliminaAccount(){
 async function eliminaAccount(){
   if(!_supabase || !userData.userId){ showToast('Nessun account registrato da eliminare'); return; }
   showToast('Eliminazione in corso...');
-  var r = await _supabase.rpc('delete_user');
-  if(r.error){ showToast('Errore durante l\'eliminazione. Contatta il supporto.'); return; }
-  logout();
-  showToast('Account eliminato. Ci dispiace vederti andar via.');
+  try {
+    var r = await _supabase.rpc('delete_user');
+    if(r.error){ showToast('Errore durante l\'eliminazione. Contatta il supporto.'); return; }
+    logout();
+    showToast('Account eliminato. Ci dispiace vederti andar via.');
+  } catch(e) {
+    showToast('Errore di connessione. Riprova.');
+  }
 }
 
 function hasAffiliate(nomeNegozio){
