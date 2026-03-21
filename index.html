@@ -1851,7 +1851,7 @@ function aggiornaConfrontoConLista(prodotti){
   if(banner) banner.textContent = prodotti.length + ' prodott' + (prodotti.length===1?'o':'i') + ' nella tua lista';
   if(!tprod) return;
 
-  var totali = [0,0,0,0,0];
+  var totali = new Array(STORES.length).fill(0);
   var out = '';
 
   for(var p=0; p<prodotti.length; p++){
@@ -1892,7 +1892,7 @@ function aggiornaConfrontoConLista(prodotti){
     }
     var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * confez).toFixed(2)); });
 
-    for(var s=0; s<5; s++) totali[s] += prezzi[s];
+    for(var s=0; s<STORES.length; s++) totali[s] += prezzi[s];
 
     var minP = Math.min.apply(null, prezzi);
     var bestIdx = prezzi.indexOf(minP);
@@ -1912,7 +1912,7 @@ function aggiornaConfrontoConLista(prodotti){
     out += '</div></div>';
     // Mostra tutti i prezzi
     out += '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">';
-    for(var s=0; s<5; s++){
+    for(var s=0; s<STORES.length; s++){
       var isBest = (s === bestIdx);
       out += '<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:' +
         (isBest ? 'var(--green)' : 'var(--surface2)') +
