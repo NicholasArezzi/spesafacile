@@ -1807,7 +1807,7 @@ function parseQtyProduct(line){
   var qty = 1, unit = '', name = s;
   var m;
   // "300 g Spaghetti" / "1.5 kg Farina" / "200 ml Panna"
-  m = s.match(/^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l|cl|dl|pz|pezzi|fette|cucchiai?|cucchiaini?)\.?\s+(.+)$/i);
+  m = s.match(/^(\d+(?:[.,]\d+)?)\s*(g|kg|etti?|hg|ml|l|cl|dl|pz|pezzi|fette|cucchiai?|cucchiaini?)\.?\s+(.+)$/i);
   if(m){ qty = parseFloat(m[1].replace(',','.')); unit = m[2].toLowerCase(); name = m[3].trim(); return {qty:qty,unit:unit,name:name}; }
   // "10x uova" / "10 x uova" / "10 uova"
   m = s.match(/^(\d+)\s*[xX]?\s+(.+)$/);
@@ -1846,7 +1846,7 @@ function aggiornaConfrontoConLista(prodotti){
   var totItems = prodotti.length;
   var nProd = prodotti.length;
   if(chipEl)    chipEl.textContent      = totItems + (totItems===1?' articolo':' articoli');
-  if(ssubEl)    ssubEl.textContent      = nProd + ' prodott' + (nProd===1?'o':'i') + ' · 5 supermercati analizzati';
+  if(ssubEl)    ssubEl.textContent      = nProd + ' prodott' + (nProd===1?'o':'i') + ' · ' + STORES.length + ' supermercati analizzati';
 
   var tprod = document.getElementById('t-prod-content');
   var banner = document.getElementById('lista-prodotti-count');
@@ -1867,29 +1867,33 @@ function aggiornaConfrontoConLista(prodotti){
     var unita  = entry ? entry.u : '';
     var isReal = !!entry;
     // Converti qty+unit in numero di confezioni rispetto al riferimento DB.
-    // Se è presente un'unità di misura il default sicuro è 1 confezione;
-    // il blocco qui sotto lo sovrascrive con la conversione esatta quando possibile.
-    var confez = unit ? 1 : qty;
+    var countUnits = ['pz','pezzi','fette','cucchiai','cucchiaio','cucchiaini','cucchiaino'];
+    // Per unità di peso/volume: default 1 (la conversione sotto sovrascrive).
+    // Per unità di conteggio (pz, fette…) o nessuna unità: default qty.
+    var confez = (unit && countUnits.indexOf(unit.toLowerCase()) === -1) ? 1 : qty;
     if(unit && entry && unita){
       var inputBase = qty;
-      if(unit==='kg') inputBase = qty*1000;
-      else if(unit==='l') inputBase = qty*1000;
-      else if(unit==='cl') inputBase = qty*10;
-      else if(unit==='dl') inputBase = qty*100;
+      if(unit==='kg')                                     inputBase = qty*1000;
+      else if(unit==='l')                                 inputBase = qty*1000;
+      else if(unit==='cl')                                inputBase = qty*10;
+      else if(unit==='dl')                                inputBase = qty*100;
+      else if(unit==='etti'||unit==='etto'||unit==='hg')  inputBase = qty*100;
       // inputBase ora in g (per solidi) o ml (per liquidi)
-      var dbRef = parseFloat(unita) || 1;
+      var dbRef  = parseFloat(unita) || 1;
       var dbUnit = unita.replace(/[\d.,]/g,'').trim().toLowerCase();
       var dbBase = dbRef;
       if(dbUnit==='kg') dbBase = dbRef*1000;
       else if(dbUnit==='l') dbBase = dbRef*1000;
       // Converti solo se le unità sono dello stesso tipo (evita ml÷pz, g÷l ecc.)
-      var volUnits = ['ml','l','cl','dl'];
-      var wtUnits  = ['g','kg'];
-      var inputIsVol    = volUnits.indexOf(unit)   >= 0;
-      var inputIsWeight = wtUnits.indexOf(unit)    >= 0;
-      var dbIsVol       = volUnits.indexOf(dbUnit) >= 0;
-      var dbIsWeight    = wtUnits.indexOf(dbUnit)  >= 0;
-      var compatible    = (inputIsVol && dbIsVol) || (inputIsWeight && dbIsWeight);
+      var volUnits      = ['ml','l','cl','dl'];
+      var wtUnits       = ['g','kg','etti','etto','hg'];
+      var inputIsVol    = volUnits.indexOf(unit)     >= 0;
+      var inputIsWeight = wtUnits.indexOf(unit)      >= 0;
+      var dbIsVol       = volUnits.indexOf(dbUnit)   >= 0;
+      var dbIsWeight    = wtUnits.indexOf(dbUnit)    >= 0;
+      var inputIsCount  = countUnits.indexOf(unit)   >= 0;
+      var dbIsCount     = countUnits.indexOf(dbUnit) >= 0;
+      var compatible    = (inputIsVol && dbIsVol) || (inputIsWeight && dbIsWeight) || (inputIsCount && dbIsCount);
       if(compatible && dbBase > 0) confez = Math.max(0.1, inputBase / dbBase);
     }
     var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * confez).toFixed(2)); });
