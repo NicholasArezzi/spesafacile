@@ -2525,11 +2525,14 @@ _dbPromise.then(function(){
   if(startEl){ startEl.classList.add('active'); startEl.style.display='flex'; }
 
   // Verifica sessione Supabase in background
+  var _inRecoveryMode = false;
   if(_supabase){
     _supabase.auth.onAuthStateChange(function(event, session){
       if(event === 'PASSWORD_RECOVERY'){
+        _inRecoveryMode = true;
         go('nuova-password');
       } else if(event === 'SIGNED_IN' && session){
+        if(_inRecoveryMode) return;
         userData.userId   = session.user.id;
         userData.isOspite = false;
         if(!userData.nome)
@@ -2542,6 +2545,7 @@ _dbPromise.then(function(){
     });
 
     _supabase.auth.getSession().then(function(r){
+      if(_inRecoveryMode) return;
       if(r.data && r.data.session){
         var session = r.data.session;
         userData.userId   = session.user.id;
@@ -2864,6 +2868,7 @@ async function aggiornaPassword(){
   var r = await _supabase.auth.updateUser({ password: p1 });
   if(btn){ btn.disabled = false; btn.textContent = 'Salva password \u2192'; }
   if(r.error){ showToast('Errore: ' + r.error.message); return; }
+  _inRecoveryMode = false;
   showToast('Password aggiornata! Bentornato/a \uD83C\uDF89');
   setTimeout(function(){ go('home'); }, 1500);
 }
