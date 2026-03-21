@@ -46,7 +46,7 @@ const APP_CONFIG = {
 
   // Supabase (inserire le credenziali del tuo progetto)
   SUPABASE_URL:      'https://nzrelznyvzhkhbplihpg.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_GHu5VEA5YptIr_K74jw3vw_BdDrASoO',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56cmVsem55dnpoa2hicGxpaHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMzE2MzUsImV4cCI6MjA4ODgwNzYzNX0.R1g2Pjqxlpv9d08OZ5eAzjd5zk_WxbwbDANxLOS-nRk',
 
   // LocalStorage
   STORAGE_USER: 'sf_user',
@@ -54,4 +54,13 @@ const APP_CONFIG = {
   // Timing UI (ms)
   MAP_INVALIDATE_DELAY: 200,
   MAP_VIEW_DELAY:       150,
+
+  // Affiliazioni supermercati online
+  // Sostituire i link con quelli ottenuti dai network (Awin, Tradedoubler, ecc.)
+  // Lasciare vuoto un negozio per nascondere il pulsante "Ordina Online"
+  AFFILIATES: {
+    'esselunga': 'https://www.esselunga.it/?ref=spesafacile',
+    'conad':     'https://spesa.conad.it/?utm_source=spesafacile&utm_medium=affiliate',
+    'carrefour': 'https://www.carrefour.it/?awc=SOSTITUISCI_CON_ID_AWIN',
+  },
 };

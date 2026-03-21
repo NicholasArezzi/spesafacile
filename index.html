@@ -191,6 +191,9 @@ body{
 .abtn{width:100%;background:linear-gradient(135deg,#1A8C4E,#22A85F);color:#fff;border-radius:100px;padding:14px;font-size:15px;font-weight:700;font-family:'Syne',sans-serif;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(26,140,78,.4);}
 .atog{font-size:13px;color:rgba(255,255,255,.45);text-align:center;margin-top:12px;cursor:pointer;}
 .atog em{color:#4ADE80;font-weight:600;font-style:normal;}
+.ainput-check{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:rgba(255,255,255,.7);margin-bottom:10px;cursor:pointer;line-height:1.4;}
+.ainput-check input[type=checkbox]{width:18px;height:18px;flex-shrink:0;margin-top:1px;accent-color:#22A85F;cursor:pointer;}
+.ainput-check em{color:#4ADE80;font-weight:600;font-style:normal;}
 .receipt-zone{border:2px dashed var(--border);border-radius:var(--r);padding:36px 20px;text-align:center;background:var(--surface2);cursor:pointer;transition:all .2s;}
 .receipt-zone:hover{border-color:var(--green);background:var(--green-bg);}
 
@@ -453,6 +456,40 @@ body{
   </div>
 </div>
 
+<!-- ══ VERIFICA EMAIL ══ -->
+<div class="screen" id="s-email-verifica">
+  <div class="splash">
+    <div class="orb1"></div><div class="orb2"></div>
+    <div style="font-size:60px;position:relative;z-index:1;">📬</div>
+    <div class="splash-logo">Controlla<em> l'email</em></div>
+    <div style="font-size:15px;color:rgba(255,255,255,.7);text-align:center;line-height:1.6;max-width:280px;position:relative;z-index:1;margin-bottom:12px;">
+      Ti abbiamo inviato un link di conferma.<br>Clicca il link nell'email per attivare il tuo account.
+    </div>
+    <div class="acard">
+      <button class="abtn" onclick="go('login')">Torna al login →</button>
+      <div class="atog" style="margin-top:12px;">Non hai ricevuto l'email?
+        <em onclick="rinviaEmailVerifica()" style="cursor:pointer;">Reinvia</em>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RESET PASSWORD ══ -->
+<div class="screen" id="s-reset-password">
+  <div class="splash">
+    <div class="orb1"></div><div class="orb2"></div>
+    <div style="font-size:50px;position:relative;z-index:1;">🔑</div>
+    <div class="splash-logo">Reset<em> Password</em></div>
+    <div style="font-size:14px;color:rgba(255,255,255,.6);text-align:center;max-width:260px;position:relative;z-index:1;margin-bottom:8px;">Ti inviamo un link via email per reimpostare la password.</div>
+    <div class="acard">
+      <div class="atitle">Inserisci la tua email</div>
+      <input class="ainput" id="reset-email" type="email" placeholder="Email" autocomplete="email">
+      <button class="abtn" onclick="richiestaResetPassword()">Invia link →</button>
+      <button class="abtn" onclick="go('login')" style="background:transparent;border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);margin-top:8px;">← Torna al login</button>
+    </div>
+  </div>
+</div>
+
 <div class="screen" id="s-register">
   <div class="splash">
     <div class="orb1"></div><div class="orb2"></div>
@@ -465,6 +502,10 @@ body{
       <input class="ainput" id="reg-email" type="email" placeholder="Email o username">
       <input class="ainput" id="reg-pass" type="password" placeholder="Scegli una password">
       <input class="ainput" id="reg-pass2" type="password" placeholder="Ripeti la password">
+      <label class="ainput-check">
+        <input type="checkbox" id="reg-consenso">
+        <span>Accetto la <em onclick="event.stopPropagation();go('privacy')" style="cursor:pointer;text-decoration:underline;">Privacy Policy</em> e i <em onclick="event.stopPropagation();go('termini')" style="cursor:pointer;text-decoration:underline;">Termini di Servizio</em></span>
+      </label>
       <button class="abtn" onclick="registrati()">Crea account</button>
       <div class="atog">Hai gia un account? <em onclick="go('login')" style="cursor:pointer;text-decoration:underline;">Accedi</em></div>
     </div>
@@ -488,6 +529,7 @@ body{
       <div class="atitle">Accedi al tuo account</div>
       <input class="ainput" id="login-email" type="email" placeholder="Email" autocomplete="email">
       <input class="ainput" id="login-pass" type="password" placeholder="Password" autocomplete="current-password">
+      <div class="atog" style="text-align:right;margin-bottom:8px;margin-top:-4px;"><em onclick="go('reset-password')" style="cursor:pointer;">Password dimenticata?</em></div>
       <button class="abtn" onclick="tentaLogin()">Entra &rarr;</button>
       <button class="abtn" onclick="entraComeOspite()" style="background:transparent;border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);margin-top:6px;">Prova senza registrarti</button>
       <div class="atog">Non hai un account? <em onclick="go('register')" style="cursor:pointer;">Registrati gratis</em></div>
@@ -1047,7 +1089,12 @@ body{
     <button class="btn-g" style="margin-bottom:10px;" onclick="go('scontrino')">🧾 Carica scontrino</button>
     <button onclick="go('classifica')" style="width:100%;max-width:340px;margin:0 auto 10px;display:block;padding:14px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🏆 Vedi classifica Milano</button>
     <button onclick="logout()" style="width:100%;max-width:340px;margin:6px auto 0;display:block;padding:14px;background:transparent;border:2px solid var(--red);color:var(--red);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🚪 Esci dall'account</button>
-    
+
+    <div style="margin:20px 0 8px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;text-align:left;max-width:340px;margin-left:auto;margin-right:auto;">Informazioni legali</div>
+    <button onclick="go('privacy')" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">🔒 Privacy Policy</button>
+    <button onclick="go('termini')" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">📋 Termini di Servizio</button>
+    <button onclick="confermaEliminaAccount()" style="width:100%;max-width:340px;margin:8px auto 0;display:block;padding:13px;background:transparent;border:1.5px solid var(--red);color:var(--red);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">🗑️ Elimina account e dati</button>
+
   </div></div>
     
   <div class="bnav">
@@ -1060,6 +1107,97 @@ body{
 </div>
 
 
+
+<!-- ══ PRIVACY POLICY ══ -->
+<div class="screen" id="s-privacy">
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar">
+    <button onclick="go('profilo')" style="background:none;border:none;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;padding:6px 10px 6px 0;">← Indietro</button>
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px;">Privacy Policy</div>
+    <div style="width:70px;"></div>
+  </div>
+  <div class="scroll-area"><div class="page">
+    <div class="card"><div class="cb2" style="font-size:14px;line-height:1.6;color:var(--text);">
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Titolare del trattamento</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">SpesaFacile — per contatti privacy: <em style="color:var(--green);">[inserire email]</em></p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Dati raccolti</h3>
+      <ul style="margin:0 0 14px;padding-left:18px;color:var(--text2);">
+        <li>Email e nome (solo se ci si registra, volontario)</li>
+        <li>Prezzi dei prodotti inseriti tramite scontrini fotografati</li>
+        <li>Posizione geografica approssimativa (solo se esplicitamente autorizzata)</li>
+      </ul>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Finalità del trattamento</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">Erogazione del servizio di comparazione prezzi, gestione classifica utenti, aggiornamento collaborativo del database prezzi pubblico.</p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Base giuridica</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">Consenso esplicito dell'utente al momento della registrazione (Art. 6 lett. a GDPR).</p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Conservazione dei dati</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">I dati personali sono conservati fino alla cancellazione dell'account. L'utente può eliminare il proprio account in qualsiasi momento dalla schermata Profilo → "Elimina account e dati".</p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Diritti dell'utente (GDPR)</h3>
+      <p style="margin:0 0 6px;color:var(--text2);">Hai diritto di:</p>
+      <ul style="margin:0 0 14px;padding-left:18px;color:var(--text2);">
+        <li>Accesso ai tuoi dati (Art. 15)</li>
+        <li>Rettifica dei dati inesatti (Art. 16)</li>
+        <li>Cancellazione ("diritto all'oblio", Art. 17) — disponibile in-app</li>
+        <li>Portabilità dei dati (Art. 20)</li>
+        <li>Opposizione al trattamento (Art. 21)</li>
+      </ul>
+      <p style="margin:0 0 14px;color:var(--text2);">Per esercitare questi diritti: <em style="color:var(--green);">[inserire email contatto]</em></p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Terze parti coinvolte</h3>
+      <ul style="margin:0 0 14px;padding-left:18px;color:var(--text2);">
+        <li><strong>Supabase</strong> — hosting dati, server in UE</li>
+        <li><strong>OpenStreetMap / Nominatim</strong> — mappe, nessun dato personale trasmesso</li>
+        <li><strong>OCR.space</strong> — elaborazione immagini scontrini, nessuna associazione a utenti</li>
+      </ul>
+
+      <p style="font-size:11px;color:var(--text3);margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">Ultimo aggiornamento: marzo 2026 · Versione 1.0</p>
+    </div></div>
+  </div></div>
+</div>
+
+<!-- ══ TERMINI DI SERVIZIO ══ -->
+<div class="screen" id="s-termini">
+  <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
+  <div class="navbar">
+    <button onclick="go('profilo')" style="background:none;border:none;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;padding:6px 10px 6px 0;">← Indietro</button>
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px;">Termini di Servizio</div>
+    <div style="width:70px;"></div>
+  </div>
+  <div class="scroll-area"><div class="page">
+    <div class="card"><div class="cb2" style="font-size:14px;line-height:1.6;color:var(--text);">
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Accettazione</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">Usando SpesaFacile accetti i presenti Termini di Servizio. Se non li accetti, non utilizzare l'app.</p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Età minima</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">L'app è destinata a utenti di almeno 16 anni, in conformità al GDPR (Art. 8).</p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Uso consentito</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">SpesaFacile è un servizio gratuito per uso personale non commerciale. È vietato usare l'app per raccogliere dati in modo automatico (scraping), per scopi commerciali o per attività illecite.</p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Accuratezza dei prezzi</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">I prezzi mostrati sono indicativi e basati su dati inviati dalla community. SpesaFacile non garantisce l'accuratezza o l'aggiornamento dei prezzi. I prezzi reali potrebbero variare.</p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Contenuto utente</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">Gli scontrini e i prezzi caricati dagli utenti diventano parte del database condiviso in forma anonima. Caricando dati, l'utente conferma di avere il diritto di farlo e che il contenuto non viola diritti di terzi.</p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Sospensione del servizio</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">Ci riserviamo il diritto di sospendere o terminare account in caso di utilizzo abusivo, violazione dei presenti termini o comportamento fraudolento.</p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Limitazione di responsabilità</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">SpesaFacile è fornito "così com'è" senza garanzie di alcun tipo. Non siamo responsabili per danni derivanti dall'uso o dall'impossibilità di usare il servizio.</p>
+
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin:0 0 6px;">Legge applicabile</h3>
+      <p style="margin:0 0 14px;color:var(--text2);">I presenti Termini sono regolati dalla legge italiana e dal diritto dell'Unione Europea.</p>
+
+      <p style="font-size:11px;color:var(--text3);margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">Ultimo aggiornamento: marzo 2026 · Versione 1.0</p>
+    </div></div>
+  </div></div>
+</div>
 
 <!-- ══ CLASSIFICA ══ -->
 <div class="screen" id="s-classifica">
@@ -1182,11 +1320,13 @@ async function registrati(){
   var email = (document.getElementById('reg-email').value || '').trim();
   var pass  = document.getElementById('reg-pass').value   || '';
   var pass2 = document.getElementById('reg-pass2').value  || '';
-  if(!nome)                { showToast('Inserisci il tuo nome'); return; }
-  if(!email.includes('@')) { showToast('Inserisci una email valida'); return; }
-  if(pass.length < 6)      { showToast('La password deve avere almeno 6 caratteri'); return; }
-  if(pass !== pass2)       { showToast('Le password non coincidono'); return; }
-  if(!_supabase)           { showToast('Servizio non disponibile'); return; }
+  var consenso = document.getElementById('reg-consenso');
+  if(!nome)                          { showToast('Inserisci il tuo nome'); return; }
+  if(!email.includes('@'))           { showToast('Inserisci una email valida'); return; }
+  if(pass.length < 6)                { showToast('La password deve avere almeno 6 caratteri'); return; }
+  if(pass !== pass2)                 { showToast('Le password non coincidono'); return; }
+  if(!consenso || !consenso.checked) { showToast('Accetta la Privacy Policy per continuare'); return; }
+  if(!_supabase)                     { showToast('Servizio non disponibile'); return; }
 
   var btn = document.querySelector('#s-register .abtn');
   if(btn){ btn.disabled = true; btn.textContent = 'Creazione account...'; }
@@ -1212,8 +1352,8 @@ async function registrati(){
 
   rilevaCitta();
   salvaUserData();
-  showToast('Benvenuto, ' + nome + '! \uD83C\uDF89');
-  setTimeout(function(){ go('home'); }, 800);
+  showToast('Controlla la tua email per attivare l\'account 📬');
+  setTimeout(function(){ go('email-verifica'); }, 800);
 }
 
 </script>
@@ -1984,6 +2124,11 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     }
     out += '<span style="font-size:11px;color:var(--text2);">su ' + nProdotti + ' prodott' + (nProdotti===1?'o':'i') + '</span>';
     out += '</div>';
+    if(isWinner && hasAffiliate(r.store)){
+      out += '<div style="padding:10px 14px 4px;">';
+      out += '<button class="abtn" style="width:100%;background:var(--green);font-size:13px;padding:10px;border-radius:12px;" onclick="event.stopPropagation();apriNegozioOnline(\'' + r.store + '\')">🛒 Ordina Online</button>';
+      out += '</div>';
+    }
     out += '</div>';
   }
   container.innerHTML = out;
@@ -2652,6 +2797,66 @@ function generaOfferte(){
   return offerte;
 }
 
+// ── GDPR / Auth helpers ──────────────────────────────────────────────────
+
+async function rinviaEmailVerifica(){
+  var email = (document.getElementById('reg-email').value || '').trim();
+  if(!email || !_supabase){ showToast('Email non disponibile, riprova la registrazione'); return; }
+  var r = await _supabase.auth.resend({ type: 'signup', email: email });
+  if(r.error){ showToast('Errore: ' + r.error.message); return; }
+  showToast('Email inviata di nuovo!');
+}
+
+async function richiestaResetPassword(){
+  var email = (document.getElementById('reset-email').value || '').trim();
+  if(!email){ showToast('Inserisci la tua email'); return; }
+  if(!_supabase){ showToast('Servizio non disponibile'); return; }
+  var btns = document.querySelectorAll('#s-reset-password .abtn');
+  btns.forEach(function(b){ b.disabled = true; });
+  btns[0].textContent = 'Invio in corso...';
+  var r = await _supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname
+  });
+  btns.forEach(function(b){ b.disabled = false; });
+  btns[0].textContent = 'Invia link \u2192';
+  if(r.error){ showToast('Errore: ' + r.error.message); return; }
+  showToast('Email inviata! Controlla la posta \uD83D\uDCEC');
+  setTimeout(function(){ go('login'); }, 2500);
+}
+
+function confermaEliminaAccount(){
+  if(!confirm('Sei sicuro?\n\nTutti i tuoi dati (profilo, punti, scontrini) verranno eliminati permanentemente.\n\nQuesta azione non è reversibile.')) return;
+  eliminaAccount();
+}
+
+async function eliminaAccount(){
+  if(!_supabase || !userData.userId){ showToast('Nessun account registrato da eliminare'); return; }
+  showToast('Eliminazione in corso...');
+  var r = await _supabase.rpc('delete_user');
+  if(r.error){ showToast('Errore durante l\'eliminazione. Contatta il supporto.'); return; }
+  logout();
+  showToast('Account eliminato. Ci dispiace vederti andar via.');
+}
+
+function hasAffiliate(nomeNegozio){
+  if(!nomeNegozio || !APP_CONFIG.AFFILIATES) return false;
+  var key = nomeNegozio.toLowerCase();
+  for(var k in APP_CONFIG.AFFILIATES){ if(key.includes(k)) return true; }
+  return false;
+}
+
+function apriNegozioOnline(nomeNegozio){
+  if(!nomeNegozio) return;
+  var key = nomeNegozio.toLowerCase();
+  var url = null;
+  for(var k in APP_CONFIG.AFFILIATES){
+    if(key.includes(k)){ url = APP_CONFIG.AFFILIATES[k]; break; }
+  }
+  if(!url){ showToast('Ordine online non disponibile'); return; }
+  window.open(url, '_blank', 'noopener');
+  showToast('Apertura negozio online... 🛒');
+}
+
 function renderOfferte(){
   var tutte = generaOfferte();
   var filtrate = tutte.filter(function(o){
@@ -2671,6 +2876,7 @@ function renderOfferte(){
       + '<div style="display:inline-block;background:#FEF3C7;color:#92400E;font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;margin-top:2px;">-'+o.sconto+'%</div>'
       + '</div>'
       + '</div>'
+      + (hasAffiliate(o.store) ? '<div style="padding:0 14px 10px;"><button class="abtn" style="width:100%;background:var(--green);font-size:12px;padding:8px;border-radius:10px;" onclick="apriNegozioOnline(\'' + o.store + '\')">🛒 Acquista su ' + o.store + '</button></div>' : '')
       + '</div></div>';
   }).join('');
   document.getElementById('off-grid').innerHTML = html || '<div style="text-align:center;padding:40px 0;color:var(--text3);">Nessuna offerta</div>';
