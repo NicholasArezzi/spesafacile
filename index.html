@@ -1414,7 +1414,8 @@ function getChain(n){
 
 // ── SCONTRINO: stato form ──
 var scProdotti = [];
-var _scDaFoto = false; // true solo se l'utente ha scattato una foto (anti-frode punti)
+var _scDaFoto = false;        // true solo se l'utente ha scattato una foto (anti-frode punti)
+var _ocrTotaleValido = false; // true solo se l'OCR ha estratto un totale numerico reale
 
 function mostraFormScontrino(){
   document.getElementById('scontrino-step1').style.display = 'none';
@@ -1428,16 +1429,20 @@ function nascondiFormScontrino(){
   document.getElementById('ocr-result').style.display = 'none';
   document.getElementById('sc-autocomplete').style.display = 'none';
   scProdotti = [];
+  _scDaFoto = false;
+  _ocrTotaleValido = false;
 }
 
 function inviaManuale(){
   _scDaFoto = false;
+  _ocrTotaleValido = false;
   mostraFormScontrino();
   renderFormScontrino(-1, '', []);
 }
 
 function inviaFoto(){
   _scDaFoto = true;
+  _ocrTotaleValido = false;
   var input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
@@ -1484,6 +1489,7 @@ function popolaFormDaOCR(testo){
            || testo.match(/TOT[^\d]*(\d+[.,]\d{2})/i)
            || testo.match(/(\d+[.,]\d{2})\s*[€E]\s*$/m);
   if(mTot) totale = mTot[1].replace(',','.');
+  _ocrTotaleValido = !!(totale && parseFloat(totale) > 0);
 
   var prods = [];
   testo.split('\n').forEach(function(riga){
@@ -1640,7 +1646,8 @@ function confermaScontrino(){
   if(INDICI.length > 0) {
     risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
   }
-  var punti = _scDaFoto ? Math.floor(totale) : 0;
+  var eraFoto = _scDaFoto; // salva prima che nascondiFormScontrino() resetti i flag
+  var punti = (eraFoto && _ocrTotaleValido) ? Math.floor(totale) : 0;
   if(punti > 0) userData.punti = (userData.punti||0) + punti;
   userData.scontrini = (userData.scontrini||0) + 1;
   userData.risparmio = parseFloat(((userData.risparmio||0) + risparmio).toFixed(2));
@@ -1677,7 +1684,9 @@ function confermaScontrino(){
   nascondiFormScontrino();
   var msg = punti > 0
     ? '+'+punti+' punti! 🎉'
-    : 'Scontrino registrato! (punti solo con foto 📷)';
+    : (eraFoto
+        ? 'Scontrino registrato! Totale non rilevato dalla foto 📷'
+        : 'Scontrino registrato! (punti solo con foto 📷)');
   if(risparmio>0 && punti>0) msg += ' Potresti risparmiare \u20ac'+risparmio.toFixed(2)+' da '+(STORES[0]||'Eurospin');
   showToast(msg);
   setTimeout(function(){ go('home'); }, 1800);
