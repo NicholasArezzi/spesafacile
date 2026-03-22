@@ -1747,8 +1747,8 @@ function aggiornaHome(){
       var offPreview = generaOfferte().slice(0,4);
       prevEl.innerHTML = offPreview.map(function(o){
         return '<div onclick="go(\'offerte\')" style="flex-shrink:0;width:100px;background:var(--surface2);border-radius:12px;padding:10px;cursor:pointer;text-align:center;">'
-          + '<div style="font-size:28px;margin-bottom:4px;">'+o.ico+'</div>'
-          + '<div style="font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+o.nome+'</div>'
+          + '<div style="font-size:28px;margin-bottom:4px;">'+_escHtml(o.ico)+'</div>'
+          + '<div style="font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_escHtml(o.nome)+'</div>'
           + '<div style="font-size:13px;font-weight:800;color:var(--green);margin-top:2px;">€'+o.prezzoOff.toFixed(2)+'</div>'
           + '<div style="font-size:9px;background:#FEF3C7;color:#92400E;font-weight:800;padding:1px 6px;border-radius:99px;display:inline-block;margin-top:2px;">-'+o.sconto+'%</div>'
           + '</div>';
@@ -2014,7 +2014,7 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     out += '</div>';
     if(isWinner && hasAffiliate(r.store)){
       out += '<div style="padding:10px 14px 4px;">';
-      out += '<button class="abtn" style="width:100%;background:var(--green);font-size:13px;padding:10px;border-radius:12px;" onclick="event.stopPropagation();apriNegozioOnline(\'' + r.store + '\')">🛒 Ordina Online</button>';
+      out += '<button class="abtn" style="width:100%;background:var(--green);font-size:13px;padding:10px;border-radius:12px;" onclick="event.stopPropagation();apriNegozioOnline(\'' + _escHtml(r.store) + '\')">🛒 Ordina Online</button>';
       out += '</div>';
     }
     out += '</div>';
@@ -2158,14 +2158,14 @@ function renderGriglia(lista) {
   noRes.style.display = 'none';
   grid.innerHTML = lista.map(function(r) {
     var cls = r.diff === 'Facile' ? 'diff-easy' : r.diff === 'Media' ? 'diff-med' : 'diff-hard';
-    return '<div class="ricetta-card" onclick="apriRicetta(' + r.id + ')">'
-      + '<div class="r-img" style="background:' + r.bg + '">'
-      + r.emoji
-      + '<div class="r-badge ' + cls + '">' + r.diff + '</div>'
+    return '<div class="ricetta-card" onclick="apriRicetta(' + parseInt(r.id) + ')">'
+      + '<div class="r-img" style="background:' + _escHtml(r.bg) + '">'
+      + _escHtml(r.emoji)
+      + '<div class="r-badge ' + cls + '">' + _escHtml(r.diff) + '</div>'
       + '</div>'
       + '<div class="r-body">'
-      + '<div class="r-name">' + r.nome + '</div>'
-      + '<div class="r-meta">⏱ ' + r.tempo + '</div>'
+      + '<div class="r-name">' + _escHtml(r.nome) + '</div>'
+      + '<div class="r-meta">⏱ ' + _escHtml(r.tempo) + '</div>'
       + '</div></div>';
   }).join('');
 }
@@ -2306,11 +2306,11 @@ function renderIspiPills() {
   el.innerHTML = sample.map(function(r){
     var dc = DIFF_COLORS[r.diff] || DIFF_COLORS['Facile'];
     return '<div class="isp-pill" onclick="go(\'ispirami\')">' +
-      '<span style="font-size:20px;">' + r.emoji + '</span>' +
-      '<div><div style="font-size:12px;font-weight:700;color:var(--text);">' + r.nome + '</div>' +
+      '<span style="font-size:20px;">' + _escHtml(r.emoji) + '</span>' +
+      '<div><div style="font-size:12px;font-weight:700;color:var(--text);">' + _escHtml(r.nome) + '</div>' +
       '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;' +
-      'background:' + dc.bg + ';color:' + dc.fg + ';display:block;margin-top:2px;">' +
-      r.diff + '</span></div></div>';
+      'background:' + _escHtml(dc.bg) + ';color:' + _escHtml(dc.fg) + ';display:block;margin-top:2px;">' +
+      _escHtml(r.diff) + '</span></div></div>';
   }).join('');
 }
 
@@ -2320,7 +2320,7 @@ function initHero() {
   var r = DB[Math.floor(Math.random() * Math.min(8, DB.length))];
   var el = function(id) { return document.getElementById(id); };
   if (el('hero-nome')) el('hero-nome').textContent = r.nome;
-  if (el('hero-meta')) el('hero-meta').textContent = '⏱ ' + r.tempo + ' · ' + (r.diff === 'Facile' ? 'Facile' : r.diff === 'Media' ? 'Media' : 'Difficile') + ' ' + r.diff + ' · ' + r.ingredienti.length + ' ingredienti';
+  if (el('hero-meta')) el('hero-meta').textContent = '⏱ ' + r.tempo + ' · ' + r.diff + ' · ' + r.ingredienti.length + ' ingredienti';
   if (el('hero-emoji')) el('hero-emoji').textContent = r.emoji;
   if (el('hero-ricette-count')) el('hero-ricette-count').textContent = DB.length;
   window._heroRicettaId = r.id;
@@ -2350,7 +2350,8 @@ function aggiornaDBConSupabase(data){
     if(storeIdx < 0) return;
     for(var i=0; i<DB_PREZZI.length; i++){
       if(DB_PREZZI[i].k.indexOf(row.product_key) >= 0){
-        DB_PREZZI[i].p[storeIdx] = parseFloat(row.avg_price);
+        var p = parseFloat(row.avg_price);
+        if(!isNaN(p) && p > 0) DB_PREZZI[i].p[storeIdx] = p;
         break;
       }
     }
@@ -2677,7 +2678,9 @@ var OFFERTE_DATA = '';
 
 function generaOfferte(){
   var oggi = new Date();
-  var dataStr = oggi.getFullYear()+'-'+(oggi.getMonth()+1)+'-'+oggi.getDate();
+  var mm = String(oggi.getMonth()+1).padStart(2,'0');
+  var dd = String(oggi.getDate()).padStart(2,'0');
+  var dataStr = oggi.getFullYear()+'-'+mm+'-'+dd;
   if(OFFERTE_CACHE && OFFERTE_DATA===dataStr) return OFFERTE_CACHE;
   var seed = oggi.getFullYear()*10000 + (oggi.getMonth()+1)*100 + oggi.getDate();
   function sr(s){ var x = Math.sin(s+1)*10000; return x-Math.floor(x); }
@@ -2840,10 +2843,10 @@ function renderOfferte(){
   var html = filtrate.map(function(o){
     return '<div class="card" style="margin-bottom:10px;"><div class="cb2" style="padding:14px;">'
       + '<div style="display:flex;align-items:center;gap:12px;">'
-      + '<div style="font-size:36px;flex-shrink:0;">'+o.ico+'</div>'
+      + '<div style="font-size:36px;flex-shrink:0;">'+_escHtml(o.ico)+'</div>'
       + '<div style="flex:1;min-width:0;">'
-      + '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+o.nome+'</div>'
-      + '<div style="font-size:12px;color:var(--text3);margin-top:2px;">'+o.unita+' · <b style="color:var(--green);">'+o.store+'</b></div>'
+      + '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_escHtml(o.nome)+'</div>'
+      + '<div style="font-size:12px;color:var(--text3);margin-top:2px;">'+_escHtml(o.unita)+' · <b style="color:var(--green);">'+_escHtml(o.store)+'</b></div>'
       + '</div>'
       + '<div style="text-align:right;flex-shrink:0;">'
       + '<div style="font-size:11px;color:var(--text3);text-decoration:line-through;">€'+o.prezzoNorm.toFixed(2)+'</div>'
@@ -2851,7 +2854,7 @@ function renderOfferte(){
       + '<div style="display:inline-block;background:#FEF3C7;color:#92400E;font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;margin-top:2px;">-'+o.sconto+'%</div>'
       + '</div>'
       + '</div>'
-      + (hasAffiliate(o.store) ? '<div style="padding:0 14px 10px;"><button class="abtn" style="width:100%;background:var(--green);font-size:12px;padding:8px;border-radius:10px;" onclick="apriNegozioOnline(\'' + o.store + '\')">🛒 Acquista su ' + o.store + '</button></div>' : '')
+      + (hasAffiliate(o.store) ? '<div style="padding:0 14px 10px;"><button class="abtn" style="width:100%;background:var(--green);font-size:12px;padding:8px;border-radius:10px;" onclick="apriNegozioOnline(\'' + _escHtml(o.store) + '\')">🛒 Acquista su ' + _escHtml(o.store) + '</button></div>' : '')
       + '</div></div>';
   }).join('');
   document.getElementById('off-grid').innerHTML = html || '<div style="text-align:center;padding:40px 0;color:var(--text3);">Nessuna offerta</div>';
