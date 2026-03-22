@@ -59,8 +59,8 @@ const APP_CONFIG = {
   // Sostituire i link con quelli ottenuti dai network (Awin, Tradedoubler, ecc.)
   // Lasciare vuoto un negozio per nascondere il pulsante "Ordina Online"
   AFFILIATES: {
-    'esselunga': 'https://www.esselunga.it/?ref=spesafacile',
-    'conad':     'https://spesa.conad.it/?utm_source=spesafacile&utm_medium=affiliate',
+    'esselunga': 'https://www.esselunga.it/?ref=spesaoggi',
+    'conad':     'https://spesa.conad.it/?utm_source=spesaoggi&utm_medium=affiliate',
     'carrefour': 'https://www.carrefour.it/?awc=SOSTITUISCI_CON_ID_AWIN',
   },
 };

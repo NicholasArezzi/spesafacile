@@ -1,6 +1,6 @@
 {
-  "name": "SpesaFacile",
-  "short_name": "SpesaFacile",
+  "name": "SpesaOggi",
+  "short_name": "SpesaOggi",
   "description": "Scopri dove conviene fare la spesa oggi vicino a te.",
   "start_url": "/",
   "display": "standalone",
