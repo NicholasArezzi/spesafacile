@@ -161,6 +161,7 @@ body{
 .ps+.ps{border-left:1px solid var(--border);}
 .psv{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;}
 .psl{font-size:11px;color:var(--text2);margin-top:2px;}
+.badge-stimato{display:inline-block;font-size:10px;font-weight:700;color:#fff;background:var(--green);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:middle;letter-spacing:0.3px;}
 .badge-wrap{display:flex;gap:14px;flex-wrap:wrap;}
 .badge-i{text-align:center;width:60px;}
 .badge-ico{font-size:30px;background:var(--green-bg);border-radius:14px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;}
@@ -1567,32 +1568,54 @@ function rimuoviProdotto(idx){
   aggiornaListaProdotti();
 }
 
+function _scRenderDrop(drop, results) {
+  drop.innerHTML = '';
+  results.forEach(function(r) {
+    var div = document.createElement('div');
+    div.style.cssText = 'padding:10px 16px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--surface2);display:flex;align-items:center;';
+    var span = document.createElement('span');
+    span.textContent = r.label;
+    div.appendChild(span);
+    if (r.stimato) {
+      var badge = document.createElement('span');
+      badge.className = 'badge-stimato';
+      badge.textContent = 'Stimato';
+      div.appendChild(badge);
+    }
+    div.addEventListener('mouseover', function(){ this.style.background='var(--surface2)'; });
+    div.addEventListener('mouseout',  function(){ this.style.background=''; });
+    div.addEventListener('click', (function(label){ return function(){ scAggiungiProdotto(label); }; })(r.label));
+    drop.appendChild(div);
+  });
+  drop.style.display = 'block';
+}
+
+var _scSearchTimer = null;
 function scSearchProd(val){
   var drop = document.getElementById('sc-autocomplete');
   if(!drop) return;
-  if(val.length<2){ drop.style.display='none'; return; }
+  if(val.length<2){ drop.style.display='none'; clearTimeout(_scSearchTimer); return; }
   var q = val.toLowerCase();
   var res = [];
   for(var i=0; i<DB_PREZZI.length && res.length<6; i++){
     for(var j=0; j<DB_PREZZI[i].k.length; j++){
       if(DB_PREZZI[i].k[j].indexOf(q)>=0){
-        res.push(DB_PREZZI[i].k[0]);
+        res.push({ label: DB_PREZZI[i].k[0], stimato: false });
         break;
       }
     }
   }
-  if(res.length===0){ drop.style.display='none'; return; }
-  drop.innerHTML = '';
-  res.forEach(function(r){
-    var div = document.createElement('div');
-    div.textContent = r;
-    div.style.cssText = 'padding:10px 16px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--surface2);';
-    div.addEventListener('mouseover', function(){ this.style.background='var(--surface2)'; });
-    div.addEventListener('mouseout',  function(){ this.style.background=''; });
-    div.addEventListener('click',     function(){ scAggiungiProdotto(r); });
-    drop.appendChild(div);
-  });
+  if(res.length>0){ _scRenderDrop(drop, res); return; }
+  // Fallback: cerca su OpenFoodFacts
+  drop.innerHTML = '<div style="padding:10px 16px;font-size:13px;color:var(--text2);">Cerco online...</div>';
   drop.style.display = 'block';
+  clearTimeout(_scSearchTimer);
+  _scSearchTimer = setTimeout(function(){
+    cercaInOpenFoodFacts(val).then(function(found){
+      if(!found){ drop.style.display='none'; return; }
+      _scRenderDrop(drop, [{ label: found.label, stimato: true }]);
+    });
+  }, 400);
 }
 
 function scAggiungiProdotto(nome){
@@ -2467,6 +2490,89 @@ function cercaInDB(nomeProd) {
       if(q.indexOf(entry.k[j]) >= 0 || entry.k[j].indexOf(q) >= 0){ return entry; }
     }
   }
+  return null;
+}
+
+// ── OPENFOODFACTS INTEGRATION ──
+var OFF_CATEGORY_MAP = {
+  'en:pastas':              'pasta',
+  'en:pasta':               'pasta',
+  'en:rices':               'riso',
+  'en:breads':              'pane',
+  'en:biscuits':            'biscotti',
+  'en:cookies':             'biscotti',
+  'en:crackers':            'crackers',
+  'en:cereals':             'cornflakes',
+  'en:milks':               'latte intero',
+  'en:uht-milks':           'latte uht',
+  'en:plant-based-milks':   'latte di soia',
+  'en:butters':             'burro',
+  'en:mozzarellas':         'mozzarella',
+  'en:parmesan':            'parmigiano',
+  'en:yogurts':             'yogurt',
+  'en:creams':              'panna',
+  'en:cheeses':             'formaggio',
+  'en:eggs':                'uova',
+  'en:olive-oils':          'olio extravergine',
+  'en:sunflower-oils':      'olio di semi',
+  'en:vinegars':            'aceto',
+  'en:sugars':              'zucchero',
+  'en:honeys':              'miele',
+  'en:chocolate-spreads':   'nutella',
+  'en:jams':                'marmellata',
+  'en:coffees':             'caffe',
+  'en:teas':                'te',
+  'en:mineral-waters':      'acqua naturale',
+  'en:fruit-juices':        'succo di frutta',
+  'en:colas':               'coca cola',
+  'en:beers':               'birra',
+  'en:wines':               'vino rosso',
+  'en:tomato-sauces':       'passata',
+  'en:canned-tomatoes':     'pelati',
+  'en:tuna':                'tonno',
+  'en:cooked-hams':         'prosciutto cotto',
+  'en:dried-pastas':        'pasta',
+  'en:shampoos':            'shampoo',
+  'en:toothpastes':         'dentifricio',
+  'en:deodorants':          'deodorante',
+  'en:shower-gels':         'gel doccia',
+  'en:laundry-detergents':  'detersivo lavatrice',
+  'en:dishwasher-detergents':'detersivo lavastoviglie',
+  'en:toilet-papers':       'carta igienica',
+  'en:chips':               'patate surgelate',
+  'en:ice-creams':          'gelato',
+  'en:frozen-pizzas':       'pizza surgelata',
+  'en:chocolate-bars':      'cioccolato',
+  'en:wafers':              'wafer',
+  'en:snacks':              'merendine',
+  'en:canned-fish':         'tonno',
+  'en:smoked-salmons':      'salmone affumicato',
+};
+
+async function cercaInOpenFoodFacts(query) {
+  try {
+    var url = 'https://world.openfoodfacts.org/cgi/search.pl'
+      + '?search_terms=' + encodeURIComponent(query)
+      + '&search_simple=1&action=process&json=1'
+      + '&countries=Italy&page_size=5'
+      + '&fields=product_name,brands,quantity,categories_tags';
+    var res = await fetch(url);
+    if (!res.ok) return null;
+    var data = await res.json();
+    if (!data.products || !data.products.length) return null;
+    var prod = data.products[0];
+    var cats = prod.categories_tags || [];
+    for (var c = 0; c < cats.length; c++) {
+      var kw = OFF_CATEGORY_MAP[cats[c]];
+      if (kw) {
+        var entry = cercaInDB(kw);
+        if (entry) {
+          var label = [prod.brands, prod.product_name].filter(Boolean).join(' ');
+          return { entry: entry, label: label || kw, stimato: true };
+        }
+      }
+    }
+  } catch(e) {}
   return null;
 }
 
