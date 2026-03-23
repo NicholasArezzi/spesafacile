@@ -2216,10 +2216,10 @@ function renderGriglia(lista) {
   if (!grid) return;
   if (lista.length === 0) {
     grid.innerHTML = '';
-    noRes.style.display = 'block';
+    if (noRes) noRes.style.display = 'block';
     return;
   }
-  noRes.style.display = 'none';
+  if (noRes) noRes.style.display = 'none';
   grid.innerHTML = lista.map(function(r) {
     var cls = r.diff === 'Facile' ? 'diff-easy' : r.diff === 'Media' ? 'diff-med' : 'diff-hard';
     return '<div class="ricetta-card" onclick="apriRicetta(' + parseInt(r.id) + ')">'
@@ -3044,9 +3044,6 @@ function initMappa(){
   _mapAvviaConPosizione();
 }
 
-// Alias per compatibilità con il resto del codice
-function aggiornaMappaPosizione(){ initMappa(); }
-function caricaGoogleMaps(lat,lng){ initMappa(); }
 
 // ─── Recupera posizione poi inizializza la mappa ─────────────────────────
 function _mapAvviaConPosizione(){
