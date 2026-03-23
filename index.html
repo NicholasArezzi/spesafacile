@@ -1510,8 +1510,13 @@ function popolaFormDaOCR(testo){
   Object.keys(storeMap).forEach(function(k){ if(testoUp.indexOf(k)>=0) storeIdx = storeMap[k]; });
 
   var totale = '';
-  var mTot = testo.match(/TOTALE[^\d]*(\d+[.,]\d{2})/i)
+  var mTot = testo.match(/TOTALE\s+A\s+PAGARE[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/TOTALE\s+COMPLESSIVO[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/TOTALE\s+EURO[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/TOTALE[^\d]*(\d+[.,]\d{2})/i)
            || testo.match(/TOT[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/DA\s+PAGARE[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/IMPORTO[^\d]*(\d+[.,]\d{2})/i)
            || testo.match(/(\d+[.,]\d{2})\s*[€E]\s*$/m);
   if(mTot) totale = mTot[1].replace(',','.');
   _ocrTotaleValido = !!(totale && parseFloat(totale) > 0);
@@ -1672,7 +1677,7 @@ function confermaScontrino(){
     risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
   }
   var eraFoto = _scDaFoto; // salva prima che nascondiFormScontrino() resetti i flag
-  var punti = (eraFoto && _ocrTotaleValido) ? Math.floor(totale) : 0;
+  var punti = (eraFoto && totale > 0) ? Math.floor(totale) : 0;
   if(punti > 0) userData.punti = (userData.punti||0) + punti;
   userData.scontrini = (userData.scontrini||0) + 1;
   userData.risparmio = parseFloat(((userData.risparmio||0) + risparmio).toFixed(2));
