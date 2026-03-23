@@ -61,6 +61,6 @@ const APP_CONFIG = {
   AFFILIATES: {
     'esselunga': 'https://www.esselunga.it/?ref=spesaoggi',
     'conad':     'https://spesa.conad.it/?utm_source=spesaoggi&utm_medium=affiliate',
-    'carrefour': 'https://www.carrefour.it/?awc=SOSTITUISCI_CON_ID_AWIN',
+    // 'carrefour': '',  // Aggiungere l'ID Awin reale per abilitare il bottone "Ordina Online"
   },
 };

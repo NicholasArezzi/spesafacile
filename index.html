@@ -1313,7 +1313,16 @@ async function tentaLogin(){
     var r = await _supabase.auth.signInWithPassword({ email: email, password: pass });
     btns.forEach(function(b){ b.disabled = false; });
     btns[0].textContent = 'Entra \u2192';
-    if(r.error){ showToast('Credenziali errate. Riprova.'); return; }
+    if(r.error){
+      var errMsg = (r.error.message || '').toLowerCase();
+      if(errMsg.includes('email not confirmed') || errMsg.includes('not confirmed')){
+        showToast('Devi prima verificare la tua email 📬');
+        setTimeout(function(){ go('email-verifica'); }, 800);
+      } else {
+        showToast('Credenziali errate. Riprova.');
+      }
+      return;
+    }
     userData.userId   = r.data.user.id;
     userData.isOspite = false;
     userData.nome     = (r.data.user.user_metadata && r.data.user.user_metadata.nome)
@@ -1769,7 +1778,7 @@ function aggiornaHome(){
   if(el('stat-punti'))     el('stat-punti').textContent     = userData.punti;
   if(el('stat-scontrini')) el('stat-scontrini').textContent = userData.scontrini;
   if(el('stat-liste'))     el('stat-liste').textContent     = userData.liste;
-  if(el('stat-risparmio')) el('stat-risparmio').textContent = '\u20ac' + userData.risparmio.toFixed(2).replace('.',',');
+  if(el('stat-risparmio')) el('stat-risparmio').textContent = '\u20ac' + (userData.risparmio || 0).toFixed(2).replace('.',',');
   var badges = [
     userData.liste     >= APP_CONFIG.BADGE_LISTE,
     userData.scontrini >= APP_CONFIG.BADGE_SCONTRINI_1,
@@ -1997,7 +2006,9 @@ function aggiornaConfrontoConLista(prodotti){
   if(rispEl) rispEl.textContent = '€' + risparmio.replace('.',',');
 
   var subEl = document.getElementById('lista-prodotti-count');
-  if(subEl) subEl.textContent = 'scegliendo ' + STORES[bestStoreIdx] + ' invece di ' + STORES[worstStoreIdx];
+  if(subEl && STORES.length > 0 && bestStoreIdx >= 0 && worstStoreIdx >= 0 && bestStoreIdx !== worstStoreIdx){
+    subEl.textContent = 'scegliendo ' + STORES[bestStoreIdx] + ' invece di ' + STORES[worstStoreIdx];
+  }
 
   // ── Aggiorna classifica tab con totali reali ──
   aggiornaClassificaTab(totali, STORES, totItems, bestStoreIdx);
