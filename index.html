@@ -1850,7 +1850,7 @@ function aggiornaProfiloUI(){
   }
 
   // Stats
-  var risp = '\u20ac' + userData.risparmio.toFixed(2).replace('.',',');
+  var risp = '\u20ac' + (userData.risparmio || 0).toFixed(2).replace('.',',');
   if(el('prof-risparmio')) el('prof-risparmio').textContent = risp;
   if(el('prof-punti'))     el('prof-punti').textContent     = userData.punti;
   if(el('prof-scontrini')) el('prof-scontrini').textContent = userData.scontrini;
@@ -1873,9 +1873,9 @@ function aggiornaProfiloUI(){
   if(el('goal-eur-txt')) el('goal-eur-txt').textContent = '\u20ac' + eur50.toFixed(2).replace('.',',') + '/\u20ac' + APP_CONFIG.BADGE_RISPARMIO;
   if(el('goal-eur-bar')) el('goal-eur-bar').style.width = (eur50/APP_CONFIG.BADGE_RISPARMIO*100) + '%';
 
-  var ric5 = Math.min(userData.ricette, APP_CONFIG.BADGE_SCONTRINI_5);
-  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/' + APP_CONFIG.BADGE_SCONTRINI_5;
-  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/APP_CONFIG.BADGE_SCONTRINI_5*100) + '%';
+  var ric5 = Math.min(userData.ricette, APP_CONFIG.BADGE_RICETTE);
+  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/' + APP_CONFIG.BADGE_RICETTE;
+  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/APP_CONFIG.BADGE_RICETTE*100) + '%';
 }
 
 // ════════════════════════════════════════
@@ -3270,8 +3270,8 @@ function _mapCercaSupermercati(lat, lng){
           + '&travelmode=walking';
 
         var popup = '<div style="font-family:sans-serif;min-width:160px;padding:2px;">'
-          + '<b style="font-size:14px;color:#111;">' + nome + '</b>'
-          + (via ? '<br><span style="font-size:11px;color:#666;">📍 ' + via + '</span>' : '')
+          + '<b style="font-size:14px;color:#111;">' + _escHtml(nome) + '</b>'
+          + (via ? '<br><span style="font-size:11px;color:#666;">📍 ' + _escHtml(via) + '</span>' : '')
           + '<br><a href="' + navUrl + '" target="_blank" rel="noopener"'
           + ' style="display:inline-block;margin-top:8px;padding:7px 14px;background:#22C55E;color:#fff;border-radius:20px;text-decoration:none;font-size:12px;font-weight:700;">Portami qui →</a>'
           + '</div>';
