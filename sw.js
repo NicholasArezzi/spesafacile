@@ -56,6 +56,8 @@ self.addEventListener('fetch', function(event) {
         var clone = response.clone();
         caches.open(CACHE_NAME).then(function(cache) {
           cache.put(event.request, clone);
+        }).catch(function(e) {
+          console.warn('[SW] cache write failed:', e);
         });
         return response;
       }).catch(function() {

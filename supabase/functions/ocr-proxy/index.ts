@@ -22,6 +22,13 @@ serve(async (req) => {
       });
     }
 
+    if (file.size > 10 * 1024 * 1024) {
+      return new Response(JSON.stringify({ error: "File troppo grande (max 10MB)" }), {
+        status: 413,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const ocrKey = Deno.env.get("OCR_API_KEY");
     if (!ocrKey) {
       return new Response(JSON.stringify({ error: "Configurazione mancante" }), {
@@ -40,12 +47,23 @@ serve(async (req) => {
       method: "POST",
       body: fd,
     });
+
+    if (!ocrResp.ok) {
+      const errBody = await ocrResp.text();
+      console.error("[ocr-proxy] OCR API error:", ocrResp.status, errBody);
+      return new Response(JSON.stringify({ error: "Errore OCR API", status: ocrResp.status }), {
+        status: ocrResp.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const result = await ocrResp.json();
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (_e) {
+  } catch (e) {
+    console.error("[ocr-proxy] Unexpected error:", e);
     return new Response(JSON.stringify({ error: "Errore interno" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
