@@ -1181,7 +1181,11 @@ body{
         <li><strong>OCR.space</strong> — elaborazione immagini scontrini, nessuna associazione a utenti</li>
       </ul>
 
-      <p style="font-size:11px;color:var(--text3);margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">Ultimo aggiornamento: marzo 2026 · Versione 1.0</p>
+      <p style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;font-size:13px;color:var(--text2);">
+        Versione completa e aggiornata:
+        <a href="/privacy.html" target="_blank" style="color:var(--green);font-weight:700;">privacy policy completa</a>
+      </p>
+      <p style="font-size:11px;color:var(--text3);margin-top:8px;">Ultimo aggiornamento: marzo 2026 · Versione 1.1</p>
     </div></div>
   </div></div>
 </div>
@@ -1484,10 +1488,15 @@ function eseguiOCR(file){
   document.getElementById('ocr-result').style.display = 'none';
   var fd = new FormData();
   fd.append('file', file);
-  fd.append('apikey', APP_CONFIG.OCR_API_KEY);
   fd.append('language', APP_CONFIG.OCR_LANGUAGE);
-  fd.append('isOverlayRequired', 'false');
-  fetch(APP_CONFIG.OCR_API_URL, { method:'POST', body:fd })
+  fetch(APP_CONFIG.OCR_EDGE_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + APP_CONFIG.SUPABASE_ANON_KEY,
+      'apikey': APP_CONFIG.SUPABASE_ANON_KEY
+    },
+    body: fd
+  })
     .then(function(r){ return r.json(); })
     .then(function(d){
       var testo = '';

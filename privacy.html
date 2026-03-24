@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — SpesaOggi</title>
+  <style>
+    :root {
+      --green: #2d9e6b;
+      --text: #1a1a1a;
+      --text2: #444;
+      --text3: #888;
+      --bg: #f5f7f5;
+      --surface: #fff;
+      --border: #e0e4e0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text: #f0f0f0;
+        --text2: #bbb;
+        --text3: #777;
+        --bg: #111;
+        --surface: #1c1c1e;
+        --border: #2c2c2e;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px 16px 64px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -0.5px;
+    }
+    .logo em { font-style: normal; font-weight: 400; }
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text3);
+      margin-bottom: 32px;
+    }
+    h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 28px 0 8px;
+      padding-top: 4px;
+    }
+    p, li { font-size: 14px; color: var(--text2); margin-bottom: 10px; }
+    ul { padding-left: 20px; margin-bottom: 14px; }
+    li { margin-bottom: 4px; }
+    a { color: var(--green); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin: 12px 0 20px;
+    }
+    th {
+      background: var(--surface);
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    .badge {
+      display: inline-block;
+      background: rgba(45, 158, 107, 0.12);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+    footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text3);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🌿 Spesa<em>Oggi</em></div>
+  </header>
+
+  <h1>Privacy Policy</h1>
+  <p class="subtitle">Ultimo aggiornamento: marzo 2026 &middot; Versione 1.1</p>
+
+  <h2>Titolare del trattamento</h2>
+  <p>
+    <strong>SpesaOggi</strong> — Nicholas Arezzi<br>
+    Contatto privacy: <a href="mailto:arezzinicholas@gmail.com">arezzinicholas@gmail.com</a>
+  </p>
+
+  <h2>Riepilogo dei dati raccolti</h2>
+  <p>La tabella seguente riassume i dati personali trattati dall'app, come richiesto dalle linee guida Apple App Store (Privacy Nutrition Labels).</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Categoria</th>
+        <th>Tipo di dato</th>
+        <th>Finalità</th>
+        <th>Condiviso con terzi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge">Dati account</span></td>
+        <td>Email, nome (facoltativi)</td>
+        <td>Autenticazione, classifica, salvataggio liste</td>
+        <td>Supabase (hosting UE)</td>
+      </tr>
+      <tr>
+        <td><span class="badge">Posizione</span></td>
+        <td>Posizione approssimativa (coarse location), città</td>
+        <td>Mostrare supermercati vicini, filtrare prezzi locali</td>
+        <td>Nominatim/OSM, Overpass API (solo coordinate, no ID utente)</td>
+      </tr>
+      <tr>
+        <td><span class="badge">Contenuto utente</span></td>
+        <td>Foto scontrino (elaborata), prezzi prodotti</td>
+        <td>Riconoscimento testo OCR, aggiornamento database prezzi community</td>
+        <td>OCR.space (solo elaborazione, nessuna associazione a utente)</td>
+      </tr>
+      <tr>
+        <td><span class="badge">Dati d'uso</span></td>
+        <td>Città selezionata, punteggi, scontrini inseriti</td>
+        <td>Gamification, classifica anonima</td>
+        <td>Supabase (solo se registrato)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Dati NON raccolti</h2>
+  <ul>
+    <li>Dati di salute o finanziari personali</li>
+    <li>Rubrica, foto di sistema, microfono</li>
+    <li>Identificatori pubblicitari (IDFA, GAID)</li>
+    <li>Cronologia di navigazione o acquisti</li>
+  </ul>
+
+  <h2>Geolocalizzazione</h2>
+  <p>L'app richiede l'accesso alla posizione <strong>solo durante l'utilizzo</strong> ("While Using the App") per:</p>
+  <ul>
+    <li>Identificare la città dell'utente tramite reverse geocoding (Nominatim)</li>
+    <li>Trovare supermercati nelle vicinanze sulla mappa (Overpass API)</li>
+  </ul>
+  <p>Viene usata <strong>solo la posizione approssimativa (coarse location)</strong> — l'app non memorizza coordinate GPS precise. In caso di diniego, viene usata la geolocalizzazione tramite IP (ipwho.is) come fallback anonimo. L'autorizzazione può essere revocata in qualsiasi momento dalle Impostazioni del dispositivo.</p>
+
+  <h2>Dati account e registrazione</h2>
+  <p>La registrazione è <strong>facoltativa</strong>. Gli utenti non registrati possono usare tutte le funzionalità principali (lista spesa, comparazione prezzi, mappa) in modalità ospite senza fornire dati personali.</p>
+  <p>Se ci si registra, vengono raccolti:</p>
+  <ul>
+    <li><strong>Email</strong> — richiesta per autenticazione (Supabase Auth)</li>
+    <li><strong>Nome</strong> — facoltativo, usato nella classifica</li>
+  </ul>
+  <p>L'account e tutti i dati associati possono essere eliminati in qualsiasi momento dall'app: <em>Profilo → Elimina account e dati</em>. La cancellazione è permanente e immediata.</p>
+
+  <h2>Finalità del trattamento</h2>
+  <ul>
+    <li>Erogazione del servizio di comparazione prezzi</li>
+    <li>Gestione classifica e gamification utenti</li>
+    <li>Aggiornamento collaborativo del database prezzi (anonimizzato)</li>
+  </ul>
+
+  <h2>Base giuridica (GDPR)</h2>
+  <p>Il trattamento dei dati si basa sul <strong>consenso esplicito</strong> dell'utente al momento della registrazione (Art. 6, lett. a GDPR). L'uso della geolocalizzazione richiede consenso separato tramite il sistema operativo del dispositivo.</p>
+
+  <h2>Conservazione dei dati</h2>
+  <p>I dati personali sono conservati <strong>fino alla cancellazione dell'account</strong>. I prezzi inviati alla community vengono anonimizzati prima dell'inserimento nel database pubblico e non sono associabili all'utente dopo l'eliminazione dell'account.</p>
+
+  <h2>Terze parti</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Servizio</th>
+        <th>Finalità</th>
+        <th>Dati trasmessi</th>
+        <th>Privacy policy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Supabase</strong></td>
+        <td>Database, autenticazione</td>
+        <td>Email, nome, dati profilo</td>
+        <td><a href="https://supabase.com/privacy" target="_blank">supabase.com/privacy</a></td>
+      </tr>
+      <tr>
+        <td><strong>OpenStreetMap / Nominatim</strong></td>
+        <td>Mappe, geocoding inverso</td>
+        <td>Coordinate GPS (no ID utente)</td>
+        <td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank">osmfoundation.org</a></td>
+      </tr>
+      <tr>
+        <td><strong>Overpass API</strong></td>
+        <td>Ricerca supermercati vicini</td>
+        <td>Coordinate GPS (no ID utente)</td>
+        <td><a href="https://wiki.openstreetmap.org/wiki/Overpass_API" target="_blank">wiki.openstreetmap.org</a></td>
+      </tr>
+      <tr>
+        <td><strong>OCR.space</strong></td>
+        <td>Analisi testo scontrini</td>
+        <td>Immagine scontrino (no ID utente)</td>
+        <td><a href="https://ocr.space/privacypolicy" target="_blank">ocr.space/privacypolicy</a></td>
+      </tr>
+      <tr>
+        <td><strong>ipwho.is</strong></td>
+        <td>Geolocalizzazione IP (fallback)</td>
+        <td>Indirizzo IP (solo se GPS non disponibile)</td>
+        <td><a href="https://ipwhois.io/privacy-policy" target="_blank">ipwhois.io</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Diritti dell'utente (GDPR)</h2>
+  <p>In conformità al Regolamento UE 2016/679 (GDPR), hai diritto di:</p>
+  <ul>
+    <li><strong>Accesso</strong> ai tuoi dati personali (Art. 15)</li>
+    <li><strong>Rettifica</strong> dei dati inesatti (Art. 16)</li>
+    <li><strong>Cancellazione</strong> ("diritto all'oblio", Art. 17) — disponibile direttamente in-app</li>
+    <li><strong>Portabilità</strong> dei dati (Art. 20)</li>
+    <li><strong>Opposizione</strong> al trattamento (Art. 21)</li>
+  </ul>
+  <p>Per esercitare questi diritti scrivi a: <a href="mailto:arezzinicholas@gmail.com">arezzinicholas@gmail.com</a></p>
+
+  <h2>Trasferimenti internazionali</h2>
+  <p>I dati sono conservati su server Supabase situati nell'Unione Europea. Nessun dato personale viene trasferito in paesi terzi senza adeguate garanzie.</p>
+
+  <h2>Minori</h2>
+  <p>Il servizio è destinato a utenti di almeno 16 anni (GDPR Art. 8). Non raccogliamo consapevolmente dati di minori di 16 anni.</p>
+
+  <h2>Modifiche alla Privacy Policy</h2>
+  <p>Eventuali modifiche sostanziali saranno comunicate tramite notifica in-app. Continuando a usare l'app dopo le modifiche, l'utente accetta la versione aggiornata.</p>
+
+  <footer>
+    <p>SpesaOggi &mdash; Privacy Policy &middot; Ultimo aggiornamento: marzo 2026 &middot; Versione 1.1</p>
+    <p style="margin-top:6px;"><a href="mailto:arezzinicholas@gmail.com">arezzinicholas@gmail.com</a></p>
+  </footer>
+</body>
+</html>
