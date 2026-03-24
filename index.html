@@ -1300,6 +1300,8 @@ function aggiornaOrologio(){
 aggiornaOrologio();
 setInterval(aggiornaOrologio, 30000);
 
+function el(id){ return document.getElementById(id); }
+
 // Navigazione sicura - indipendente dal resto
 
 async function tentaLogin(){
@@ -1793,7 +1795,6 @@ function pushProfiloASupabase(){
 function aggiornaHome(){
   var nomeEl = document.getElementById('home-nome');
   if(nomeEl) nomeEl.textContent = userData.nome || 'Ciao!';
-  var el = function(id){ return document.getElementById(id); };
   if(el('stat-punti'))     el('stat-punti').textContent     = userData.punti;
   if(el('stat-scontrini')) el('stat-scontrini').textContent = userData.scontrini;
   if(el('stat-liste'))     el('stat-liste').textContent     = userData.liste;
@@ -1837,8 +1838,6 @@ function sbloccaBadge(id){
 }
 
 function aggiornaProfiloUI(){
-  var el = function(id){ return document.getElementById(id); };
-
   // Nome
   var nome = userData.nome || 'Utente';
   if(el('prof-nome')) el('prof-nome').textContent = nome;
@@ -1851,7 +1850,7 @@ function aggiornaProfiloUI(){
   }
 
   // Stats
-  var risp = '\u20ac' + userData.risparmio.toFixed(2).replace('.',',');
+  var risp = '\u20ac' + (userData.risparmio || 0).toFixed(2).replace('.',',');
   if(el('prof-risparmio')) el('prof-risparmio').textContent = risp;
   if(el('prof-punti'))     el('prof-punti').textContent     = userData.punti;
   if(el('prof-scontrini')) el('prof-scontrini').textContent = userData.scontrini;
@@ -1874,9 +1873,9 @@ function aggiornaProfiloUI(){
   if(el('goal-eur-txt')) el('goal-eur-txt').textContent = '\u20ac' + eur50.toFixed(2).replace('.',',') + '/\u20ac' + APP_CONFIG.BADGE_RISPARMIO;
   if(el('goal-eur-bar')) el('goal-eur-bar').style.width = (eur50/APP_CONFIG.BADGE_RISPARMIO*100) + '%';
 
-  var ric5 = Math.min(userData.ricette, APP_CONFIG.BADGE_SCONTRINI_5);
-  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/' + APP_CONFIG.BADGE_SCONTRINI_5;
-  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/APP_CONFIG.BADGE_SCONTRINI_5*100) + '%';
+  var ric5 = Math.min(userData.ricette, APP_CONFIG.BADGE_RICETTE);
+  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/' + APP_CONFIG.BADGE_RICETTE;
+  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/APP_CONFIG.BADGE_RICETTE*100) + '%';
 }
 
 // ════════════════════════════════════════
@@ -2257,7 +2256,6 @@ function apriRicetta(id) {
   if (!ricettaAperta) { showToast('Ricetta non trovata'); return; }
   persone = ricettaAperta.persone_base || 2;
 
-  var el = function(id) { return document.getElementById(id); };
   if (el('m-title')) el('m-title').textContent = ricettaAperta.nome;
   if (el('m-emoji')) { el('m-emoji').textContent = ricettaAperta.emoji; el('m-emoji').style.background = ricettaAperta.bg; }
   if (el('m-meta')) el('m-meta').textContent = '⏱ ' + ricettaAperta.tempo + ' · 🍽 ' + ricettaAperta.diff + ' · 📋 ' + ricettaAperta.ingredienti.length + ' ingredienti';
@@ -2391,7 +2389,6 @@ function renderIspiPills() {
 function initHero() {
   if (!DB || DB.length === 0) return;
   var r = DB[Math.floor(Math.random() * Math.min(8, DB.length))];
-  var el = function(id) { return document.getElementById(id); };
   if (el('hero-nome')) el('hero-nome').textContent = r.nome;
   if (el('hero-meta')) el('hero-meta').textContent = '⏱ ' + r.tempo + ' · ' + r.diff + ' · ' + r.ingredienti.length + ' ingredienti';
   if (el('hero-emoji')) el('hero-emoji').textContent = r.emoji;
@@ -3273,8 +3270,8 @@ function _mapCercaSupermercati(lat, lng){
           + '&travelmode=walking';
 
         var popup = '<div style="font-family:sans-serif;min-width:160px;padding:2px;">'
-          + '<b style="font-size:14px;color:#111;">' + nome + '</b>'
-          + (via ? '<br><span style="font-size:11px;color:#666;">📍 ' + via + '</span>' : '')
+          + '<b style="font-size:14px;color:#111;">' + _escHtml(nome) + '</b>'
+          + (via ? '<br><span style="font-size:11px;color:#666;">📍 ' + _escHtml(via) + '</span>' : '')
           + '<br><a href="' + navUrl + '" target="_blank" rel="noopener"'
           + ' style="display:inline-block;margin-top:8px;padding:7px 14px;background:#22C55E;color:#fff;border-radius:20px;text-decoration:none;font-size:12px;font-weight:700;">Portami qui →</a>'
           + '</div>';
