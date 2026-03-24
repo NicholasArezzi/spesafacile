@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spesaoggi-v2';
+const CACHE_NAME = 'spesaoggi-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ const STATIC_ASSETS = [
   '/icon-192.png',
   '/icon-512.png',
   '/og-image.png',
+  '/privacy.html',
   '/casa.json',
   '/products.json',
   '/recipes.json'
