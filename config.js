@@ -1,5 +1,7 @@
 const APP_CONFIG = {
   // OCR
+  // ATTENZIONE: 'helloworld' è la chiave demo pubblica di OCR.space (~25 req/giorno).
+  // In produzione sostituire con una chiave gratuita/a pagamento da https://ocr.space/ocrapi
   OCR_API_KEY:    'helloworld',
   OCR_API_URL:    'https://api.ocr.space/parse/image',
   OCR_LANGUAGE:   'ita',

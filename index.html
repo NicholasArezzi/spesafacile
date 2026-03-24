@@ -19,8 +19,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="SpesaOggi – Risparmia ogni giorno">
 <meta property="og:description" content="Scopri dove conviene fare la spesa oggi vicino a te. Confronta prezzi, ricette e offerte dei supermercati.">
-<meta property="og:image" content="og-image.png">
-<meta property="og:url" content="https://spesaoggi.vercel.app">
+<meta property="og:image" content="https://spesaoggi.it/og-image.png">
+<meta property="og:url" content="https://spesaoggi.it">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="SpesaOggi – Risparmia ogni giorno">
 <meta name="twitter:description" content="Confronta prezzi dei supermercati vicino a te.">
@@ -1492,9 +1492,14 @@ function eseguiOCR(file){
     .then(function(d){
       var testo = '';
       if(d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
+      if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
       popolaFormDaOCR(testo);
     })
-    .catch(function(){ popolaFormDaOCR(''); });
+    .catch(function(){
+      document.getElementById('ocr-loading').style.display = 'none';
+      showToast('Errore analisi immagine. Riprova o inserisci manualmente.');
+      popolaFormDaOCR('');
+    });
 }
 
 function popolaFormDaOCR(testo){
@@ -1505,8 +1510,13 @@ function popolaFormDaOCR(testo){
   Object.keys(storeMap).forEach(function(k){ if(testoUp.indexOf(k)>=0) storeIdx = storeMap[k]; });
 
   var totale = '';
-  var mTot = testo.match(/TOTALE[^\d]*(\d+[.,]\d{2})/i)
+  var mTot = testo.match(/TOTALE\s+A\s+PAGARE[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/TOTALE\s+COMPLESSIVO[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/TOTALE\s+EURO[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/TOTALE[^\d]*(\d+[.,]\d{2})/i)
            || testo.match(/TOT[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/DA\s+PAGARE[^\d]*(\d+[.,]\d{2})/i)
+           || testo.match(/IMPORTO[^\d]*(\d+[.,]\d{2})/i)
            || testo.match(/(\d+[.,]\d{2})\s*[€E]\s*$/m);
   if(mTot) totale = mTot[1].replace(',','.');
   _ocrTotaleValido = !!(totale && parseFloat(totale) > 0);
@@ -1583,7 +1593,7 @@ function aggiornaListaProdotti(){
     var prezzo = entry ? '€'+(entry.p[storeIdx]*(p.qty||1)).toFixed(2) : '';
     var prezzoHtml = prezzo ? ' <span style="color:var(--green);font-weight:700;">'+prezzo+'</span>' : '';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--surface2);">'
-         + '<span style="font-size:13px;">'+(p.qty>1?p.qty+'× ':'')+p.name+prezzoHtml+'</span>'
+         + '<span style="font-size:13px;">'+(p.qty>1?p.qty+'× ':'')+_escHtml(p.name)+prezzoHtml+'</span>'
          + '<button onclick="rimuoviProdotto('+i+')" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;">✕</button>'
          + '</div>';
   }).join('');
@@ -1667,7 +1677,7 @@ function confermaScontrino(){
     risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
   }
   var eraFoto = _scDaFoto; // salva prima che nascondiFormScontrino() resetti i flag
-  var punti = (eraFoto && _ocrTotaleValido) ? Math.floor(totale) : 0;
+  var punti = (eraFoto && totale > 0) ? Math.floor(totale) : 0;
   if(punti > 0) userData.punti = (userData.punti||0) + punti;
   userData.scontrini = (userData.scontrini||0) + 1;
   userData.risparmio = parseFloat(((userData.risparmio||0) + risparmio).toFixed(2));
@@ -2206,10 +2216,10 @@ function renderGriglia(lista) {
   if (!grid) return;
   if (lista.length === 0) {
     grid.innerHTML = '';
-    noRes.style.display = 'block';
+    if (noRes) noRes.style.display = 'block';
     return;
   }
-  noRes.style.display = 'none';
+  if (noRes) noRes.style.display = 'none';
   grid.innerHTML = lista.map(function(r) {
     var cls = r.diff === 'Facile' ? 'diff-easy' : r.diff === 'Media' ? 'diff-med' : 'diff-hard';
     return '<div class="ricetta-card" onclick="apriRicetta(' + parseInt(r.id) + ')">'
@@ -3034,9 +3044,6 @@ function initMappa(){
   _mapAvviaConPosizione();
 }
 
-// Alias per compatibilità con il resto del codice
-function aggiornaMappaPosizione(){ initMappa(); }
-function caricaGoogleMaps(lat,lng){ initMappa(); }
 
 // ─── Recupera posizione poi inizializza la mappa ─────────────────────────
 function _mapAvviaConPosizione(){
@@ -3315,5 +3322,15 @@ function _mapSetLoading(msg, pct){
 </script>
 <!-- Leaflet JS – caricato DOPO il DOM -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<!-- Service Worker per PWA offline -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+      console.warn('SW registration failed:', err);
+    });
+  });
+}
+</script>
 </body>
 </html>
