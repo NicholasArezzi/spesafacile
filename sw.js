@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spesaoggi-v3';
+const CACHE_NAME = 'spesaoggi-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

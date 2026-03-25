@@ -47,6 +47,9 @@ const APP_CONFIG = {
   BADGE_RISPARMIO:   50,
 
   // Supabase (inserire le credenziali del tuo progetto)
+  // SICUREZZA: la ANON KEY è pubblica per design in Supabase (non è un segreto).
+  // La protezione dei dati è garantita dalle Row Level Security (RLS) policies
+  // configurate sul progetto Supabase — assicurarsi che siano abilitate su tutte le tabelle.
   SUPABASE_URL:      'https://nzrelznyvzhkhbplihpg.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56cmVsem55dnpoa2hicGxpaHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMzE2MzUsImV4cCI6MjA4ODgwNzYzNX0.R1g2Pjqxlpv9d08OZ5eAzjd5zk_WxbwbDANxLOS-nRk',
 

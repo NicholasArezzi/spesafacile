@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SpesaOggi">
 <meta name="theme-color" content="#071A0C">
+<meta name="app-version" content="1.1.0">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 
@@ -2972,7 +2973,7 @@ async function eliminaAccount(){
 function hasAffiliate(nomeNegozio){
   if(!nomeNegozio || !APP_CONFIG.AFFILIATES) return false;
   var key = nomeNegozio.toLowerCase();
-  for(var k in APP_CONFIG.AFFILIATES){ if(key.includes(k)) return true; }
+  for(var k in APP_CONFIG.AFFILIATES){ if(key.includes(k) && APP_CONFIG.AFFILIATES[k]) return true; }
   return false;
 }
 
