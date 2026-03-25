@@ -1604,7 +1604,7 @@ function aggiornaListaProdotti(){
   badge.textContent = scProdotti.length;
   list.innerHTML = scProdotti.map(function(p, i){
     var entry = cercaInDB(p.name);
-    var prezzo = entry ? '€'+(entry.p[storeIdx]*(p.qty||1)).toFixed(2) : '';
+    var prezzo = (entry && storeIdx >= 0 && storeIdx < entry.p.length && entry.p[storeIdx]) ? '€'+(entry.p[storeIdx]*(p.qty||1)).toFixed(2) : '';
     var prezzoHtml = prezzo ? ' <span style="color:var(--green);font-weight:700;">'+prezzo+'</span>' : '';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--surface2);">'
          + '<span style="font-size:13px;">'+(p.qty>1?p.qty+'× ':'')+_escHtml(p.name)+prezzoHtml+'</span>'
@@ -1687,7 +1687,7 @@ function confermaScontrino(){
   if(_confBtn) _confBtn.disabled = true;
   var storeIdx = parseInt(storeEl.value);
   var risparmio = 0;
-  if(INDICI.length > 0) {
+  if(INDICI.length > 0 && storeIdx >= 0 && storeIdx < INDICI.length) {
     risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
   }
   var eraFoto = _scDaFoto; // salva prima che nascondiFormScontrino() resetti i flag
@@ -2262,7 +2262,7 @@ function apriRicetta(id) {
 
   if (el('m-title')) el('m-title').textContent = ricettaAperta.nome;
   if (el('m-emoji')) { el('m-emoji').textContent = ricettaAperta.emoji; el('m-emoji').style.background = ricettaAperta.bg; }
-  if (el('m-meta')) el('m-meta').textContent = '⏱ ' + ricettaAperta.tempo + ' · 🍽 ' + ricettaAperta.diff + ' · 📋 ' + ricettaAperta.ingredienti.length + ' ingredienti';
+  if (el('m-meta')) el('m-meta').textContent = '⏱ ' + ricettaAperta.tempo + ' · 🍽 ' + ricettaAperta.diff + ' · 📋 ' + (ricettaAperta.ingredienti || []).length + ' ingredienti';
   if (el('m-desc')) el('m-desc').textContent = ricettaAperta.desc || '';
   if (el('m-persone')) el('m-persone').textContent = persone;
   renderIngredienti();
@@ -2295,8 +2295,9 @@ function renderIngredienti() {
   var base = ricettaAperta.persone_base || 2;
   var mult = persone / base;
   var out = '';
-  for (var i = 0; i < ricettaAperta.ingredienti.length; i++) {
-    var ing = ricettaAperta.ingredienti[i];
+  var ingList = ricettaAperta.ingredienti || [];
+  for (var i = 0; i < ingList.length; i++) {
+    var ing = ingList[i];
     var qty = ing.q ? (Math.round(ing.q * mult * 10) / 10) + (ing.u ? ' ' + ing.u : '') : '';
     out += '<div class="ingr-row" onclick="toggleIngr(this.querySelector(\'.ingr-check\'))">';
     out += '<div class="ingr-check"></div>';
@@ -2853,6 +2854,7 @@ function generaOfferte(){
   var dd = String(oggi.getDate()).padStart(2,'0');
   var dataStr = oggi.getFullYear()+'-'+mm+'-'+dd;
   if(OFFERTE_CACHE && OFFERTE_DATA===dataStr) return OFFERTE_CACHE;
+  if(!DB_PREZZI || DB_PREZZI.length === 0) return [];
   var seed = oggi.getFullYear()*10000 + (oggi.getMonth()+1)*100 + oggi.getDate();
   function sr(s){ var x = Math.sin(s+1)*10000; return x-Math.floor(x); }
 
