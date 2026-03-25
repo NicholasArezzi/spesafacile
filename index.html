@@ -1524,10 +1524,15 @@ function eseguiOCR(file){
       },
       body: fd
     })
-      .then(function(r){ return r.json(); })
+      .then(function(r){
+        return r.text().then(function(txt){
+          try { return JSON.parse(txt); } catch(e) { return {}; }
+        });
+      })
       .then(function(d){
         var testo = '';
-        if(d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
+        if(d && d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
+        if(d && d.IsErroredOnProcessing) testo = '';
         if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
         popolaFormDaOCR(testo);
       })
