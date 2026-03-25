@@ -643,10 +643,10 @@ body{
           <div onclick="go('casa')" style="font-size:12px;color:var(--green);font-weight:700;cursor:pointer;">Vedi tutti →</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <div onclick="addItem('detersivo piatti');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🧴 Detersivo piatti</div>
-          <div onclick="addItem('carta igienica');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🧻 Carta igienica</div>
-          <div onclick="addItem('shampoo');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🚿 Shampoo</div>
-          <div onclick="addItem('dentifricio');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🪥 Dentifricio</div>
+          <div onclick="addItem('detersivo piatti')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🧴 Detersivo piatti</div>
+          <div onclick="addItem('carta igienica')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🧻 Carta igienica</div>
+          <div onclick="addItem('shampoo')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🚿 Shampoo</div>
+          <div onclick="addItem('dentifricio')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🪥 Dentifricio</div>
           <div onclick="go('casa')" style="background:var(--green);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#fff;">+ Altro →</div>
         </div>
       </div>
@@ -1486,32 +1486,57 @@ function inviaFoto(){
   input.click();
 }
 
+function comprimiImmagine(file, callback){
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var MAX_DIM = 1800;
+      var w = img.width, h = img.height;
+      if(w > MAX_DIM || h > MAX_DIM){
+        if(w > h){ h = Math.round(h * MAX_DIM / w); w = MAX_DIM; }
+        else { w = Math.round(w * MAX_DIM / h); h = MAX_DIM; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(function(blob){ callback(blob || file); }, 'image/jpeg', 0.85);
+    };
+    img.onerror = function(){ callback(file); };
+    img.src = e.target.result;
+  };
+  reader.onerror = function(){ callback(file); };
+  reader.readAsDataURL(file);
+}
+
 function eseguiOCR(file){
   document.getElementById('ocr-loading').style.display = 'block';
   document.getElementById('ocr-result').style.display = 'none';
-  var fd = new FormData();
-  fd.append('file', file);
-  fd.append('language', APP_CONFIG.OCR_LANGUAGE);
-  fetch(APP_CONFIG.OCR_EDGE_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + APP_CONFIG.SUPABASE_ANON_KEY,
-      'apikey': APP_CONFIG.SUPABASE_ANON_KEY
-    },
-    body: fd
-  })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      var testo = '';
-      if(d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
-      if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
-      popolaFormDaOCR(testo);
+  comprimiImmagine(file, function(blob){
+    var fd = new FormData();
+    fd.append('file', blob, 'scontrino.jpg');
+    fd.append('language', APP_CONFIG.OCR_LANGUAGE);
+    fetch(APP_CONFIG.OCR_EDGE_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + APP_CONFIG.SUPABASE_ANON_KEY,
+        'apikey': APP_CONFIG.SUPABASE_ANON_KEY
+      },
+      body: fd
     })
-    .catch(function(){
-      document.getElementById('ocr-loading').style.display = 'none';
-      showToast('Errore analisi immagine. Riprova o inserisci manualmente.');
-      popolaFormDaOCR('');
-    });
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var testo = '';
+        if(d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
+        if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
+        popolaFormDaOCR(testo);
+      })
+      .catch(function(){
+        document.getElementById('ocr-loading').style.display = 'none';
+        showToast('Errore analisi immagine. Riprova o inserisci manualmente.');
+        popolaFormDaOCR('');
+      });
+  });
 }
 
 function popolaFormDaOCR(testo){
@@ -1604,7 +1629,7 @@ function aggiornaListaProdotti(){
   badge.textContent = scProdotti.length;
   list.innerHTML = scProdotti.map(function(p, i){
     var entry = cercaInDB(p.name);
-    var prezzo = entry ? '€'+(entry.p[storeIdx]*(p.qty||1)).toFixed(2) : '';
+    var prezzo = (entry && storeIdx >= 0 && storeIdx < entry.p.length && entry.p[storeIdx]) ? '€'+(entry.p[storeIdx]*(p.qty||1)).toFixed(2) : '';
     var prezzoHtml = prezzo ? ' <span style="color:var(--green);font-weight:700;">'+prezzo+'</span>' : '';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--surface2);">'
          + '<span style="font-size:13px;">'+(p.qty>1?p.qty+'× ':'')+_escHtml(p.name)+prezzoHtml+'</span>'
@@ -1687,7 +1712,7 @@ function confermaScontrino(){
   if(_confBtn) _confBtn.disabled = true;
   var storeIdx = parseInt(storeEl.value);
   var risparmio = 0;
-  if(INDICI.length > 0) {
+  if(INDICI.length > 0 && storeIdx >= 0 && storeIdx < INDICI.length) {
     risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
   }
   var eraFoto = _scDaFoto; // salva prima che nascondiFormScontrino() resetti i flag
@@ -1876,9 +1901,10 @@ function aggiornaProfiloUI(){
   if(el('goal-eur-txt')) el('goal-eur-txt').textContent = '\u20ac' + eur50.toFixed(2).replace('.',',') + '/\u20ac' + APP_CONFIG.BADGE_RISPARMIO;
   if(el('goal-eur-bar')) el('goal-eur-bar').style.width = (eur50/APP_CONFIG.BADGE_RISPARMIO*100) + '%';
 
-  var ric5 = Math.min(userData.ricette, APP_CONFIG.BADGE_RICETTE);
-  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/' + APP_CONFIG.BADGE_RICETTE;
-  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/APP_CONFIG.BADGE_RICETTE*100) + '%';
+  var ricGoal = APP_CONFIG.BADGE_RICETTE_GOAL || 5;
+  var ric5 = Math.min(userData.ricette, ricGoal);
+  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/' + ricGoal;
+  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/ricGoal*100) + '%';
 }
 
 // ════════════════════════════════════════
@@ -2063,7 +2089,7 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     var savStr   = saving > 0.005 ? ('-\u20ac' + saving.toFixed(2).replace('.',',')) : '';
 
     if(isWinner){
-      out += '<div class="sc win" style="overflow:hidden;" onclick="goMappaStore(\'' + r.store + '\')">';
+      out += '<div class="sc win" style="overflow:hidden;" onclick="goMappaStore(\'' + _escHtml(r.store) + '\')">';
       out += '<div class="wb">\ud83c\udfc6 MIGLIOR PREZZO \u2014 TOCCA PER LA MAPPA</div>';
       out += '<div style="height:26px;"></div>';
     } else {
@@ -2071,8 +2097,8 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     }
 
     out += '<div style="display:flex;align-items:center;gap:10px;">';
-    out += '<div class="sico" style="width:44px;height:44px;flex-shrink:0;background:' + bg + ';color:' + fg + ';font-size:11px;font-weight:900;">' + abbr + '</div>';
-    out += '<div style="flex:1;min-width:0;font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;">' + r.store + '</div>';
+    out += '<div class="sico" style="width:44px;height:44px;flex-shrink:0;background:' + bg + ';color:' + fg + ';font-size:11px;font-weight:900;">' + _escHtml(abbr) + '</div>';
+    out += '<div style="flex:1;min-width:0;font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;">' + _escHtml(r.store) + '</div>';
     out += '<div style="text-align:right;flex-shrink:0;margin-left:6px;">';
     out += '<div style="font-family:\'Syne\',sans-serif;font-size:17px;font-weight:800;white-space:nowrap;">\u20ac' + r.tot.toFixed(2).replace('.',',') + '</div>';
     if(diffStr){
@@ -2261,7 +2287,7 @@ function apriRicetta(id) {
 
   if (el('m-title')) el('m-title').textContent = ricettaAperta.nome;
   if (el('m-emoji')) { el('m-emoji').textContent = ricettaAperta.emoji; el('m-emoji').style.background = ricettaAperta.bg; }
-  if (el('m-meta')) el('m-meta').textContent = '⏱ ' + ricettaAperta.tempo + ' · 🍽 ' + ricettaAperta.diff + ' · 📋 ' + ricettaAperta.ingredienti.length + ' ingredienti';
+  if (el('m-meta')) el('m-meta').textContent = '⏱ ' + ricettaAperta.tempo + ' · 🍽 ' + ricettaAperta.diff + ' · 📋 ' + (ricettaAperta.ingredienti || []).length + ' ingredienti';
   if (el('m-desc')) el('m-desc').textContent = ricettaAperta.desc || '';
   if (el('m-persone')) el('m-persone').textContent = persone;
   renderIngredienti();
@@ -2294,8 +2320,9 @@ function renderIngredienti() {
   var base = ricettaAperta.persone_base || 2;
   var mult = persone / base;
   var out = '';
-  for (var i = 0; i < ricettaAperta.ingredienti.length; i++) {
-    var ing = ricettaAperta.ingredienti[i];
+  var ingList = ricettaAperta.ingredienti || [];
+  for (var i = 0; i < ingList.length; i++) {
+    var ing = ingList[i];
     var qty = ing.q ? (Math.round(ing.q * mult * 10) / 10) + (ing.u ? ' ' + ing.u : '') : '';
     out += '<div class="ingr-row" onclick="toggleIngr(this.querySelector(\'.ingr-check\'))">';
     out += '<div class="ingr-check"></div>';
@@ -2413,7 +2440,12 @@ var _dbPromise = Promise.all([
   CHAINS       = prod.chains;
   DB           = rec.recipes;
   prodottiCasa = casa.products;
-}).catch(function(e){ console.warn('Errore caricamento dati', e); });
+}).catch(function(e){
+  console.warn('Errore caricamento dati', e);
+  setTimeout(function(){
+    try { showToast('Errore caricamento dati. Ricarica la pagina.'); } catch(_){}
+  }, 2000);
+});
 
 // Aggiorna DB_PREZZI con i prezzi medi da Supabase (se disponibili)
 function aggiornaDBConSupabase(data){
@@ -2717,8 +2749,16 @@ function logout(){
   userData.userId         = null;
   userData.isOspite       = false;
   listaCorrente = [];
+  scProdotti = [];
+  _scDaFoto = false;
+  _ocrTotaleValido = false;
+  ricettaAperta = null;
+  catAttiva = 'Tutte';
+  diffAttiva = 'Tutte';
   var notepad = document.getElementById('notepad');
   if(notepad) notepad.value = '';
+  var modal = document.getElementById('modal');
+  if(modal) modal.classList.remove('open');
   try { aggiornaContatori(); } catch(e){}
   go('login');
   showToast('Arrivederci!');
@@ -2839,6 +2879,7 @@ function generaOfferte(){
   var dd = String(oggi.getDate()).padStart(2,'0');
   var dataStr = oggi.getFullYear()+'-'+mm+'-'+dd;
   if(OFFERTE_CACHE && OFFERTE_DATA===dataStr) return OFFERTE_CACHE;
+  if(!DB_PREZZI || DB_PREZZI.length === 0) return [];
   var seed = oggi.getFullYear()*10000 + (oggi.getMonth()+1)*100 + oggi.getDate();
   function sr(s){ var x = Math.sin(s+1)*10000; return x-Math.floor(x); }
 

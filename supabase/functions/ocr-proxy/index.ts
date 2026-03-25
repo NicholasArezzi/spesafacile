@@ -42,6 +42,8 @@ serve(async (req) => {
     fd.append("apikey", ocrKey);
     fd.append("language", language);
     fd.append("isOverlayRequired", "false");
+    fd.append("scale", "true");
+    fd.append("OCREngine", "2");
 
     const ocrResp = await fetch("https://api.ocr.space/parse/image", {
       method: "POST",
