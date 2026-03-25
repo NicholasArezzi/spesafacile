@@ -643,10 +643,10 @@ body{
           <div onclick="go('casa')" style="font-size:12px;color:var(--green);font-weight:700;cursor:pointer;">Vedi tutti →</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <div onclick="addItem('detersivo piatti');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🧴 Detersivo piatti</div>
-          <div onclick="addItem('carta igienica');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🧻 Carta igienica</div>
-          <div onclick="addItem('shampoo');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🚿 Shampoo</div>
-          <div onclick="addItem('dentifricio');showToast('Aggiunto alla lista!')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🪥 Dentifricio</div>
+          <div onclick="addItem('detersivo piatti')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🧴 Detersivo piatti</div>
+          <div onclick="addItem('carta igienica')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🧻 Carta igienica</div>
+          <div onclick="addItem('shampoo')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🚿 Shampoo</div>
+          <div onclick="addItem('dentifricio')" style="background:var(--surface2);border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">🪥 Dentifricio</div>
           <div onclick="go('casa')" style="background:var(--green);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#fff;">+ Altro →</div>
         </div>
       </div>
@@ -1876,9 +1876,10 @@ function aggiornaProfiloUI(){
   if(el('goal-eur-txt')) el('goal-eur-txt').textContent = '\u20ac' + eur50.toFixed(2).replace('.',',') + '/\u20ac' + APP_CONFIG.BADGE_RISPARMIO;
   if(el('goal-eur-bar')) el('goal-eur-bar').style.width = (eur50/APP_CONFIG.BADGE_RISPARMIO*100) + '%';
 
-  var ric5 = Math.min(userData.ricette, APP_CONFIG.BADGE_RICETTE);
-  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/' + APP_CONFIG.BADGE_RICETTE;
-  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/APP_CONFIG.BADGE_RICETTE*100) + '%';
+  var ricGoal = APP_CONFIG.BADGE_RICETTE_GOAL || 5;
+  var ric5 = Math.min(userData.ricette, ricGoal);
+  if(el('goal-ric-txt')) el('goal-ric-txt').textContent = ric5 + '/' + ricGoal;
+  if(el('goal-ric-bar')) el('goal-ric-bar').style.width = (ric5/ricGoal*100) + '%';
 }
 
 // ════════════════════════════════════════
@@ -2063,7 +2064,7 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     var savStr   = saving > 0.005 ? ('-\u20ac' + saving.toFixed(2).replace('.',',')) : '';
 
     if(isWinner){
-      out += '<div class="sc win" style="overflow:hidden;" onclick="goMappaStore(\'' + r.store + '\')">';
+      out += '<div class="sc win" style="overflow:hidden;" onclick="goMappaStore(\'' + _escHtml(r.store) + '\')">';
       out += '<div class="wb">\ud83c\udfc6 MIGLIOR PREZZO \u2014 TOCCA PER LA MAPPA</div>';
       out += '<div style="height:26px;"></div>';
     } else {
@@ -2071,8 +2072,8 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     }
 
     out += '<div style="display:flex;align-items:center;gap:10px;">';
-    out += '<div class="sico" style="width:44px;height:44px;flex-shrink:0;background:' + bg + ';color:' + fg + ';font-size:11px;font-weight:900;">' + abbr + '</div>';
-    out += '<div style="flex:1;min-width:0;font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;">' + r.store + '</div>';
+    out += '<div class="sico" style="width:44px;height:44px;flex-shrink:0;background:' + bg + ';color:' + fg + ';font-size:11px;font-weight:900;">' + _escHtml(abbr) + '</div>';
+    out += '<div style="flex:1;min-width:0;font-family:\'Syne\',sans-serif;font-size:16px;font-weight:800;">' + _escHtml(r.store) + '</div>';
     out += '<div style="text-align:right;flex-shrink:0;margin-left:6px;">';
     out += '<div style="font-family:\'Syne\',sans-serif;font-size:17px;font-weight:800;white-space:nowrap;">\u20ac' + r.tot.toFixed(2).replace('.',',') + '</div>';
     if(diffStr){
@@ -2413,7 +2414,12 @@ var _dbPromise = Promise.all([
   CHAINS       = prod.chains;
   DB           = rec.recipes;
   prodottiCasa = casa.products;
-}).catch(function(e){ console.warn('Errore caricamento dati', e); });
+}).catch(function(e){
+  console.warn('Errore caricamento dati', e);
+  setTimeout(function(){
+    try { showToast('Errore caricamento dati. Ricarica la pagina.'); } catch(_){}
+  }, 2000);
+});
 
 // Aggiorna DB_PREZZI con i prezzi medi da Supabase (se disponibili)
 function aggiornaDBConSupabase(data){
@@ -2717,8 +2723,16 @@ function logout(){
   userData.userId         = null;
   userData.isOspite       = false;
   listaCorrente = [];
+  scProdotti = [];
+  _scDaFoto = false;
+  _ocrTotaleValido = false;
+  ricettaAperta = null;
+  catAttiva = 'Tutte';
+  diffAttiva = 'Tutte';
   var notepad = document.getElementById('notepad');
   if(notepad) notepad.value = '';
+  var modal = document.getElementById('modal');
+  if(modal) modal.classList.remove('open');
   try { aggiornaContatori(); } catch(e){}
   go('login');
   showToast('Arrivederci!');

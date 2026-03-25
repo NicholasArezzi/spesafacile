@@ -43,8 +43,9 @@ const APP_CONFIG = {
   BADGE_LISTE:       1,
   BADGE_SCONTRINI_1: 1,
   BADGE_RICETTE:     1,
-  BADGE_SCONTRINI_5: 5,
-  BADGE_RISPARMIO:   50,
+  BADGE_SCONTRINI_5:   5,
+  BADGE_RISPARMIO:    50,
+  BADGE_RICETTE_GOAL:  5,
 
   // Supabase (inserire le credenziali del tuo progetto)
   // SICUREZZA: la ANON KEY è pubblica per design in Supabase (non è un segreto).
