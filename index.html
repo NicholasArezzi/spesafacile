@@ -1486,32 +1486,57 @@ function inviaFoto(){
   input.click();
 }
 
+function comprimiImmagine(file, callback){
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var MAX_DIM = 1800;
+      var w = img.width, h = img.height;
+      if(w > MAX_DIM || h > MAX_DIM){
+        if(w > h){ h = Math.round(h * MAX_DIM / w); w = MAX_DIM; }
+        else { w = Math.round(w * MAX_DIM / h); h = MAX_DIM; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(function(blob){ callback(blob || file); }, 'image/jpeg', 0.85);
+    };
+    img.onerror = function(){ callback(file); };
+    img.src = e.target.result;
+  };
+  reader.onerror = function(){ callback(file); };
+  reader.readAsDataURL(file);
+}
+
 function eseguiOCR(file){
   document.getElementById('ocr-loading').style.display = 'block';
   document.getElementById('ocr-result').style.display = 'none';
-  var fd = new FormData();
-  fd.append('file', file);
-  fd.append('language', APP_CONFIG.OCR_LANGUAGE);
-  fetch(APP_CONFIG.OCR_EDGE_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + APP_CONFIG.SUPABASE_ANON_KEY,
-      'apikey': APP_CONFIG.SUPABASE_ANON_KEY
-    },
-    body: fd
-  })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      var testo = '';
-      if(d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
-      if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
-      popolaFormDaOCR(testo);
+  comprimiImmagine(file, function(blob){
+    var fd = new FormData();
+    fd.append('file', blob, 'scontrino.jpg');
+    fd.append('language', APP_CONFIG.OCR_LANGUAGE);
+    fetch(APP_CONFIG.OCR_EDGE_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + APP_CONFIG.SUPABASE_ANON_KEY,
+        'apikey': APP_CONFIG.SUPABASE_ANON_KEY
+      },
+      body: fd
     })
-    .catch(function(){
-      document.getElementById('ocr-loading').style.display = 'none';
-      showToast('Errore analisi immagine. Riprova o inserisci manualmente.');
-      popolaFormDaOCR('');
-    });
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var testo = '';
+        if(d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
+        if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
+        popolaFormDaOCR(testo);
+      })
+      .catch(function(){
+        document.getElementById('ocr-loading').style.display = 'none';
+        showToast('Errore analisi immagine. Riprova o inserisci manualmente.');
+        popolaFormDaOCR('');
+      });
+  });
 }
 
 function popolaFormDaOCR(testo){
