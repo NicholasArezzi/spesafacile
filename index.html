@@ -1535,7 +1535,9 @@ function popolaFormDaOCR(testo){
 
   var prods = [];
   testo.split('\n').forEach(function(riga){
-    var entry = cercaInDB(riga.trim());
+    var rigaTrim = riga.trim();
+    if(!rigaTrim) return;
+    var entry = cercaInDB(rigaTrim);
     if(entry && !prods.find(function(p){ return p.k === entry.k[0]; })){
       var mPrezzo = riga.match(/(\d+[.,]\d{2})/g);
       var prezzo = mPrezzo ? parseFloat(mPrezzo[mPrezzo.length-1].replace(',','.')) : null;
@@ -1653,11 +1655,11 @@ function scSearchProd(val){
       }
     }
   }
+  clearTimeout(_scSearchTimer);
   if(res.length>0){ _scRenderDrop(drop, res); return; }
   // Fallback: cerca su OpenFoodFacts
   drop.innerHTML = '<div style="padding:10px 16px;font-size:13px;color:var(--text2);">Cerco online...</div>';
   drop.style.display = 'block';
-  clearTimeout(_scSearchTimer);
   _scSearchTimer = setTimeout(function(){
     cercaInOpenFoodFacts(val).then(function(found){
       if(!found){ drop.style.display='none'; return; }
@@ -2532,6 +2534,7 @@ var prodottiCasa = [];
 
 function cercaInDB(nomeProd) {
   var q = nomeProd.toLowerCase().trim();
+  if(!q) return null;
   for(var i=0; i<DB_PREZZI.length; i++){
     var entry = DB_PREZZI[i];
     for(var j=0; j<entry.k.length; j++){
