@@ -2,6 +2,7 @@
   "name": "SpesaOggi",
   "short_name": "SpesaOggi",
   "description": "Scopri dove conviene fare la spesa oggi vicino a te.",
+  "version": "1.1.0",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#071A0C",
