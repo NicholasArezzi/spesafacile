@@ -2034,7 +2034,7 @@ function aggiornaConfrontoConLista(prodotti){
 
     var minP = Math.min.apply(null, prezzi);
     var bestIdx = prezzi.indexOf(minP);
-    var bestStore = STORES[bestIdx];
+    var bestStore = (bestIdx >= 0 && bestIdx < STORES.length) ? STORES[bestIdx] : '';
     var prodLabel = unit ? (qty + ' ' + _escHtml(unit) + ' ' + _escHtml(prod)) : (qty > 1 ? qty + 'x ' + _escHtml(prod) : _escHtml(prod));
     var unitaLabel = unit ? (confez.toFixed(1) + ' × ' + _escHtml(unita)) : (qty > 1 ? qty + ' × ' + _escHtml(unita) : _escHtml(unita));
 
@@ -2087,6 +2087,7 @@ function aggiornaConfrontoConLista(prodotti){
 function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
   var container = document.getElementById('t-rank-stores');
   if(!container) return;
+  if(!totali || totali.length === 0) return;
 
   var ranked = totali.map(function(tot, i){ return {store: stores[i], tot: tot}; });
   ranked.sort(function(a, b){ return a.tot - b.tot; });
