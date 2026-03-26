@@ -1531,14 +1531,29 @@ function eseguiOCR(file){
       })
       .then(function(d){
         var testo = '';
+        // Errore dal proxy Supabase (es. OCR_API_KEY non impostata, quota superata, ecc.)
+        if(d && d.error) {
+          document.getElementById('ocr-loading').style.display = 'none';
+          showToast('Servizio OCR non disponibile (' + d.error + '). Inserisci i dati manualmente.');
+          popolaFormDaOCR('');
+          return;
+        }
+        // Errore dall'API OCR.space (chiave non valida, quota finita, ecc.)
+        if(d && d.IsErroredOnProcessing) {
+          var errMsg = '';
+          if(d.ErrorMessage) errMsg = Array.isArray(d.ErrorMessage) ? d.ErrorMessage.join(' ') : String(d.ErrorMessage);
+          document.getElementById('ocr-loading').style.display = 'none';
+          showToast('OCR non riuscito' + (errMsg ? ': ' + errMsg : '') + '. Inserisci manualmente.');
+          popolaFormDaOCR('');
+          return;
+        }
         if(d && d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
-        if(d && d.IsErroredOnProcessing) testo = '';
         if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
         popolaFormDaOCR(testo);
       })
       .catch(function(){
         document.getElementById('ocr-loading').style.display = 'none';
-        showToast('Errore analisi immagine. Riprova o inserisci manualmente.');
+        showToast('Errore di rete analisi immagine. Riprova o inserisci manualmente.');
         popolaFormDaOCR('');
       });
   });
@@ -1708,7 +1723,7 @@ function scAggiungiProdotto(nome){
 }
 
 function confermaScontrino(){
-  var _confBtn = document.querySelector('#s-scontrino .btn-g');
+  var _confBtn = document.querySelector('#scontrino-step2 .btn-g');
   if(_confBtn && _confBtn.disabled) return;
   var storeEl = document.querySelector('input[name="sc-store"]:checked');
   var totale = parseFloat(document.getElementById('sc-totale').value);
@@ -1945,6 +1960,10 @@ function analizzaLista(){
     showToast('Scrivi almeno un prodotto nella lista!');
     return;
   }
+  if(!STORES.length){
+    showToast('Dati in caricamento, riprova tra un momento.');
+    return;
+  }
   listaCorrente = lines;
   userData.liste++;
   salvaUserData();
@@ -2019,7 +2038,7 @@ function aggiornaConfrontoConLista(prodotti){
 
     var minP = Math.min.apply(null, prezzi);
     var bestIdx = prezzi.indexOf(minP);
-    var bestStore = STORES[bestIdx];
+    var bestStore = (bestIdx >= 0 && bestIdx < STORES.length) ? STORES[bestIdx] : '';
     var prodLabel = unit ? (qty + ' ' + _escHtml(unit) + ' ' + _escHtml(prod)) : (qty > 1 ? qty + 'x ' + _escHtml(prod) : _escHtml(prod));
     var unitaLabel = unit ? (confez.toFixed(1) + ' × ' + _escHtml(unita)) : (qty > 1 ? qty + ' × ' + _escHtml(unita) : _escHtml(unita));
 
@@ -2048,8 +2067,8 @@ function aggiornaConfrontoConLista(prodotti){
   tprod.innerHTML = out;
 
   // ── Aggiorna banner risparmio con valori reali ──
-  var minTot = Math.min.apply(null, totali);
-  var maxTot = Math.max.apply(null, totali);
+  var minTot = totali.length ? Math.min.apply(null, totali) : 0;
+  var maxTot = totali.length ? Math.max.apply(null, totali) : 0;
   var bestStoreIdx = totali.indexOf(minTot);
   var worstStoreIdx = totali.indexOf(maxTot);
   var risparmio = (maxTot - minTot).toFixed(2);
@@ -2072,6 +2091,7 @@ function aggiornaConfrontoConLista(prodotti){
 function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
   var container = document.getElementById('t-rank-stores');
   if(!container) return;
+  if(!totali || totali.length === 0) return;
 
   var ranked = totali.map(function(tot, i){ return {store: stores[i], tot: tot}; });
   ranked.sort(function(a, b){ return a.tot - b.tot; });
@@ -2433,23 +2453,24 @@ function initHero() {
 
 // ── FETCH JSON — products.json / recipes.json / casa.json ──
 // I JSON sono locali → risolvono in <5ms, prima della fine splash (1.5s)
+// Ogni fetch è indipendente: un fallimento su recipes/casa non blocca il DB prezzi.
 var _dbPromise = Promise.all([
-  fetch('products.json').then(function(r){ return r.json(); }),
-  fetch('recipes.json').then(function(r){ return r.json(); }),
-  fetch('casa.json').then(function(r){ return r.json(); })
+  fetch('products.json').then(function(r){ return r.json(); }).catch(function(e){
+    console.warn('Errore caricamento products.json', e);
+    setTimeout(function(){ try { showToast('Errore caricamento dati. Ricarica la pagina.'); } catch(_){} }, 2000);
+    return null;
+  }),
+  fetch('recipes.json').then(function(r){ return r.json(); }).catch(function(e){
+    console.warn('Errore caricamento recipes.json', e); return null;
+  }),
+  fetch('casa.json').then(function(r){ return r.json(); }).catch(function(e){
+    console.warn('Errore caricamento casa.json', e); return null;
+  })
 ]).then(function(results){
   var prod = results[0], rec = results[1], casa = results[2];
-  DB_PREZZI    = prod.products;
-  STORES       = prod.stores;
-  INDICI       = prod.indices;
-  CHAINS       = prod.chains;
-  DB           = rec.recipes;
-  prodottiCasa = casa.products;
-}).catch(function(e){
-  console.warn('Errore caricamento dati', e);
-  setTimeout(function(){
-    try { showToast('Errore caricamento dati. Ricarica la pagina.'); } catch(_){}
-  }, 2000);
+  if(prod){ DB_PREZZI = prod.products; STORES = prod.stores; INDICI = prod.indices; CHAINS = prod.chains; }
+  if(rec)  DB = rec.recipes;
+  if(casa) prodottiCasa = casa.products;
 });
 
 // Aggiorna DB_PREZZI con i prezzi medi da Supabase (se disponibili)
