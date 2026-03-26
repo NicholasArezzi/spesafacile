@@ -1524,10 +1524,15 @@ function eseguiOCR(file){
       },
       body: fd
     })
-      .then(function(r){ return r.json(); })
+      .then(function(r){
+        return r.text().then(function(txt){
+          try { return JSON.parse(txt); } catch(e) { return {}; }
+        });
+      })
       .then(function(d){
         var testo = '';
-        if(d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
+        if(d && d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
+        if(d && d.IsErroredOnProcessing) testo = '';
         if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
         popolaFormDaOCR(testo);
       })
@@ -2015,8 +2020,8 @@ function aggiornaConfrontoConLista(prodotti){
     var minP = Math.min.apply(null, prezzi);
     var bestIdx = prezzi.indexOf(minP);
     var bestStore = STORES[bestIdx];
-    var prodLabel = unit ? (qty + ' ' + unit + ' ' + prod) : (qty > 1 ? qty + 'x ' + prod : prod);
-    var unitaLabel = unit ? (confez.toFixed(1) + ' × ' + unita) : (qty > 1 ? qty + ' × ' + unita : unita);
+    var prodLabel = unit ? (qty + ' ' + _escHtml(unit) + ' ' + _escHtml(prod)) : (qty > 1 ? qty + 'x ' + _escHtml(prod) : _escHtml(prod));
+    var unitaLabel = unit ? (confez.toFixed(1) + ' × ' + _escHtml(unita)) : (qty > 1 ? qty + ' × ' + _escHtml(unita) : _escHtml(unita));
 
     out += '<div style="padding:11px 0;border-bottom:1px solid var(--border);">';
     out += '<div style="display:flex;align-items:center;justify-content:space-between;">';
