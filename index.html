@@ -1960,6 +1960,10 @@ function analizzaLista(){
     showToast('Scrivi almeno un prodotto nella lista!');
     return;
   }
+  if(!STORES.length){
+    showToast('Dati in caricamento, riprova tra un momento.');
+    return;
+  }
   listaCorrente = lines;
   userData.liste++;
   salvaUserData();
@@ -2063,8 +2067,8 @@ function aggiornaConfrontoConLista(prodotti){
   tprod.innerHTML = out;
 
   // ── Aggiorna banner risparmio con valori reali ──
-  var minTot = Math.min.apply(null, totali);
-  var maxTot = Math.max.apply(null, totali);
+  var minTot = totali.length ? Math.min.apply(null, totali) : 0;
+  var maxTot = totali.length ? Math.max.apply(null, totali) : 0;
   var bestStoreIdx = totali.indexOf(minTot);
   var worstStoreIdx = totali.indexOf(maxTot);
   var risparmio = (maxTot - minTot).toFixed(2);
