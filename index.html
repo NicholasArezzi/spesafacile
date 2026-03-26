@@ -1723,7 +1723,7 @@ function scAggiungiProdotto(nome){
 }
 
 function confermaScontrino(){
-  var _confBtn = document.querySelector('#s-scontrino .btn-g');
+  var _confBtn = document.querySelector('#scontrino-step2 .btn-g');
   if(_confBtn && _confBtn.disabled) return;
   var storeEl = document.querySelector('input[name="sc-store"]:checked');
   var totale = parseFloat(document.getElementById('sc-totale').value);
@@ -2453,23 +2453,24 @@ function initHero() {
 
 // ── FETCH JSON — products.json / recipes.json / casa.json ──
 // I JSON sono locali → risolvono in <5ms, prima della fine splash (1.5s)
+// Ogni fetch è indipendente: un fallimento su recipes/casa non blocca il DB prezzi.
 var _dbPromise = Promise.all([
-  fetch('products.json').then(function(r){ return r.json(); }),
-  fetch('recipes.json').then(function(r){ return r.json(); }),
-  fetch('casa.json').then(function(r){ return r.json(); })
+  fetch('products.json').then(function(r){ return r.json(); }).catch(function(e){
+    console.warn('Errore caricamento products.json', e);
+    setTimeout(function(){ try { showToast('Errore caricamento dati. Ricarica la pagina.'); } catch(_){} }, 2000);
+    return null;
+  }),
+  fetch('recipes.json').then(function(r){ return r.json(); }).catch(function(e){
+    console.warn('Errore caricamento recipes.json', e); return null;
+  }),
+  fetch('casa.json').then(function(r){ return r.json(); }).catch(function(e){
+    console.warn('Errore caricamento casa.json', e); return null;
+  })
 ]).then(function(results){
   var prod = results[0], rec = results[1], casa = results[2];
-  DB_PREZZI    = prod.products;
-  STORES       = prod.stores;
-  INDICI       = prod.indices;
-  CHAINS       = prod.chains;
-  DB           = rec.recipes;
-  prodottiCasa = casa.products;
-}).catch(function(e){
-  console.warn('Errore caricamento dati', e);
-  setTimeout(function(){
-    try { showToast('Errore caricamento dati. Ricarica la pagina.'); } catch(_){}
-  }, 2000);
+  if(prod){ DB_PREZZI = prod.products; STORES = prod.stores; INDICI = prod.indices; CHAINS = prod.chains; }
+  if(rec)  DB = rec.recipes;
+  if(casa) prodottiCasa = casa.products;
 });
 
 // Aggiorna DB_PREZZI con i prezzi medi da Supabase (se disponibili)
