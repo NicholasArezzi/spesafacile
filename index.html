@@ -1531,14 +1531,29 @@ function eseguiOCR(file){
       })
       .then(function(d){
         var testo = '';
+        // Errore dal proxy Supabase (es. OCR_API_KEY non impostata, quota superata, ecc.)
+        if(d && d.error) {
+          document.getElementById('ocr-loading').style.display = 'none';
+          showToast('Servizio OCR non disponibile (' + d.error + '). Inserisci i dati manualmente.');
+          popolaFormDaOCR('');
+          return;
+        }
+        // Errore dall'API OCR.space (chiave non valida, quota finita, ecc.)
+        if(d && d.IsErroredOnProcessing) {
+          var errMsg = '';
+          if(d.ErrorMessage) errMsg = Array.isArray(d.ErrorMessage) ? d.ErrorMessage.join(' ') : String(d.ErrorMessage);
+          document.getElementById('ocr-loading').style.display = 'none';
+          showToast('OCR non riuscito' + (errMsg ? ': ' + errMsg : '') + '. Inserisci manualmente.');
+          popolaFormDaOCR('');
+          return;
+        }
         if(d && d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
-        if(d && d.IsErroredOnProcessing) testo = '';
         if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
         popolaFormDaOCR(testo);
       })
       .catch(function(){
         document.getElementById('ocr-loading').style.display = 'none';
-        showToast('Errore analisi immagine. Riprova o inserisci manualmente.');
+        showToast('Errore di rete analisi immagine. Riprova o inserisci manualmente.');
         popolaFormDaOCR('');
       });
   });
