@@ -3006,8 +3006,8 @@ function generaOfferte(){
     var entry = DB_PREZZI[idx];
     var prezzoMin = Math.min.apply(null, entry.p);
     var prezzoMax = Math.max.apply(null, entry.p);
-    var scontoPerc = 10 + Math.floor(sr(seed + j*53) * 25);
-    var prezzoNorm = parseFloat((prezzoMin * (1 + scontoPerc/100)).toFixed(2));
+    var scontoPerc = 10 + Math.floor(sr(seed + idx*53) * 25);
+    var prezzoNorm = parseFloat((prezzoMin / (1 - scontoPerc/100)).toFixed(2));
     var storeIdx = entry.p.indexOf(prezzoMin);
     var k0 = entry.k[0];
     var ico = '🛒';
