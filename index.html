@@ -1518,8 +1518,10 @@ function _ocrDiretto(blob, onSuccess, onFail){
   fd.append('isOverlayRequired', 'false');
   fd.append('scale', 'true');
   fd.append('OCREngine', '2');
-  fetch('https://api.ocr.space/parse/image', { method: 'POST', body: fd })
-    .then(function(r){ return r.json(); })
+  var ctrl = new AbortController();
+  var tid = setTimeout(function(){ ctrl.abort(); }, 20000);
+  fetch('https://api.ocr.space/parse/image', { method: 'POST', body: fd, signal: ctrl.signal })
+    .then(function(r){ clearTimeout(tid); return r.json(); })
     .then(function(d){
       if(d && d.IsErroredOnProcessing){
         var errMsg = d.ErrorMessage ? (Array.isArray(d.ErrorMessage) ? d.ErrorMessage.join(' ') : String(d.ErrorMessage)) : '';
@@ -1529,7 +1531,22 @@ function _ocrDiretto(blob, onSuccess, onFail){
       var testo = (d && d.ParsedResults && d.ParsedResults[0]) ? (d.ParsedResults[0].ParsedText || '') : '';
       onSuccess(testo);
     })
-    .catch(function(){ onFail('Errore di rete'); });
+    .catch(function(e){ clearTimeout(tid); onFail(e && e.name === 'AbortError' ? 'timeout' : 'Errore di rete'); });
+}
+
+// OCR locale con Tesseract.js — fallback finale, nessuna API key richiesta
+function _ocrTesseract(blob, onSuccess, onFail){
+  function runIt(){
+    Tesseract.recognize(blob, 'ita')
+      .then(function(r){ onSuccess(r.data.text || ''); })
+      .catch(function(e){ onFail(String(e)); });
+  }
+  if(typeof Tesseract !== 'undefined'){ runIt(); return; }
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+  s.onload = runIt;
+  s.onerror = function(){ onFail('Tesseract.js non disponibile'); };
+  document.head.appendChild(s);
 }
 
 function eseguiOCR(file){
@@ -1543,16 +1560,33 @@ function eseguiOCR(file){
     function gestisciRisultatoOCR(d){
       var testo = '';
       if(d && d.IsErroredOnProcessing){
-        var errMsg = '';
-        if(d.ErrorMessage) errMsg = Array.isArray(d.ErrorMessage) ? d.ErrorMessage.join(' ') : String(d.ErrorMessage);
-        document.getElementById('ocr-loading').style.display = 'none';
-        showToast('OCR non riuscito' + (errMsg ? ': ' + errMsg : '') + '. Inserisci manualmente.');
-        popolaFormDaOCR('');
+        // OCR cloud fallito → prova Tesseract locale
+        usaFallbackTesseract();
         return;
       }
       if(d && d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
       if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
       popolaFormDaOCR(testo);
+    }
+
+    function usaFallbackTesseract(){
+      var loaderSub = document.querySelector('#ocr-loading > div:last-child');
+      if(loaderSub) loaderSub.textContent = 'Analisi locale in corso...';
+      _ocrTesseract(blob,
+        function(testo){
+          var loaderSub2 = document.querySelector('#ocr-loading > div:last-child');
+          if(loaderSub2) loaderSub2.textContent = 'Analisi OCR dello scontrino';
+          if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
+          popolaFormDaOCR(testo);
+        },
+        function(){
+          var loaderSub2 = document.querySelector('#ocr-loading > div:last-child');
+          if(loaderSub2) loaderSub2.textContent = 'Analisi OCR dello scontrino';
+          document.getElementById('ocr-loading').style.display = 'none';
+          showToast('OCR non disponibile. Inserisci i dati manualmente.');
+          popolaFormDaOCR('');
+        }
+      );
     }
 
     function usaFallbackDiretto(motivo){
@@ -1562,13 +1596,15 @@ function eseguiOCR(file){
           if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
           popolaFormDaOCR(testo);
         },
-        function(err){
-          document.getElementById('ocr-loading').style.display = 'none';
-          showToast('OCR non disponibile (' + (motivo || err) + '). Inserisci i dati manualmente.');
-          popolaFormDaOCR('');
+        function(){
+          // OCR.space diretto fallito → prova Tesseract locale
+          usaFallbackTesseract();
         }
       );
     }
+
+    var proxyCtrl = new AbortController();
+    var proxyTid = setTimeout(function(){ proxyCtrl.abort(); }, 25000);
 
     fetch(APP_CONFIG.OCR_EDGE_URL, {
       method: 'POST',
@@ -1576,11 +1612,20 @@ function eseguiOCR(file){
         'Authorization': 'Bearer ' + APP_CONFIG.SUPABASE_ANON_KEY,
         'apikey': APP_CONFIG.SUPABASE_ANON_KEY
       },
-      body: fd
+      body: fd,
+      signal: proxyCtrl.signal
     })
       .then(function(r){
+        clearTimeout(proxyTid);
+        var ok = r.ok, status = r.status;
         return r.text().then(function(txt){
-          try { return JSON.parse(txt); } catch(e) { return {}; }
+          try {
+            var json = JSON.parse(txt);
+            if(!ok && !json.error) json = { error: 'HTTP ' + status };
+            return json;
+          } catch(e) {
+            return { error: ok ? 'Risposta non valida' : 'HTTP ' + status };
+          }
         });
       })
       .then(function(d){
@@ -1591,9 +1636,10 @@ function eseguiOCR(file){
         }
         gestisciRisultatoOCR(d);
       })
-      .catch(function(){
-        // Errore di rete verso il proxy → fallback diretto
-        usaFallbackDiretto('proxy non raggiungibile');
+      .catch(function(err){
+        clearTimeout(proxyTid);
+        // Errore di rete o timeout verso il proxy → fallback diretto
+        usaFallbackDiretto(err && err.name === 'AbortError' ? 'timeout' : 'proxy non raggiungibile');
       });
   });
 }
@@ -2960,8 +3006,8 @@ function generaOfferte(){
     var entry = DB_PREZZI[idx];
     var prezzoMin = Math.min.apply(null, entry.p);
     var prezzoMax = Math.max.apply(null, entry.p);
-    var scontoPerc = 10 + Math.floor(sr(seed + j*53) * 25);
-    var prezzoNorm = parseFloat((prezzoMin * (1 + scontoPerc/100)).toFixed(2));
+    var scontoPerc = 10 + Math.floor(sr(seed + idx*53) * 25);
+    var prezzoNorm = parseFloat((prezzoMin / (1 - scontoPerc/100)).toFixed(2));
     var storeIdx = entry.p.indexOf(prezzoMin);
     var k0 = entry.k[0];
     var ico = '🛒';
