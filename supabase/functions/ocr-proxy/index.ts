@@ -1,11 +1,9 @@
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -31,7 +29,8 @@ serve(async (req) => {
 
     const ocrKey = Deno.env.get("OCR_API_KEY");
     if (!ocrKey) {
-      return new Response(JSON.stringify({ error: "Configurazione mancante" }), {
+      console.error("[ocr-proxy] OCR_API_KEY non impostata");
+      return new Response(JSON.stringify({ error: "Configurazione mancante: OCR_API_KEY non impostata" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -45,6 +44,8 @@ serve(async (req) => {
     fd.append("scale", "true");
     fd.append("OCREngine", "2");
 
+    console.log("[ocr-proxy] Invio richiesta a OCR.space, file size:", file.size);
+
     const ocrResp = await fetch("https://api.ocr.space/parse/image", {
       method: "POST",
       body: fd,
@@ -53,20 +54,21 @@ serve(async (req) => {
     if (!ocrResp.ok) {
       const errBody = await ocrResp.text();
       console.error("[ocr-proxy] OCR API error:", ocrResp.status, errBody);
-      return new Response(JSON.stringify({ error: "Errore OCR API", status: ocrResp.status }), {
+      return new Response(JSON.stringify({ error: `Errore OCR API (${ocrResp.status})`, details: errBody }), {
         status: ocrResp.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const result = await ocrResp.json();
+    console.log("[ocr-proxy] OCR completato, IsErroredOnProcessing:", result?.IsErroredOnProcessing);
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("[ocr-proxy] Unexpected error:", e);
-    return new Response(JSON.stringify({ error: "Errore interno" }), {
+    return new Response(JSON.stringify({ error: "Errore interno: " + String(e) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
