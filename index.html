@@ -1509,6 +1509,29 @@ function comprimiImmagine(file, callback){
   reader.readAsDataURL(file);
 }
 
+// Chiamata OCR.space diretta (fallback quando il proxy Supabase non è configurato)
+function _ocrDiretto(blob, onSuccess, onFail){
+  var fd = new FormData();
+  fd.append('file', blob, 'scontrino.jpg');
+  fd.append('apikey', 'helloworld');
+  fd.append('language', APP_CONFIG.OCR_LANGUAGE);
+  fd.append('isOverlayRequired', 'false');
+  fd.append('scale', 'true');
+  fd.append('OCREngine', '2');
+  fetch('https://api.ocr.space/parse/image', { method: 'POST', body: fd })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.IsErroredOnProcessing){
+        var errMsg = d.ErrorMessage ? (Array.isArray(d.ErrorMessage) ? d.ErrorMessage.join(' ') : String(d.ErrorMessage)) : '';
+        onFail(errMsg || 'OCR non riuscito');
+        return;
+      }
+      var testo = (d && d.ParsedResults && d.ParsedResults[0]) ? (d.ParsedResults[0].ParsedText || '') : '';
+      onSuccess(testo);
+    })
+    .catch(function(){ onFail('Errore di rete'); });
+}
+
 function eseguiOCR(file){
   document.getElementById('ocr-loading').style.display = 'block';
   document.getElementById('ocr-result').style.display = 'none';
@@ -1516,6 +1539,37 @@ function eseguiOCR(file){
     var fd = new FormData();
     fd.append('file', blob, 'scontrino.jpg');
     fd.append('language', APP_CONFIG.OCR_LANGUAGE);
+
+    function gestisciRisultatoOCR(d){
+      var testo = '';
+      if(d && d.IsErroredOnProcessing){
+        var errMsg = '';
+        if(d.ErrorMessage) errMsg = Array.isArray(d.ErrorMessage) ? d.ErrorMessage.join(' ') : String(d.ErrorMessage);
+        document.getElementById('ocr-loading').style.display = 'none';
+        showToast('OCR non riuscito' + (errMsg ? ': ' + errMsg : '') + '. Inserisci manualmente.');
+        popolaFormDaOCR('');
+        return;
+      }
+      if(d && d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
+      if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
+      popolaFormDaOCR(testo);
+    }
+
+    function usaFallbackDiretto(motivo){
+      // Il proxy Supabase non è disponibile: riprova direttamente via OCR.space
+      _ocrDiretto(blob,
+        function(testo){
+          if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
+          popolaFormDaOCR(testo);
+        },
+        function(err){
+          document.getElementById('ocr-loading').style.display = 'none';
+          showToast('OCR non disponibile (' + (motivo || err) + '). Inserisci i dati manualmente.');
+          popolaFormDaOCR('');
+        }
+      );
+    }
+
     fetch(APP_CONFIG.OCR_EDGE_URL, {
       method: 'POST',
       headers: {
@@ -1530,31 +1584,16 @@ function eseguiOCR(file){
         });
       })
       .then(function(d){
-        var testo = '';
-        // Errore dal proxy Supabase (es. OCR_API_KEY non impostata, quota superata, ecc.)
+        // Errore dal proxy Supabase (es. OCR_API_KEY non impostata) → fallback diretto
         if(d && d.error) {
-          document.getElementById('ocr-loading').style.display = 'none';
-          showToast('Servizio OCR non disponibile (' + d.error + '). Inserisci i dati manualmente.');
-          popolaFormDaOCR('');
+          usaFallbackDiretto(d.error);
           return;
         }
-        // Errore dall'API OCR.space (chiave non valida, quota finita, ecc.)
-        if(d && d.IsErroredOnProcessing) {
-          var errMsg = '';
-          if(d.ErrorMessage) errMsg = Array.isArray(d.ErrorMessage) ? d.ErrorMessage.join(' ') : String(d.ErrorMessage);
-          document.getElementById('ocr-loading').style.display = 'none';
-          showToast('OCR non riuscito' + (errMsg ? ': ' + errMsg : '') + '. Inserisci manualmente.');
-          popolaFormDaOCR('');
-          return;
-        }
-        if(d && d.ParsedResults && d.ParsedResults[0]) testo = d.ParsedResults[0].ParsedText || '';
-        if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
-        popolaFormDaOCR(testo);
+        gestisciRisultatoOCR(d);
       })
       .catch(function(){
-        document.getElementById('ocr-loading').style.display = 'none';
-        showToast('Errore di rete analisi immagine. Riprova o inserisci manualmente.');
-        popolaFormDaOCR('');
+        // Errore di rete verso il proxy → fallback diretto
+        usaFallbackDiretto('proxy non raggiungibile');
       });
   });
 }
@@ -3133,11 +3172,13 @@ function _mapAvviaConPosizione(){
           userLat = d.latitude; userLng = d.longitude;
           if(d.city) userData.citta = d.city;
         }
-        _mapRender(userLat || APP_CONFIG.FALLBACK_LAT_ITALY, userLng || APP_CONFIG.FALLBACK_LNG_ITALY);
+        // Zoom 12 se l'IP ha restituito coordinate (precisione ~città), 6 altrimenti (tutta Italia)
+        var ipZoom = (userLat && userLng) ? 12 : APP_CONFIG.MAP_ZOOM_DEFAULT;
+        _mapRender(userLat || APP_CONFIG.FALLBACK_LAT_ITALY, userLng || APP_CONFIG.FALLBACK_LNG_ITALY, ipZoom);
         showToast('Posizione approssimativa. Tocca 📍 GPS per usare il tuo GPS reale.');
       })
       .catch(function(){
-        _mapRender(APP_CONFIG.FALLBACK_LAT_ITALY, APP_CONFIG.FALLBACK_LNG_ITALY);
+        _mapRender(APP_CONFIG.FALLBACK_LAT_ITALY, APP_CONFIG.FALLBACK_LNG_ITALY, APP_CONFIG.MAP_ZOOM_DEFAULT);
         showToast('Posizione approssimativa. Tocca 📍 GPS per usare il tuo GPS reale.');
       });
   }
@@ -3204,13 +3245,14 @@ function rilevaGPSManuale(){
 }
 
 // ─── Render mappa Leaflet ────────────────────────────────────────────────
-function _mapRender(lat, lng){
+function _mapRender(lat, lng, zoom){
+  var z = zoom || APP_CONFIG.MAP_ZOOM_USER;
   var container = document.getElementById('leaflet-map');
   if(!container){ _mapNascondiLoading(); return; }
 
   // Se la mappa esiste già la sposto solo se coordinate cambiate
   if(_mapInstance && _mapInitialized){
-    _mapInstance.setView([lat, lng], APP_CONFIG.MAP_ZOOM_USER);
+    _mapInstance.setView([lat, lng], z);
     if(_mapUserMarker) _mapUserMarker.setLatLng([lat, lng]);
     setTimeout(function(){ _mapInstance.invalidateSize(); }, 100);
     _mapNascondiLoading();
@@ -3228,7 +3270,7 @@ function _mapRender(lat, lng){
       attributionControl: false,
       tap: true,
       tapTolerance: 15
-    }).setView([lat, lng], APP_CONFIG.MAP_ZOOM_USER);
+    }).setView([lat, lng], z);
 
     // Tile OpenStreetMap (gratuito, no API key)
     L.tileLayer(APP_CONFIG.TILE_URL, {
