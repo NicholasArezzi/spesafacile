@@ -1443,6 +1443,7 @@ function getChain(n){
 var scProdotti = [];
 var _scDaFoto = false;        // true solo se l'utente ha scattato una foto (anti-frode punti)
 var _ocrTotaleValido = false; // true solo se l'OCR ha estratto un totale numerico reale
+var _scImageHash = null;      // SHA-256 dell'immagine compressa (anti-duplicato)
 
 function mostraFormScontrino(){
   document.getElementById('scontrino-step1').style.display = 'none';
@@ -1458,6 +1459,7 @@ function nascondiFormScontrino(){
   scProdotti = [];
   _scDaFoto = false;
   _ocrTotaleValido = false;
+  _scImageHash = null;
 }
 
 function inviaManuale(){
@@ -1553,6 +1555,17 @@ function eseguiOCR(file){
   document.getElementById('ocr-loading').style.display = 'block';
   document.getElementById('ocr-result').style.display = 'none';
   comprimiImmagine(file, function(blob){
+    // Calcola SHA-256 dell'immagine compressa per il controllo anti-duplicato
+    _scImageHash = null;
+    if(window.crypto && window.crypto.subtle){
+      blob.arrayBuffer().then(function(buf){
+        window.crypto.subtle.digest('SHA-256', buf).then(function(hashBuf){
+          _scImageHash = Array.from(new Uint8Array(hashBuf))
+            .map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+        }).catch(function(){ _scImageHash = null; });
+      }).catch(function(){ _scImageHash = null; });
+    }
+
     var fd = new FormData();
     fd.append('file', blob, 'scontrino.jpg');
     fd.append('language', APP_CONFIG.OCR_LANGUAGE);
@@ -1815,55 +1828,106 @@ function confermaScontrino(){
   if(!storeEl){ showToast('Seleziona il supermercato!'); return; }
   if(!totale || totale<=0){ showToast('Inserisci il totale speso!'); return; }
   if(_confBtn) _confBtn.disabled = true;
+
   var storeIdx = parseInt(storeEl.value);
   var risparmio = 0;
   if(INDICI.length > 0 && storeIdx >= 0 && storeIdx < INDICI.length) {
     risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
   }
   var eraFoto = _scDaFoto; // salva prima che nascondiFormScontrino() resetti i flag
-  var punti = (eraFoto && totale > 0) ? Math.floor(totale) : 0;
-  if(punti > 0) userData.punti = (userData.punti||0) + punti;
-  userData.scontrini = (userData.scontrini||0) + 1;
-  userData.risparmio = parseFloat(((userData.risparmio||0) + risparmio).toFixed(2));
-  salvaUserData();
+  var puntiCalcolati = (eraFoto && totale > 0) ? Math.floor(totale) : 0;
 
-  // Invio dati a Supabase (fire-and-forget, non blocca l'UX)
-  if(_supabase && storeIdx >= 0 && scProdotti.length > 0){
-    var storeName = STORES[storeIdx] || '';
-    var citta = userData.citta || '';
-    var rows = scProdotti
-      .filter(function(p){ return p.price && p.price > 0 && p.price < 500; })
-      .map(function(p){
-        return {
-          store_name:   storeName,
-          product_key:  p.name,
-          price:        p.price,
-          unit:         p.u || '',
-          city:         citta,
-          user_id:      userData.userId   || null,
-          is_anonymous: userData.isOspite || !userData.userId
-        };
-      });
-    if(rows.length > 0){
-      _supabase.from('price_reports').insert(rows).then(function(){}).catch(function(){});
+  // Funzione interna che completa la registrazione con i punti definitivi
+  function _completaConferma(puntiFinali, motivoNoPunti){
+    if(puntiFinali > 0) userData.punti = (userData.punti||0) + puntiFinali;
+    userData.scontrini = (userData.scontrini||0) + 1;
+    userData.risparmio = parseFloat(((userData.risparmio||0) + risparmio).toFixed(2));
+    salvaUserData();
+
+    // Invio dati a Supabase (fire-and-forget, non blocca l'UX)
+    if(_supabase && storeIdx >= 0 && scProdotti.length > 0){
+      var storeName = STORES[storeIdx] || '';
+      var citta = userData.citta || '';
+      var rows = scProdotti
+        .filter(function(p){ return p.price && p.price > 0 && p.price < 500; })
+        .map(function(p){
+          return {
+            store_name:   storeName,
+            product_key:  p.name,
+            price:        p.price,
+            unit:         p.u || '',
+            city:         citta,
+            user_id:      userData.userId   || null,
+            is_anonymous: userData.isOspite || !userData.userId
+          };
+        });
+      if(rows.length > 0){
+        _supabase.from('price_reports').insert(rows).then(function(){}).catch(function(){});
+      }
     }
+
+    // Sync punti/scontrini a Supabase per utenti registrati
+    pushProfiloASupabase();
+
+    if(_confBtn) _confBtn.disabled = false;
+    aggiornaHome();
+    aggiornaProfiloUI();
+    nascondiFormScontrino();
+
+    var msg;
+    if(puntiFinali > 0){
+      msg = '+'+puntiFinali+' punti! 🎉';
+      if(risparmio > 0) msg += ' Potresti risparmiare \u20ac'+risparmio.toFixed(2)+' da '+(STORES[0]||'Eurospin');
+    } else if(motivoNoPunti === 'duplicato'){
+      msg = 'Scontrino già inserito! Nessun punto assegnato. 🚫';
+    } else if(motivoNoPunti === 'rate_limit'){
+      msg = 'Limite giornaliero raggiunto (max 5 scontrini/giorno). ⏳';
+    } else if(eraFoto){
+      msg = 'Scontrino registrato! Totale non rilevato dalla foto 📷';
+    } else {
+      msg = 'Scontrino registrato! (punti solo con foto 📷)';
+    }
+    showToast(msg);
+    setTimeout(function(){ go('home'); }, 1800);
   }
 
-  // Sync punti/scontrini a Supabase per utenti registrati
-  pushProfiloASupabase();
-
-  if(_confBtn) _confBtn.disabled = false;
-  aggiornaHome();
-  aggiornaProfiloUI();
-  nascondiFormScontrino();
-  var msg = punti > 0
-    ? '+'+punti+' punti! 🎉'
-    : (eraFoto
-        ? 'Scontrino registrato! Totale non rilevato dalla foto 📷'
-        : 'Scontrino registrato! (punti solo con foto 📷)');
-  if(risparmio>0 && punti>0) msg += ' Potresti risparmiare \u20ac'+risparmio.toFixed(2)+' da '+(STORES[0]||'Eurospin');
-  showToast(msg);
-  setTimeout(function(){ go('home'); }, 1800);
+  // Anti-duplicato e rate-limit: solo per utenti registrati con foto e hash disponibile
+  if(puntiCalcolati > 0 && _supabase && userData.userId && _scImageHash){
+    _supabase.from('receipt_hashes')
+      .select('id')
+      .eq('user_id', userData.userId)
+      .eq('hash', _scImageHash)
+      .limit(1)
+      .then(function(res){
+        if(res.data && res.data.length > 0){
+          // Scontrino già inserito in precedenza
+          _completaConferma(0, 'duplicato');
+          return;
+        }
+        // Controlla rate limit: max 5 scontrini con punti al giorno
+        var oggi = new Date().toISOString().split('T')[0];
+        _supabase.from('receipt_hashes')
+          .select('id')
+          .eq('user_id', userData.userId)
+          .gte('created_at', oggi + 'T00:00:00.000Z')
+          .then(function(rateRes){
+            var count = (rateRes.data || []).length;
+            if(count >= 5){
+              _completaConferma(0, 'rate_limit');
+              return;
+            }
+            // Hash nuovo e limite non superato: salva l'hash e assegna i punti
+            _supabase.from('receipt_hashes')
+              .insert({ user_id: userData.userId, hash: _scImageHash })
+              .then(function(){}).catch(function(){});
+            _completaConferma(puntiCalcolati);
+          })
+          .catch(function(){ _completaConferma(puntiCalcolati); });
+      })
+      .catch(function(){ _completaConferma(puntiCalcolati); });
+  } else {
+    _completaConferma(puntiCalcolati);
+  }
 }
 
 // ════════════════════════════════════════
