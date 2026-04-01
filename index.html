@@ -1033,7 +1033,7 @@ body{
       <div class="card"><div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">Perché caricare?</span></div><div class="cb2">
         <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;"><span style="font-size:28px;">⭐</span><div><div style="font-weight:600;">Punti proporzionali alla spesa</div><div style="font-size:12px;color:var(--text2);">1 punto per ogni €1 speso</div></div></div>
         <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;"><span style="font-size:28px;">📊</span><div><div style="font-weight:600;">Prezzi più precisi per tutti</div><div style="font-size:12px;color:var(--text2);">I tuoi dati migliorano l'app</div></div></div>
-        <div style="display:flex;gap:12px;align-items:center;cursor:pointer;" onclick="go('classifica')"><span style="font-size:28px;">🏆</span><div><div style="font-weight:600;">Scala la classifica di Milano</div><div style="font-size:12px;color:var(--green);font-weight:700;">Vai alla classifica →</div></div></div>
+        <div style="display:flex;gap:12px;align-items:center;cursor:pointer;" onclick="go('classifica')"><span style="font-size:28px;">🏆</span><div><div style="font-weight:600;">Scala la classifica</div><div style="font-size:12px;color:var(--green);font-weight:700;">Vai alla classifica →</div></div></div>
       </div></div>
     </div>
 
@@ -1114,7 +1114,7 @@ body{
       <div class="goal"><div class="goal-top"><span style="font-size:13px;font-weight:600;">👨‍🍳 Prova 5 ricette</span><span id="goal-ric-txt" style="font-size:12px;color:var(--text2);">0/5</span></div><div class="sbar"><div id="goal-ric-bar" class="sfill" style="width:0%;background:var(--purple);"></div></div></div>
     </div></div>
     <button class="btn-g" style="margin-bottom:10px;" onclick="go('scontrino')">🧾 Carica scontrino</button>
-    <button onclick="go('classifica')" style="width:100%;max-width:340px;margin:0 auto 10px;display:block;padding:14px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🏆 Vedi classifica Milano</button>
+    <button onclick="go('classifica')" style="width:100%;max-width:340px;margin:0 auto 10px;display:block;padding:14px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🏆 Vedi classifica</button>
     <button onclick="logout()" style="width:100%;max-width:340px;margin:6px auto 0;display:block;padding:14px;background:transparent;border:2px solid var(--red);color:var(--red);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">🚪 Esci dall'account</button>
 
     <div style="margin:20px 0 8px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;text-align:left;max-width:340px;margin-left:auto;margin-right:auto;">Informazioni legali</div>
@@ -1238,11 +1238,11 @@ body{
       <button onclick="go('profilo')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
-    <div class="chip ca">Milano 🏙️</div>
+    <div class="chip ca" id="class-city-chip">Italia 🇮🇹</div>
   </div>
   <div class="scroll-area"><div class="page">
     <div class="stitle">Classifica</div>
-    <div class="ssub">I migliori risparmiatori di Milano</div>
+    <div class="ssub" id="class-subtitle">I migliori risparmiatori</div>
     <div id="class-podio" style="margin-bottom:4px;"></div>
     <div class="card"><div class="ch"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;">🏅 Classifica completa</span></div>
       <div id="class-lista"></div>
@@ -1443,7 +1443,7 @@ function getChain(n){
 var scProdotti = [];
 var _scDaFoto = false;        // true solo se l'utente ha scattato una foto (anti-frode punti)
 var _ocrTotaleValido = false; // true solo se l'OCR ha estratto un totale numerico reale
-var _scImageHash = null;      // SHA-256 dell'immagine compressa (anti-duplicato)
+var _scImageHashPromise = Promise.resolve(null); // SHA-256 dell'immagine compressa (anti-duplicato)
 
 function mostraFormScontrino(){
   document.getElementById('scontrino-step1').style.display = 'none';
@@ -1459,7 +1459,7 @@ function nascondiFormScontrino(){
   scProdotti = [];
   _scDaFoto = false;
   _ocrTotaleValido = false;
-  _scImageHash = null;
+  _scImageHashPromise = Promise.resolve(null);
 }
 
 function inviaManuale(){
@@ -1511,30 +1511,6 @@ function comprimiImmagine(file, callback){
   reader.readAsDataURL(file);
 }
 
-// Chiamata OCR.space diretta (fallback quando il proxy Supabase non è configurato)
-function _ocrDiretto(blob, onSuccess, onFail){
-  var fd = new FormData();
-  fd.append('file', blob, 'scontrino.jpg');
-  fd.append('apikey', 'helloworld');
-  fd.append('language', APP_CONFIG.OCR_LANGUAGE);
-  fd.append('isOverlayRequired', 'false');
-  fd.append('scale', 'true');
-  fd.append('OCREngine', '2');
-  var ctrl = new AbortController();
-  var tid = setTimeout(function(){ ctrl.abort(); }, 20000);
-  fetch('https://api.ocr.space/parse/image', { method: 'POST', body: fd, signal: ctrl.signal })
-    .then(function(r){ clearTimeout(tid); return r.json(); })
-    .then(function(d){
-      if(d && d.IsErroredOnProcessing){
-        var errMsg = d.ErrorMessage ? (Array.isArray(d.ErrorMessage) ? d.ErrorMessage.join(' ') : String(d.ErrorMessage)) : '';
-        onFail(errMsg || 'OCR non riuscito');
-        return;
-      }
-      var testo = (d && d.ParsedResults && d.ParsedResults[0]) ? (d.ParsedResults[0].ParsedText || '') : '';
-      onSuccess(testo);
-    })
-    .catch(function(e){ clearTimeout(tid); onFail(e && e.name === 'AbortError' ? 'timeout' : 'Errore di rete'); });
-}
 
 // OCR locale con Tesseract.js — fallback finale, nessuna API key richiesta
 function _ocrTesseract(blob, onSuccess, onFail){
@@ -1556,14 +1532,15 @@ function eseguiOCR(file){
   document.getElementById('ocr-result').style.display = 'none';
   comprimiImmagine(file, function(blob){
     // Calcola SHA-256 dell'immagine compressa per il controllo anti-duplicato
-    _scImageHash = null;
     if(window.crypto && window.crypto.subtle){
-      blob.arrayBuffer().then(function(buf){
-        window.crypto.subtle.digest('SHA-256', buf).then(function(hashBuf){
-          _scImageHash = Array.from(new Uint8Array(hashBuf))
-            .map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
-        }).catch(function(){ _scImageHash = null; });
-      }).catch(function(){ _scImageHash = null; });
+      _scImageHashPromise = blob.arrayBuffer().then(function(buf){
+        return window.crypto.subtle.digest('SHA-256', buf);
+      }).then(function(hashBuf){
+        return Array.from(new Uint8Array(hashBuf))
+          .map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+      }).catch(function(){ return null; });
+    } else {
+      _scImageHashPromise = Promise.resolve(null);
     }
 
     var fd = new FormData();
@@ -1603,17 +1580,8 @@ function eseguiOCR(file){
     }
 
     function usaFallbackDiretto(motivo){
-      // Il proxy Supabase non è disponibile: riprova direttamente via OCR.space
-      _ocrDiretto(blob,
-        function(testo){
-          if(!testo) showToast('Testo non riconosciuto. Inserisci i dati manualmente.');
-          popolaFormDaOCR(testo);
-        },
-        function(){
-          // OCR.space diretto fallito → prova Tesseract locale
-          usaFallbackTesseract();
-        }
-      );
+      // Proxy Supabase non disponibile → Tesseract locale
+      usaFallbackTesseract();
     }
 
     var proxyCtrl = new AbortController();
@@ -1834,8 +1802,9 @@ function confermaScontrino(){
   if(INDICI.length > 0 && storeIdx >= 0 && storeIdx < INDICI.length) {
     risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
   }
-  var eraFoto = _scDaFoto; // salva prima che nascondiFormScontrino() resetti i flag
-  var puntiCalcolati = (eraFoto && totale > 0) ? Math.floor(totale) : 0;
+  var eraFoto = _scDaFoto;           // salva prima che nascondiFormScontrino() resetti i flag
+  var eraOCRTotale = _ocrTotaleValido; // punti solo se il totale è stato rilevato dall'OCR
+  var puntiCalcolati = (eraFoto && eraOCRTotale && totale > 0) ? Math.floor(totale) : 0;
 
   // Funzione interna che completa la registrazione con i punti definitivi
   function _completaConferma(puntiFinali, motivoNoPunti){
@@ -1891,40 +1860,44 @@ function confermaScontrino(){
     setTimeout(function(){ go('home'); }, 1800);
   }
 
-  // Anti-duplicato e rate-limit: solo per utenti registrati con foto e hash disponibile
-  if(puntiCalcolati > 0 && _supabase && userData.userId && _scImageHash){
-    _supabase.from('receipt_hashes')
-      .select('id')
-      .eq('user_id', userData.userId)
-      .eq('hash', _scImageHash)
-      .limit(1)
-      .then(function(res){
-        if(res.data && res.data.length > 0){
-          // Scontrino già inserito in precedenza
-          _completaConferma(0, 'duplicato');
-          return;
-        }
-        // Controlla rate limit: max 5 scontrini con punti al giorno
-        var oggi = new Date().toISOString().split('T')[0];
-        _supabase.from('receipt_hashes')
-          .select('id')
-          .eq('user_id', userData.userId)
-          .gte('created_at', oggi + 'T00:00:00.000Z')
-          .then(function(rateRes){
-            var count = (rateRes.data || []).length;
-            if(count >= 5){
-              _completaConferma(0, 'rate_limit');
-              return;
-            }
-            // Hash nuovo e limite non superato: salva l'hash e assegna i punti
-            _supabase.from('receipt_hashes')
-              .insert({ user_id: userData.userId, hash: _scImageHash })
-              .then(function(){}).catch(function(){});
-            _completaConferma(puntiCalcolati);
-          })
-          .catch(function(){ _completaConferma(puntiCalcolati); });
-      })
-      .catch(function(){ _completaConferma(puntiCalcolati); });
+  // Anti-duplicato e rate-limit: solo per utenti registrati con foto
+  // Attende che la Promise SHA-256 sia risolta prima di procedere
+  if(puntiCalcolati > 0 && _supabase && userData.userId){
+    _scImageHashPromise.then(function(hash){
+      if(!hash){ _completaConferma(puntiCalcolati); return; }
+      _supabase.from('receipt_hashes')
+        .select('id')
+        .eq('user_id', userData.userId)
+        .eq('hash', hash)
+        .limit(1)
+        .then(function(res){
+          if(res.data && res.data.length > 0){
+            // Scontrino già inserito in precedenza
+            _completaConferma(0, 'duplicato');
+            return;
+          }
+          // Controlla rate limit: max 5 scontrini con punti al giorno
+          var oggi = new Date().toISOString().split('T')[0];
+          _supabase.from('receipt_hashes')
+            .select('id')
+            .eq('user_id', userData.userId)
+            .gte('created_at', oggi + 'T00:00:00.000Z')
+            .then(function(rateRes){
+              var count = (rateRes.data || []).length;
+              if(count >= 5){
+                _completaConferma(0, 'rate_limit');
+                return;
+              }
+              // Hash nuovo e limite non superato: salva l'hash e assegna i punti
+              _supabase.from('receipt_hashes')
+                .insert({ user_id: userData.userId, hash: hash })
+                .then(function(){}).catch(function(){});
+              _completaConferma(puntiCalcolati);
+            })
+            .catch(function(){ _completaConferma(puntiCalcolati); });
+        })
+        .catch(function(){ _completaConferma(puntiCalcolati); });
+    });
   } else {
     _completaConferma(puntiCalcolati);
   }
@@ -2113,8 +2086,10 @@ function analizzaLista(){
     showToast('Dati in caricamento, riprova tra un momento.');
     return;
   }
+  var listaKey = lines.join('\n');
+  var isNuova = listaKey !== listaCorrente.join('\n');
   listaCorrente = lines;
-  userData.liste++;
+  if(isNuova) userData.liste++;
   salvaUserData();
   aggiornaConfrontoConLista(lines.map(parseQtyProduct));
   go('confronta');
@@ -2334,12 +2309,14 @@ function rilevaCitta(){
     navigator.geolocation.getCurrentPosition(function(pos){
       var lat = pos.coords.latitude;
       var lng = pos.coords.longitude;
-      fetch(APP_CONFIG.NOMINATIM_URL + '?format=json&lat='+lat+'&lon='+lng)
+      fetch(APP_CONFIG.NOMINATIM_URL + '?format=json&lat='+lat+'&lon='+lng, {
+          headers: { 'User-Agent': 'SpesaFacile/1.1 (arezzinicholas@gmail.com)', 'Referer': location.origin }
+        })
         .then(function(r){ return r.json(); })
         .then(function(d){
           if(!d || !d.address) return;
           var city = d.address.city || d.address.town || d.address.village || '';
-          if(city){ userData.citta = city; aggiornaProfiloUI(); }
+          if(city){ userData.citta = city; salvaUserData(); pushProfiloASupabase(); aggiornaProfiloUI(); }
         }).catch(function(){});
     }, function(){}, {timeout:5000});
   }
@@ -2814,7 +2791,10 @@ async function cercaInOpenFoodFacts(query) {
       + '&search_simple=1&action=process&json=1'
       + '&countries=Italy&page_size=5'
       + '&fields=product_name,brands,quantity,categories_tags';
-    var res = await fetch(url);
+    var ctrl = new AbortController();
+    var tid = setTimeout(function(){ ctrl.abort(); }, 8000);
+    var res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
     if (!res.ok) return null;
     var data = await res.json();
     if (!data.products || !data.products.length) return null;
@@ -2958,7 +2938,6 @@ function aggiornaContatori(){
 // ════════════════════════════════════════
 // CLASSIFICA
 // ════════════════════════════════════════
-var NOMI_IT = ['Giulia R.','Marco B.','Sofia T.','Luca M.','Anna V.','Francesco P.','Chiara G.','Alessandro N.','Valentina C.','Matteo F.','Elena D.','Davide L.','Martina S.','Andrea B.','Sara C.','Riccardo M.','Federica A.','Simone T.','Elisa R.','Lorenzo G.','Giorgia V.','Emanuele P.','Alice N.','Nicola D.','Beatrice F.','Tommaso A.','Irene M.','Stefano C.','Laura B.','Roberto T.'];
 
 function _renderClassificaPodio(utenti){
   // Podio top 3
@@ -3000,6 +2979,13 @@ function renderClassifica(){
   document.getElementById('class-lista').innerHTML =
     '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">Carico classifica...</div>';
 
+  // Aggiorna chip e subtitle con la città dell'utente
+  var citta = userData.citta || '';
+  var chipEl = document.getElementById('class-city-chip');
+  var subEl  = document.getElementById('class-subtitle');
+  if(chipEl) chipEl.textContent = citta ? citta + ' 🏙️' : 'Italia 🇮🇹';
+  if(subEl)  subEl.textContent  = citta ? 'I migliori risparmiatori di ' + citta : 'I migliori risparmiatori';
+
   // Ospiti: solo se stessi + banner registrazione
   if(userData.isOspite){
     _renderClassificaPodio([{ nome: 'Tu (ospite)', punti: userData.punti||0, isMe: true }]);
@@ -3015,10 +3001,12 @@ function renderClassifica(){
     return;
   }
 
-  _supabase.from('user_profiles')
+  var query = _supabase.from('user_profiles')
     .select('user_id, nome, punti')
     .order('punti', { ascending: false })
-    .limit(50)
+    .limit(50);
+  if(citta) query = query.eq('citta', citta);
+  query
     .then(function(r){
       if(r.error || !r.data || r.data.length === 0){
         _renderClassificaPodio([{ nome: (userData.nome||'Tu')+' (tu)', punti: userData.punti||0, isMe: true }]);
