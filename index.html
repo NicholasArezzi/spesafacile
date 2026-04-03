@@ -1363,8 +1363,8 @@ function entraComeOspite(){
 async function registrati(){
   var nome  = (document.getElementById('reg-nome').value  || '').trim();
   var email = (document.getElementById('reg-email').value || '').trim();
-  var pass  = document.getElementById('reg-pass').value   || '';
-  var pass2 = document.getElementById('reg-pass2').value  || '';
+  var pass  = (document.getElementById('reg-pass').value  || '').trim();
+  var pass2 = (document.getElementById('reg-pass2').value || '').trim();
   var consenso = document.getElementById('reg-consenso');
   if(!nome)                          { showToast('Inserisci il tuo nome'); return; }
   if(!email.includes('@'))           { showToast('Inserisci una email valida'); return; }
@@ -1979,7 +1979,7 @@ function aggiornaHome(){
     userData.ricette   >= APP_CONFIG.BADGE_RICETTE,
     userData.scontrini >= APP_CONFIG.BADGE_SCONTRINI_5,
     userData.risparmio >= APP_CONFIG.BADGE_RISPARMIO
-  ].filter(Boolean).length + 1;
+  ].filter(Boolean).length;
   if(el('stat-badge')) el('stat-badge').textContent = badges;
   aggiornaProfiloUI();
   var cityEl = document.getElementById('home-city-title');
@@ -2242,7 +2242,7 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     var savStr   = saving > 0.005 ? ('-\u20ac' + saving.toFixed(2).replace('.',',')) : '';
 
     if(isWinner){
-      out += '<div class="sc win" style="overflow:hidden;" onclick="goMappaStore(\'' + _escHtml(r.store) + '\')">';
+      out += '<div class="sc win" style="overflow:hidden;" onclick="goMappaStore(\'' + _escJs(r.store) + '\')">';
       out += '<div class="wb">\ud83c\udfc6 MIGLIOR PREZZO \u2014 TOCCA PER LA MAPPA</div>';
       out += '<div style="height:26px;"></div>';
     } else {
@@ -2268,7 +2268,7 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     out += '</div>';
     if(isWinner && hasAffiliate(r.store)){
       out += '<div style="padding:10px 14px 4px;">';
-      out += '<button class="abtn" style="width:100%;background:var(--green);font-size:13px;padding:10px;border-radius:12px;" onclick="event.stopPropagation();apriNegozioOnline(\'' + _escHtml(r.store) + '\')">🛒 Ordina Online</button>';
+      out += '<button class="abtn" style="width:100%;background:var(--green);font-size:13px;padding:10px;border-radius:12px;" onclick="event.stopPropagation();apriNegozioOnline(\'' + _escJs(r.store) + '\')">🛒 Ordina Online</button>';
       out += '</div>';
     }
     out += '</div>';
@@ -2357,6 +2357,10 @@ function addItem(item){
 }
 function _escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// Escape per valori inseriti in stringhe JS singole-quotate all'interno di attributi onclick
+function _escJs(s){
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 }
 function showToast(msg){
   var existing=document.querySelector('.toast');
@@ -2917,7 +2921,6 @@ function filtraCasaCat(cat, btn){
 
 function addItemCasa(nome){
   addItem(nome);
-  showToast(nome + ' aggiunto alla lista!');
 }
 
 // -- LOGOUT --
@@ -3246,7 +3249,7 @@ function renderOfferte(){
       + '<div style="display:inline-block;background:#FEF3C7;color:#92400E;font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;margin-top:2px;">-'+o.sconto+'%</div>'
       + '</div>'
       + '</div>'
-      + (hasAffiliate(o.store) ? '<div style="padding:0 14px 10px;"><button class="abtn" style="width:100%;background:var(--green);font-size:12px;padding:8px;border-radius:10px;" onclick="apriNegozioOnline(\'' + _escHtml(o.store) + '\')">🛒 Acquista su ' + _escHtml(o.store) + '</button></div>' : '')
+      + (hasAffiliate(o.store) ? '<div style="padding:0 14px 10px;"><button class="abtn" style="width:100%;background:var(--green);font-size:12px;padding:8px;border-radius:10px;" onclick="apriNegozioOnline(\'' + _escJs(o.store) + '\')">🛒 Acquista su ' + _escHtml(o.store) + '</button></div>' : '')
       + '</div></div>';
   }).join('');
   document.getElementById('off-grid').innerHTML = html || '<div style="text-align:center;padding:40px 0;color:var(--text3);">Nessuna offerta</div>';
