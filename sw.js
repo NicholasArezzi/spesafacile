@@ -34,6 +34,9 @@ self.addEventListener('activate', function(event) {
   self.clients.claim();
 });
 
+// File JSON dati: network-first per ricevere sempre aggiornamenti
+var DATA_FILES = ['/products.json', '/recipes.json', '/casa.json'];
+
 self.addEventListener('fetch', function(event) {
   var url = new URL(event.request.url);
 
@@ -47,7 +50,24 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Cache-first per gli asset statici
+  // Network-first per i file JSON dati (aggiornamenti immediati)
+  if (DATA_FILES.indexOf(url.pathname) !== -1) {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        if (!response || response.status !== 200) return response;
+        var clone = response.clone();
+        caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(event.request, clone);
+        }).catch(function(){});
+        return response;
+      }).catch(function() {
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
+  // Cache-first per gli altri asset statici
   event.respondWith(
     caches.match(event.request).then(function(cached) {
       if (cached) return cached;

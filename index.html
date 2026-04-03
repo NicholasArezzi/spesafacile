@@ -1897,6 +1897,10 @@ function confermaScontrino(){
             .catch(function(){ _completaConferma(puntiCalcolati); });
         })
         .catch(function(){ _completaConferma(puntiCalcolati); });
+    }).catch(function(){
+      // Fallback: se la promise dell'hash fallisce in modo inatteso, sblocca il bottone
+      if(_confBtn) _confBtn.disabled = false;
+      _completaConferma(puntiCalcolati);
     });
   } else {
     _completaConferma(puntiCalcolati);
@@ -2304,22 +2308,25 @@ function updateCount(){
   if(el1) el1.textContent=n+' prodott'+(n===1?'o':'i')+' scritti';
   if(el2) el2.textContent=n+' prodott'+(n===1?'o':'i');
 }
+var _nominatimPending = false;
 function rilevaCitta(){
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(function(pos){
-      var lat = pos.coords.latitude;
-      var lng = pos.coords.longitude;
-      fetch(APP_CONFIG.NOMINATIM_URL + '?format=json&lat='+lat+'&lon='+lng, {
-          headers: { 'User-Agent': 'SpesaFacile/1.1 (arezzinicholas@gmail.com)', 'Referer': location.origin }
-        })
-        .then(function(r){ return r.json(); })
-        .then(function(d){
-          if(!d || !d.address) return;
-          var city = d.address.city || d.address.town || d.address.village || '';
-          if(city){ userData.citta = city; salvaUserData(); pushProfiloASupabase(); aggiornaProfiloUI(); }
-        }).catch(function(){});
-    }, function(){}, {timeout:5000});
-  }
+  if(_nominatimPending) return;
+  if(!navigator.geolocation) return;
+  _nominatimPending = true;
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat = pos.coords.latitude;
+    var lng = pos.coords.longitude;
+    fetch(APP_CONFIG.NOMINATIM_URL + '?format=json&lat='+lat+'&lon='+lng, {
+        headers: { 'User-Agent': 'SpesaFacile/1.1 (arezzinicholas@gmail.com)', 'Referer': location.origin }
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        _nominatimPending = false;
+        if(!d || !d.address) return;
+        var city = d.address.city || d.address.town || d.address.village || '';
+        if(city){ userData.citta = city; salvaUserData(); pushProfiloASupabase(); aggiornaProfiloUI(); }
+      }).catch(function(){ _nominatimPending = false; });
+  }, function(){ _nominatimPending = false; }, {timeout:5000});
 }
 
 function switchChips(tipo){
@@ -2349,7 +2356,7 @@ function addItem(item){
   showToast(item+' aggiunto!');
 }
 function _escHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function showToast(msg){
   var existing=document.querySelector('.toast');
@@ -2594,7 +2601,7 @@ var _dbPromise = Promise.all([
   })
 ]).then(function(results){
   var prod = results[0], rec = results[1], casa = results[2];
-  if(prod){ DB_PREZZI = prod.products; STORES = prod.stores; INDICI = prod.indices; CHAINS = prod.chains; }
+  if(prod){ DB_PREZZI = prod.products; STORES = prod.stores; INDICI = prod.indices; CHAINS = prod.chains; _buildDBIndex(); }
   if(rec)  DB = rec.recipes;
   if(casa) prodottiCasa = casa.products;
 });
@@ -2605,12 +2612,15 @@ function aggiornaDBConSupabase(data){
   data.forEach(function(row){
     var storeIdx = STORES.indexOf(row.store_name);
     if(storeIdx < 0) return;
-    for(var i=0; i<DB_PREZZI.length; i++){
-      if(DB_PREZZI[i].k.indexOf(row.product_key) >= 0){
-        var p = parseFloat(row.avg_price);
-        if(!isNaN(p) && p > 0) DB_PREZZI[i].p[storeIdx] = p;
-        break;
+    var entry = _dbIndex && _dbIndex[row.product_key];
+    if(!entry){
+      for(var i=0; i<DB_PREZZI.length; i++){
+        if(DB_PREZZI[i].k.indexOf(row.product_key) >= 0){ entry = DB_PREZZI[i]; break; }
       }
+    }
+    if(entry){
+      var p = parseFloat(row.avg_price);
+      if(!isNaN(p) && p > 0) entry.p[storeIdx] = p;
     }
   });
 }
@@ -2716,9 +2726,30 @@ var _inRecoveryMode = false;
 // ── DATABASE PRODOTTI CASA (caricato da casa.json via _dbPromise) ──
 var prodottiCasa = [];
 
+// Indice pre-calcolato: keyword → entry (evita O(n²) in cercaInDB)
+var _dbIndex = null;
+function _buildDBIndex(){
+  _dbIndex = {};
+  for(var i=0; i<DB_PREZZI.length; i++){
+    var entry = DB_PREZZI[i];
+    for(var j=0; j<entry.k.length; j++){
+      _dbIndex[entry.k[j]] = entry;
+    }
+  }
+}
 function cercaInDB(nomeProd) {
   var q = nomeProd.toLowerCase().trim();
   if(!q) return null;
+  // Ricerca diretta nell'indice prima del fallback lineare
+  if(_dbIndex){
+    if(_dbIndex[q]) return _dbIndex[q];
+    var keys = Object.keys(_dbIndex);
+    for(var i=0; i<keys.length; i++){
+      if(q.indexOf(keys[i]) >= 0 || keys[i].indexOf(q) >= 0) return _dbIndex[keys[i]];
+    }
+    return null;
+  }
+  // Fallback se indice non ancora costruito
   for(var i=0; i<DB_PREZZI.length; i++){
     var entry = DB_PREZZI[i];
     for(var j=0; j<entry.k.length; j++){
@@ -3524,7 +3555,9 @@ function _mapAggiornaUI(lat, lng){
 
 function _mapNascondiLoading(){
   var overlay = document.getElementById('mappa-loading-overlay');
-  if(overlay) overlay.style.display = 'none';
+  if(!overlay) return;
+  _mapSetLoading('', 100);
+  overlay.style.display = 'none';
 }
 
 function _mapSetLoading(msg, pct){
