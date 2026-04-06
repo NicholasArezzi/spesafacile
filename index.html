@@ -3194,6 +3194,7 @@ async function aggiornaPassword(){
 }
 
 function confermaEliminaAccount(){
+  if(!_supabase || !userData.userId){ showToast('Nessun account registrato'); return; }
   if(!confirm('Sei sicuro?\n\nTutti i tuoi dati (profilo, punti, scontrini) verranno eliminati permanentemente.\n\nQuesta azione non è reversibile.')) return;
   eliminaAccount();
 }
