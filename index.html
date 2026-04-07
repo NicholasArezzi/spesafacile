@@ -1685,7 +1685,7 @@ function renderFormScontrino(storeIdx, totale, prods){
 
 function aggiornaPillsStore(){
   var sel = document.querySelector('input[name="sc-store"]:checked');
-  var idx = sel ? parseInt(sel.value) : -1;
+  var idx = sel ? parseInt(sel.value, 10) : -1;
   document.querySelectorAll('#store-pills label').forEach(function(lbl, i){
     if(i===idx){
       lbl.style.border = '2px solid var(--green)';
@@ -1702,7 +1702,7 @@ function aggiornaPillsStore(){
 
 function aggiornaListaProdotti(){
   var sel = document.querySelector('input[name="sc-store"]:checked');
-  var storeIdx = sel ? parseInt(sel.value) : 0;
+  var storeIdx = sel ? parseInt(sel.value, 10) : 0;
   var list = document.getElementById('sc-prod-list');
   var badge = document.getElementById('sc-prod-badge');
   if(!list || !badge) return;
@@ -1797,7 +1797,7 @@ function confermaScontrino(){
   if(!totale || totale<=0){ showToast('Inserisci il totale speso!'); return; }
   if(_confBtn) _confBtn.disabled = true;
 
-  var storeIdx = parseInt(storeEl.value);
+  var storeIdx = parseInt(storeEl.value, 10);
   var risparmio = 0;
   if(INDICI.length > 0 && storeIdx >= 0 && storeIdx < INDICI.length) {
     risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
@@ -2692,7 +2692,7 @@ var _inRecoveryMode = false;
         sincronizzaProfiloDaSupabase(session.user.id).then(function(){
           if(!document.getElementById('s-home').classList.contains('active')) go('home');
           else try{ aggiornaHome(); } catch(e){}
-        });
+        }).catch(function(){ go('home'); });
       }
     });
 
@@ -2708,7 +2708,7 @@ var _inRecoveryMode = false;
         sincronizzaProfiloDaSupabase(session.user.id).then(function(){
           if(!document.getElementById('s-home').classList.contains('active')) go('home');
           else try{ aggiornaHome(); } catch(e){}
-        });
+        }).catch(function(){ go('home'); });
       } else if(!userData.nome || (!userData.isOspite && !userData.userId)){
         go('login');
       }
