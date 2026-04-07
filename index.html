@@ -2,6 +2,8 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://spesaoggi.it; connect-src 'self' https://*.supabase.co https://nominatim.openstreetmap.org https://overpass-api.de https://world.openfoodfacts.org https://ipwho.is https://api.ocr.space wss://*.supabase.co; media-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SpesaOggi – Risparmia ogni giorno</title>
 
@@ -11,9 +13,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SpesaOggi">
 <meta name="theme-color" content="#071A0C">
-<meta name="app-version" content="1.1.0">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
 
 <!-- SEO + Social sharing (OG tags) -->
 <meta name="description" content="Scopri dove conviene fare la spesa oggi vicino a te. Confronta prezzi di Lidl, Esselunga, Conad e altri in tempo reale.">
@@ -429,7 +433,7 @@ body{
           <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;line-height:1.2;" id="m-title">—</div>
           <div style="font-size:12px;color:var(--text2);margin-top:3px;" id="m-meta">—</div>
         </div>
-        <button class="modal-close" onclick="closeModal()">✕</button>
+        <button class="modal-close" onclick="closeModal()" aria-label="Chiudi">✕</button>
       </div>
     </div>
     <div class="modal-scroll">
@@ -652,6 +656,10 @@ body{
       </div>
 
       <button class="btn-g" onclick="go('lista')">⚡ Crea lista e confronta</button>
+      <div style="text-align:center;padding:12px 0 4px;font-size:11px;color:var(--text3);">
+        <a href="/privacy.html" target="_blank" style="color:var(--text3);text-decoration:underline;margin-right:12px;">Privacy Policy</a>
+        <span onclick="mostraTermini()" style="color:var(--text3);text-decoration:underline;cursor:pointer;">Termini di Servizio</span>
+      </div>
       <div class="sp"></div>
     </div>
   </div>
@@ -748,7 +756,7 @@ body{
   <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="go('home')" style="border:none;background:rgba(255,255,255,.12);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;color:#fff;">←</button>
+      <button onclick="go('home')" aria-label="Indietro" style="border:none;background:rgba(255,255,255,.12);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;color:#fff;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
     <div class="chip cp" style="font-size:12px;">👨‍🍳 Ispirami</div>
@@ -904,7 +912,7 @@ body{
   <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="go('confronta')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;">←</button>
+      <button onclick="go('confronta')" aria-label="Indietro" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
     <div class="chip cg" id="mappa-chip">📍 ...</div>
@@ -1010,7 +1018,7 @@ body{
   <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="history.go(-1)||go('home')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+      <button onclick="history.go(-1)||go('home')" aria-label="Indietro" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
     <div class="chip ca">1pt/€</div>
@@ -1040,7 +1048,7 @@ body{
     <!-- STEP 2: form conferma scontrino (nascosto di default) -->
     <div id="scontrino-step2" style="display:none;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <button onclick="nascondiFormScontrino()" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+        <button onclick="nascondiFormScontrino()" aria-label="Indietro" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
         <div class="stitle" style="margin:0;">Conferma scontrino</div>
       </div>
       <!-- OCR loading -->
@@ -1235,7 +1243,7 @@ body{
   <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="go('profilo')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+      <button onclick="go('profilo')" aria-label="Indietro" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
     <div class="chip ca" id="class-city-chip">Italia 🇮🇹</div>
@@ -1263,7 +1271,7 @@ body{
   <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="go('home')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+      <button onclick="go('home')" aria-label="Indietro" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
     <div class="chip ca">Oggi 🏷️</div>
@@ -1363,8 +1371,8 @@ function entraComeOspite(){
 async function registrati(){
   var nome  = (document.getElementById('reg-nome').value  || '').trim();
   var email = (document.getElementById('reg-email').value || '').trim();
-  var pass  = document.getElementById('reg-pass').value   || '';
-  var pass2 = document.getElementById('reg-pass2').value  || '';
+  var pass  = (document.getElementById('reg-pass').value  || '').trim();
+  var pass2 = (document.getElementById('reg-pass2').value || '').trim();
   var consenso = document.getElementById('reg-consenso');
   if(!nome)                          { showToast('Inserisci il tuo nome'); return; }
   if(!email.includes('@'))           { showToast('Inserisci una email valida'); return; }
@@ -1685,7 +1693,7 @@ function renderFormScontrino(storeIdx, totale, prods){
 
 function aggiornaPillsStore(){
   var sel = document.querySelector('input[name="sc-store"]:checked');
-  var idx = sel ? parseInt(sel.value) : -1;
+  var idx = sel ? parseInt(sel.value, 10) : -1;
   document.querySelectorAll('#store-pills label').forEach(function(lbl, i){
     if(i===idx){
       lbl.style.border = '2px solid var(--green)';
@@ -1702,7 +1710,7 @@ function aggiornaPillsStore(){
 
 function aggiornaListaProdotti(){
   var sel = document.querySelector('input[name="sc-store"]:checked');
-  var storeIdx = sel ? parseInt(sel.value) : 0;
+  var storeIdx = sel ? parseInt(sel.value, 10) : 0;
   var list = document.getElementById('sc-prod-list');
   var badge = document.getElementById('sc-prod-badge');
   if(!list || !badge) return;
@@ -1719,7 +1727,7 @@ function aggiornaListaProdotti(){
     var prezzoHtml = prezzo ? ' <span style="color:var(--green);font-weight:700;">'+prezzo+'</span>' : '';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--surface2);">'
          + '<span style="font-size:13px;">'+(p.qty>1?p.qty+'× ':'')+_escHtml(p.name)+prezzoHtml+'</span>'
-         + '<button onclick="rimuoviProdotto('+i+')" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;">✕</button>'
+         + '<button onclick="rimuoviProdotto('+i+')" aria-label="Rimuovi '+_escHtml(p.name)+'" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;">✕</button>'
          + '</div>';
   }).join('');
 }
@@ -1775,7 +1783,7 @@ function scSearchProd(val){
     cercaInOpenFoodFacts(val).then(function(found){
       if(!found){ drop.style.display='none'; return; }
       _scRenderDrop(drop, [{ label: found.label, stimato: true }]);
-    });
+    }).catch(function(){ drop.style.display='none'; });
   }, 400);
 }
 
@@ -1797,7 +1805,7 @@ function confermaScontrino(){
   if(!totale || totale<=0){ showToast('Inserisci il totale speso!'); return; }
   if(_confBtn) _confBtn.disabled = true;
 
-  var storeIdx = parseInt(storeEl.value);
+  var storeIdx = parseInt(storeEl.value, 10);
   var risparmio = 0;
   if(INDICI.length > 0 && storeIdx >= 0 && storeIdx < INDICI.length) {
     risparmio = parseFloat((totale * Math.max(0, INDICI[storeIdx]-INDICI[0])).toFixed(2));
@@ -1979,7 +1987,7 @@ function aggiornaHome(){
     userData.ricette   >= APP_CONFIG.BADGE_RICETTE,
     userData.scontrini >= APP_CONFIG.BADGE_SCONTRINI_5,
     userData.risparmio >= APP_CONFIG.BADGE_RISPARMIO
-  ].filter(Boolean).length + 1;
+  ].filter(Boolean).length;
   if(el('stat-badge')) el('stat-badge').textContent = badges;
   aggiornaProfiloUI();
   var cityEl = document.getElementById('home-city-title');
@@ -2069,11 +2077,11 @@ function parseQtyProduct(line){
   if(m){ qty = parseFloat(m[1].replace(',','.')); unit = m[2].toLowerCase(); name = m[3].trim(); return {qty:qty,unit:unit,name:name}; }
   // "10x uova" / "10 x uova" / "10 uova"
   m = s.match(/^(\d+)\s*[xX]?\s+(.+)$/);
-  if(m && parseInt(m[1]) > 1 && parseInt(m[1]) < 1000){ qty = parseInt(m[1]); name = m[2].trim(); }
+  if(m && parseInt(m[1], 10) > 1 && parseInt(m[1], 10) < 1000){ qty = parseInt(m[1], 10); name = m[2].trim(); }
   else {
     // "uova x10" / "uova x 10"
     m = s.match(/^(.+?)\s+[xX]\s*(\d+)$/);
-    if(m && parseInt(m[2]) > 1 && parseInt(m[2]) < 1000){ qty = parseInt(m[2]); name = m[1].trim(); }
+    if(m && parseInt(m[2], 10) > 1 && parseInt(m[2], 10) < 1000){ qty = parseInt(m[2], 10); name = m[1].trim(); }
   }
   return {qty: qty, unit: unit, name: name};
 }
@@ -2162,7 +2170,7 @@ function aggiornaConfrontoConLista(prodotti){
     }
     var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * confez).toFixed(2)); });
 
-    for(var s=0; s<STORES.length; s++) totali[s] += prezzi[s];
+    for(var s=0; s<STORES.length; s++) totali[s] += isNaN(prezzi[s]) ? 0 : prezzi[s];
 
     var minP = Math.min.apply(null, prezzi);
     var bestIdx = prezzi.indexOf(minP);
@@ -2242,7 +2250,7 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     var savStr   = saving > 0.005 ? ('-\u20ac' + saving.toFixed(2).replace('.',',')) : '';
 
     if(isWinner){
-      out += '<div class="sc win" style="overflow:hidden;" onclick="goMappaStore(\'' + _escHtml(r.store) + '\')">';
+      out += '<div class="sc win" style="overflow:hidden;" onclick="goMappaStore(\'' + _escJs(r.store) + '\')">';
       out += '<div class="wb">\ud83c\udfc6 MIGLIOR PREZZO \u2014 TOCCA PER LA MAPPA</div>';
       out += '<div style="height:26px;"></div>';
     } else {
@@ -2268,7 +2276,7 @@ function aggiornaClassificaTab(totali, stores, nProdotti, bestIdx) {
     out += '</div>';
     if(isWinner && hasAffiliate(r.store)){
       out += '<div style="padding:10px 14px 4px;">';
-      out += '<button class="abtn" style="width:100%;background:var(--green);font-size:13px;padding:10px;border-radius:12px;" onclick="event.stopPropagation();apriNegozioOnline(\'' + _escHtml(r.store) + '\')">🛒 Ordina Online</button>';
+      out += '<button class="abtn" style="width:100%;background:var(--green);font-size:13px;padding:10px;border-radius:12px;" onclick="event.stopPropagation();apriNegozioOnline(\'' + _escJs(r.store) + '\')">🛒 Ordina Online</button>';
       out += '</div>';
     }
     out += '</div>';
@@ -2312,6 +2320,7 @@ var _nominatimPending = false;
 function rilevaCitta(){
   if(_nominatimPending) return;
   if(!navigator.geolocation) return;
+  if(window._geolocationDisabled) return;
   _nominatimPending = true;
   navigator.geolocation.getCurrentPosition(function(pos){
     var lat = pos.coords.latitude;
@@ -2357,6 +2366,10 @@ function addItem(item){
 }
 function _escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// Escape per valori inseriti in stringhe JS singole-quotate all'interno di attributi onclick
+function _escJs(s){
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 }
 function showToast(msg){
   var existing=document.querySelector('.toast');
@@ -2417,7 +2430,7 @@ function renderGriglia(lista) {
   if (noRes) noRes.style.display = 'none';
   grid.innerHTML = lista.map(function(r) {
     var cls = r.diff === 'Facile' ? 'diff-easy' : r.diff === 'Media' ? 'diff-med' : 'diff-hard';
-    return '<div class="ricetta-card" onclick="apriRicetta(' + parseInt(r.id) + ')">'
+    return '<div class="ricetta-card" onclick="apriRicetta(' + parseInt(r.id, 10) + ')">'
       + '<div class="r-img" style="background:' + _escHtml(r.bg) + '">'
       + _escHtml(r.emoji)
       + '<div class="r-badge ' + cls + '">' + _escHtml(r.diff) + '</div>'
@@ -2438,7 +2451,7 @@ function apriRicettaHero() {
 function apriRicetta(id) {
   ricettaAperta = null;
   for (var i = 0; i < DB.length; i++) {
-    if (DB[i].id === parseInt(id)) { ricettaAperta = DB[i]; break; }
+    if (DB[i].id === parseInt(id, 10)) { ricettaAperta = DB[i]; break; }
   }
   if (!ricettaAperta) { showToast('Ricetta non trovata'); return; }
   persone = ricettaAperta.persone_base || 2;
@@ -2688,7 +2701,7 @@ var _inRecoveryMode = false;
         sincronizzaProfiloDaSupabase(session.user.id).then(function(){
           if(!document.getElementById('s-home').classList.contains('active')) go('home');
           else try{ aggiornaHome(); } catch(e){}
-        });
+        }).catch(function(){ go('home'); });
       }
     });
 
@@ -2704,7 +2717,7 @@ var _inRecoveryMode = false;
         sincronizzaProfiloDaSupabase(session.user.id).then(function(){
           if(!document.getElementById('s-home').classList.contains('active')) go('home');
           else try{ aggiornaHome(); } catch(e){}
-        });
+        }).catch(function(){ go('home'); });
       } else if(!userData.nome || (!userData.isOspite && !userData.userId)){
         go('login');
       }
@@ -2917,7 +2930,6 @@ function filtraCasaCat(cat, btn){
 
 function addItemCasa(nome){
   addItem(nome);
-  showToast(nome + ' aggiunto alla lista!');
 }
 
 // -- LOGOUT --
@@ -3191,6 +3203,7 @@ async function aggiornaPassword(){
 }
 
 function confermaEliminaAccount(){
+  if(!_supabase || !userData.userId){ showToast('Nessun account registrato'); return; }
   if(!confirm('Sei sicuro?\n\nTutti i tuoi dati (profilo, punti, scontrini) verranno eliminati permanentemente.\n\nQuesta azione non è reversibile.')) return;
   eliminaAccount();
 }
@@ -3246,7 +3259,7 @@ function renderOfferte(){
       + '<div style="display:inline-block;background:#FEF3C7;color:#92400E;font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;margin-top:2px;">-'+o.sconto+'%</div>'
       + '</div>'
       + '</div>'
-      + (hasAffiliate(o.store) ? '<div style="padding:0 14px 10px;"><button class="abtn" style="width:100%;background:var(--green);font-size:12px;padding:8px;border-radius:10px;" onclick="apriNegozioOnline(\'' + _escHtml(o.store) + '\')">🛒 Acquista su ' + _escHtml(o.store) + '</button></div>' : '')
+      + (hasAffiliate(o.store) ? '<div style="padding:0 14px 10px;"><button class="abtn" style="width:100%;background:var(--green);font-size:12px;padding:8px;border-radius:10px;" onclick="apriNegozioOnline(\'' + _escJs(o.store) + '\')">🛒 Acquista su ' + _escHtml(o.store) + '</button></div>' : '')
       + '</div></div>';
   }).join('');
   document.getElementById('off-grid').innerHTML = html || '<div style="text-align:center;padding:40px 0;color:var(--text3);">Nessuna offerta</div>';
@@ -3570,6 +3583,21 @@ function _mapSetLoading(msg, pct){
 }
 
 </script>
+<!-- Cookie Consent Banner (ospiti) -->
+<div id="consent-banner" role="dialog" aria-live="polite" aria-label="Consenso privacy" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface,#16271c);border-top:1px solid var(--border,#2a3d30);padding:16px;box-shadow:0 -4px 20px rgba(0,0,0,.4);">
+  <div style="max-width:480px;margin:0 auto;">
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Questa app usa la tua posizione e lo storage locale</div>
+    <div style="font-size:12px;color:var(--text2,#8fa393);margin-bottom:12px;">
+      Per funzionare, SpesaOggi usa <b>localStorage</b> per salvare le preferenze e può richiedere la <b>geolocalizzazione</b> per mostrare supermercati vicini. Nessun dato viene condiviso con terzi senza consenso.
+      <br><a href="/privacy.html" target="_blank" style="color:var(--green,#4ade80);">Privacy Policy</a> · <span onclick="mostraTermini()" style="color:var(--green,#4ade80);cursor:pointer;">Termini</span>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="accettaConsent()" style="flex:1;background:var(--green,#4ade80);color:#071A0C;border:none;border-radius:99px;padding:10px 0;font-size:13px;font-weight:700;cursor:pointer;">Accetta</button>
+      <button onclick="rifiutaConsent()" style="flex:1;background:var(--surface2,#1f3028);color:var(--text2,#8fa393);border:none;border-radius:99px;padding:10px 0;font-size:13px;font-weight:600;cursor:pointer;">Rifiuta</button>
+    </div>
+  </div>
+</div>
+
 <!-- Leaflet JS – caricato DOPO il DOM -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <!-- Service Worker per PWA offline -->
@@ -3581,6 +3609,36 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// ── Cookie/Consent banner per utenti ospiti ──
+function _consentBanner(){
+  var banner = document.getElementById('consent-banner');
+  if(!banner) return;
+  var stored = localStorage.getItem('sf_consent');
+  if(stored === 'accepted' || stored === 'refused') return; // già scelto
+  // Utenti registrati hanno già accettato durante la registrazione
+  if(userData && !userData.isOspite && userData.userId) {
+    localStorage.setItem('sf_consent', 'accepted');
+    return;
+  }
+  banner.style.display = 'block';
+}
+function accettaConsent(){
+  localStorage.setItem('sf_consent', 'accepted');
+  var banner = document.getElementById('consent-banner');
+  if(banner) banner.style.display = 'none';
+}
+function rifiutaConsent(){
+  localStorage.setItem('sf_consent', 'refused');
+  var banner = document.getElementById('consent-banner');
+  if(banner) banner.style.display = 'none';
+  // Disabilita geolocalizzazione per questa sessione
+  window._geolocationDisabled = true;
+}
+// Mostra il banner al primo accesso come ospite (dopo 1s per non intralciare il caricamento)
+window.addEventListener('load', function(){
+  setTimeout(_consentBanner, 1000);
+});
 </script>
 </body>
 </html>
