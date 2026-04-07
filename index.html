@@ -1775,7 +1775,7 @@ function scSearchProd(val){
     cercaInOpenFoodFacts(val).then(function(found){
       if(!found){ drop.style.display='none'; return; }
       _scRenderDrop(drop, [{ label: found.label, stimato: true }]);
-    });
+    }).catch(function(){ drop.style.display='none'; });
   }, 400);
 }
 
@@ -2069,11 +2069,11 @@ function parseQtyProduct(line){
   if(m){ qty = parseFloat(m[1].replace(',','.')); unit = m[2].toLowerCase(); name = m[3].trim(); return {qty:qty,unit:unit,name:name}; }
   // "10x uova" / "10 x uova" / "10 uova"
   m = s.match(/^(\d+)\s*[xX]?\s+(.+)$/);
-  if(m && parseInt(m[1]) > 1 && parseInt(m[1]) < 1000){ qty = parseInt(m[1]); name = m[2].trim(); }
+  if(m && parseInt(m[1], 10) > 1 && parseInt(m[1], 10) < 1000){ qty = parseInt(m[1], 10); name = m[2].trim(); }
   else {
     // "uova x10" / "uova x 10"
     m = s.match(/^(.+?)\s+[xX]\s*(\d+)$/);
-    if(m && parseInt(m[2]) > 1 && parseInt(m[2]) < 1000){ qty = parseInt(m[2]); name = m[1].trim(); }
+    if(m && parseInt(m[2], 10) > 1 && parseInt(m[2], 10) < 1000){ qty = parseInt(m[2], 10); name = m[1].trim(); }
   }
   return {qty: qty, unit: unit, name: name};
 }
@@ -2162,7 +2162,7 @@ function aggiornaConfrontoConLista(prodotti){
     }
     var prezzi = prezziUnitari.map(function(p){ return parseFloat((p * confez).toFixed(2)); });
 
-    for(var s=0; s<STORES.length; s++) totali[s] += prezzi[s];
+    for(var s=0; s<STORES.length; s++) totali[s] += isNaN(prezzi[s]) ? 0 : prezzi[s];
 
     var minP = Math.min.apply(null, prezzi);
     var bestIdx = prezzi.indexOf(minP);
@@ -2421,7 +2421,7 @@ function renderGriglia(lista) {
   if (noRes) noRes.style.display = 'none';
   grid.innerHTML = lista.map(function(r) {
     var cls = r.diff === 'Facile' ? 'diff-easy' : r.diff === 'Media' ? 'diff-med' : 'diff-hard';
-    return '<div class="ricetta-card" onclick="apriRicetta(' + parseInt(r.id) + ')">'
+    return '<div class="ricetta-card" onclick="apriRicetta(' + parseInt(r.id, 10) + ')">'
       + '<div class="r-img" style="background:' + _escHtml(r.bg) + '">'
       + _escHtml(r.emoji)
       + '<div class="r-badge ' + cls + '">' + _escHtml(r.diff) + '</div>'
@@ -2442,7 +2442,7 @@ function apriRicettaHero() {
 function apriRicetta(id) {
   ricettaAperta = null;
   for (var i = 0; i < DB.length; i++) {
-    if (DB[i].id === parseInt(id)) { ricettaAperta = DB[i]; break; }
+    if (DB[i].id === parseInt(id, 10)) { ricettaAperta = DB[i]; break; }
   }
   if (!ricettaAperta) { showToast('Ricetta non trovata'); return; }
   persone = ricettaAperta.persone_base || 2;
