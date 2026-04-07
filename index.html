@@ -2,6 +2,8 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://spesaoggi.it; connect-src 'self' https://*.supabase.co https://nominatim.openstreetmap.org https://overpass-api.de https://world.openfoodfacts.org https://ipwho.is https://api.ocr.space wss://*.supabase.co; media-src 'self'; worker-src 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SpesaOggi – Risparmia ogni giorno</title>
 
@@ -11,9 +13,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SpesaOggi">
 <meta name="theme-color" content="#071A0C">
-<meta name="app-version" content="1.1.0">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
 
 <!-- SEO + Social sharing (OG tags) -->
 <meta name="description" content="Scopri dove conviene fare la spesa oggi vicino a te. Confronta prezzi di Lidl, Esselunga, Conad e altri in tempo reale.">
@@ -429,7 +433,7 @@ body{
           <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;line-height:1.2;" id="m-title">—</div>
           <div style="font-size:12px;color:var(--text2);margin-top:3px;" id="m-meta">—</div>
         </div>
-        <button class="modal-close" onclick="closeModal()">✕</button>
+        <button class="modal-close" onclick="closeModal()" aria-label="Chiudi">✕</button>
       </div>
     </div>
     <div class="modal-scroll">
@@ -652,6 +656,10 @@ body{
       </div>
 
       <button class="btn-g" onclick="go('lista')">⚡ Crea lista e confronta</button>
+      <div style="text-align:center;padding:12px 0 4px;font-size:11px;color:var(--text3);">
+        <a href="/privacy.html" target="_blank" style="color:var(--text3);text-decoration:underline;margin-right:12px;">Privacy Policy</a>
+        <span onclick="mostraTermini()" style="color:var(--text3);text-decoration:underline;cursor:pointer;">Termini di Servizio</span>
+      </div>
       <div class="sp"></div>
     </div>
   </div>
@@ -748,7 +756,7 @@ body{
   <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="go('home')" style="border:none;background:rgba(255,255,255,.12);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;color:#fff;">←</button>
+      <button onclick="go('home')" aria-label="Indietro" style="border:none;background:rgba(255,255,255,.12);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;color:#fff;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
     <div class="chip cp" style="font-size:12px;">👨‍🍳 Ispirami</div>
@@ -904,7 +912,7 @@ body{
   <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="go('confronta')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;">←</button>
+      <button onclick="go('confronta')" aria-label="Indietro" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
     <div class="chip cg" id="mappa-chip">📍 ...</div>
@@ -1010,7 +1018,7 @@ body{
   <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="history.go(-1)||go('home')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+      <button onclick="history.go(-1)||go('home')" aria-label="Indietro" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
     <div class="chip ca">1pt/€</div>
@@ -1040,7 +1048,7 @@ body{
     <!-- STEP 2: form conferma scontrino (nascosto di default) -->
     <div id="scontrino-step2" style="display:none;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <button onclick="nascondiFormScontrino()" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+        <button onclick="nascondiFormScontrino()" aria-label="Indietro" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
         <div class="stitle" style="margin:0;">Conferma scontrino</div>
       </div>
       <!-- OCR loading -->
@@ -1235,7 +1243,7 @@ body{
   <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="go('profilo')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+      <button onclick="go('profilo')" aria-label="Indietro" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
     <div class="chip ca" id="class-city-chip">Italia 🇮🇹</div>
@@ -1263,7 +1271,7 @@ body{
   <div class="status"><span class="status-time">9:41</span><span style="color:var(--green);font-weight:800;">●●●</span></div>
   <div class="navbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="go('home')" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
+      <button onclick="go('home')" aria-label="Indietro" style="border:none;background:var(--surface2);border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;flex-shrink:0;">←</button>
       <div class="logo">🌿 Spesa<em>Oggi</em></div>
     </div>
     <div class="chip ca">Oggi 🏷️</div>
@@ -1719,7 +1727,7 @@ function aggiornaListaProdotti(){
     var prezzoHtml = prezzo ? ' <span style="color:var(--green);font-weight:700;">'+prezzo+'</span>' : '';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--surface2);">'
          + '<span style="font-size:13px;">'+(p.qty>1?p.qty+'× ':'')+_escHtml(p.name)+prezzoHtml+'</span>'
-         + '<button onclick="rimuoviProdotto('+i+')" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;">✕</button>'
+         + '<button onclick="rimuoviProdotto('+i+')" aria-label="Rimuovi '+_escHtml(p.name)+'" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;">✕</button>'
          + '</div>';
   }).join('');
 }
@@ -3574,6 +3582,21 @@ function _mapSetLoading(msg, pct){
 }
 
 </script>
+<!-- Cookie Consent Banner (ospiti) -->
+<div id="consent-banner" role="dialog" aria-live="polite" aria-label="Consenso privacy" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface,#16271c);border-top:1px solid var(--border,#2a3d30);padding:16px;box-shadow:0 -4px 20px rgba(0,0,0,.4);">
+  <div style="max-width:480px;margin:0 auto;">
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Questa app usa la tua posizione e lo storage locale</div>
+    <div style="font-size:12px;color:var(--text2,#8fa393);margin-bottom:12px;">
+      Per funzionare, SpesaOggi usa <b>localStorage</b> per salvare le preferenze e può richiedere la <b>geolocalizzazione</b> per mostrare supermercati vicini. Nessun dato viene condiviso con terzi senza consenso.
+      <br><a href="/privacy.html" target="_blank" style="color:var(--green,#4ade80);">Privacy Policy</a> · <span onclick="mostraTermini()" style="color:var(--green,#4ade80);cursor:pointer;">Termini</span>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="accettaConsent()" style="flex:1;background:var(--green,#4ade80);color:#071A0C;border:none;border-radius:99px;padding:10px 0;font-size:13px;font-weight:700;cursor:pointer;">Accetta</button>
+      <button onclick="rifiutaConsent()" style="flex:1;background:var(--surface2,#1f3028);color:var(--text2,#8fa393);border:none;border-radius:99px;padding:10px 0;font-size:13px;font-weight:600;cursor:pointer;">Rifiuta</button>
+    </div>
+  </div>
+</div>
+
 <!-- Leaflet JS – caricato DOPO il DOM -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <!-- Service Worker per PWA offline -->
@@ -3585,6 +3608,31 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// ── Cookie/Consent banner per utenti ospiti ──
+function _consentBanner(){
+  var banner = document.getElementById('consent-banner');
+  if(!banner) return;
+  var stored = localStorage.getItem('sf_consent');
+  if(stored === 'accepted' || stored === 'refused') return; // già scelto
+  banner.style.display = 'block';
+}
+function accettaConsent(){
+  localStorage.setItem('sf_consent', 'accepted');
+  var banner = document.getElementById('consent-banner');
+  if(banner) banner.style.display = 'none';
+}
+function rifiutaConsent(){
+  localStorage.setItem('sf_consent', 'refused');
+  var banner = document.getElementById('consent-banner');
+  if(banner) banner.style.display = 'none';
+  // Disabilita geolocalizzazione per questa sessione
+  window._geolocationDisabled = true;
+}
+// Mostra il banner al primo accesso come ospite (dopo 1s per non intralciare il caricamento)
+window.addEventListener('load', function(){
+  setTimeout(_consentBanner, 1000);
+});
 </script>
 </body>
 </html>

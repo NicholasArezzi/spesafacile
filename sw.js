@@ -10,7 +10,8 @@ const STATIC_ASSETS = [
   '/privacy.html',
   '/casa.json',
   '/products.json',
-  '/recipes.json'
+  '/recipes.json',
+  '/.well-known/assetlinks.json'
 ];
 
 self.addEventListener('install', function(event) {
