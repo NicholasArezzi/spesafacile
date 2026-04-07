@@ -2320,6 +2320,7 @@ var _nominatimPending = false;
 function rilevaCitta(){
   if(_nominatimPending) return;
   if(!navigator.geolocation) return;
+  if(window._geolocationDisabled) return;
   _nominatimPending = true;
   navigator.geolocation.getCurrentPosition(function(pos){
     var lat = pos.coords.latitude;
@@ -3615,6 +3616,11 @@ function _consentBanner(){
   if(!banner) return;
   var stored = localStorage.getItem('sf_consent');
   if(stored === 'accepted' || stored === 'refused') return; // già scelto
+  // Utenti registrati hanno già accettato durante la registrazione
+  if(userData && !userData.isOspite && userData.userId) {
+    localStorage.setItem('sf_consent', 'accepted');
+    return;
+  }
   banner.style.display = 'block';
 }
 function accettaConsent(){
