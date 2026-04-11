@@ -1,12 +1,21 @@
-const CACHE_NAME = 'spesaoggi-v4';
+const CACHE_NAME = 'spesaoggi-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/config.js',
   '/manifest.json',
+  '/icon-72.png',
+  '/icon-96.png',
+  '/icon-128.png',
+  '/icon-144.png',
+  '/icon-152.png',
   '/icon-192.png',
+  '/icon-384.png',
   '/icon-512.png',
+  '/icon-1024.png',
   '/og-image.png',
+  '/screenshot-mobile.png',
+  '/screenshot-tablet.png',
   '/privacy.html',
   '/casa.json',
   '/products.json',
