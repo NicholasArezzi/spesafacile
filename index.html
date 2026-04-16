@@ -248,15 +248,6 @@ body{
 }
 .ricetta-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.1);}
 .ricetta-card.selected{border-color:var(--green);}
-.r-img{height:100px;display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;}
-.r-badge{position:absolute;top:7px;right:7px;font-size:9px;font-weight:800;padding:3px 8px;
-  border-radius:99px;letter-spacing:.3px;}
-.diff-easy{background:#D1FAE5;color:#065F46;}
-.diff-med{background:#FEF3C7;color:#92400E;}
-.diff-hard{background:#FEE2E2;color:#991B1B;}
-.r-body{padding:10px 12px 12px;}
-.r-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;line-height:1.25;margin-bottom:4px;}
-.r-meta{font-size:11px;color:var(--text2);}
 
 /* ISPIRAMI HERO */
 .ispi-hero{
@@ -658,7 +649,7 @@ body{
       <button class="btn-g" onclick="go('lista')">⚡ Crea lista e confronta</button>
       <div style="text-align:center;padding:12px 0 4px;font-size:11px;color:var(--text3);">
         <a href="/privacy.html" target="_blank" style="color:var(--text3);text-decoration:underline;margin-right:12px;">Privacy Policy</a>
-        <span onclick="mostraTermini()" style="color:var(--text3);text-decoration:underline;cursor:pointer;">Termini di Servizio</span>
+        <span onclick="go('termini')" style="color:var(--text3);text-decoration:underline;cursor:pointer;">Termini di Servizio</span>
       </div>
       <div class="sp"></div>
     </div>
@@ -1342,7 +1333,7 @@ function el(id){ return document.getElementById(id); }
 async function tentaLogin(){
   var email = (document.getElementById('login-email').value || '').trim();
   var pass  = (document.getElementById('login-pass').value  || '').trim();
-  if(!email){ showToast('Inserisci la email'); return; }
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showToast('Inserisci una email valida'); return; }
   if(!pass){  showToast('Inserisci la password'); return; }
   if(!_supabase){ showToast('Servizio non disponibile'); return; }
 
@@ -1401,7 +1392,7 @@ async function registrati(){
   var pass2 = (document.getElementById('reg-pass2').value || '').trim();
   var consenso = document.getElementById('reg-consenso');
   if(!nome)                          { showToast('Inserisci il tuo nome'); return; }
-  if(!email.includes('@'))           { showToast('Inserisci una email valida'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Inserisci una email valida'); return; }
   if(pass.length < 6)                { showToast('La password deve avere almeno 6 caratteri'); return; }
   if(pass !== pass2)                 { showToast('Le password non coincidono'); return; }
   if(!consenso || !consenso.checked) { showToast('Accetta la Privacy Policy per continuare'); return; }
@@ -1556,8 +1547,9 @@ function _ocrTesseract(blob, onSuccess, onFail){
   if(typeof Tesseract !== 'undefined'){ runIt(); return; }
   var s = document.createElement('script');
   s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-  s.onload = runIt;
-  s.onerror = function(){ onFail('Tesseract.js non disponibile'); };
+  var _tTimeout = setTimeout(function(){ onFail('Timeout caricamento OCR locale'); }, 15000);
+  s.onload = function(){ clearTimeout(_tTimeout); runIt(); };
+  s.onerror = function(){ clearTimeout(_tTimeout); onFail('Tesseract.js non disponibile'); };
   document.head.appendChild(s);
 }
 
@@ -1977,8 +1969,22 @@ function salvaUserData(){
 function caricaUserData(){
   try {
     var s = localStorage.getItem(APP_CONFIG.STORAGE_USER);
-    if(s){ var d = JSON.parse(s); Object.assign(userData, d); return true; }
-  } catch(e){}
+    if(s){
+      var d = JSON.parse(s);
+      if(typeof d !== 'object' || d === null) throw new Error('bad data');
+      // Validazione tipi per evitare corruzione
+      if(typeof d.punti !== 'number')    d.punti    = parseInt(d.punti)||0;
+      if(typeof d.scontrini !== 'number') d.scontrini = parseInt(d.scontrini)||0;
+      if(typeof d.risparmio !== 'number') d.risparmio = parseFloat(d.risparmio)||0;
+      if(typeof d.liste !== 'number')    d.liste    = parseInt(d.liste)||0;
+      if(typeof d.ricette !== 'number')  d.ricette  = parseInt(d.ricette)||0;
+      Object.assign(userData, d);
+      return true;
+    }
+  } catch(e){
+    console.warn('[caricaUserData] dati locali corrotti, reset:', e);
+    try { localStorage.removeItem(APP_CONFIG.STORAGE_USER); } catch(e2){}
+  }
   return false;
 }
 
@@ -2211,7 +2217,8 @@ function aggiornaConfrontoConLista(prodotti){
 
     for(var s=0; s<STORES.length; s++) totali[s] += isNaN(prezzi[s]) ? 0 : prezzi[s];
 
-    var minP = Math.min.apply(null, prezzi);
+    var minP = prezzi.length ? Math.min.apply(null, prezzi) : 0;
+    if(!isFinite(minP)) minP = 0;
     var bestIdx = prezzi.indexOf(minP);
     var bestStore = (bestIdx >= 0 && bestIdx < STORES.length) ? STORES[bestIdx] : '';
     var prodLabel = unit ? (qty + ' ' + _escHtml(unit) + ' ' + _escHtml(prod)) : (qty > 1 ? qty + 'x ' + _escHtml(prod) : _escHtml(prod));
@@ -2224,8 +2231,8 @@ function aggiornaConfrontoConLista(prodotti){
     if(unita) out += '<div style="font-size:10px;color:var(--text3);">' + unitaLabel + '</div>';
     out += '</div>';
     out += '<div style="text-align:right;">';
-    out += '<div style="font-weight:800;font-size:14px;color:var(--green);">€' + minP.toFixed(2) + '</div>';
-    out += '<div style="font-size:10px;color:var(--text3);">miglior prezzo: ' + bestStore + '</div>';
+    out += '<div style="font-weight:800;font-size:14px;color:var(--green);">' + (isReal ? '' : '~') + '€' + minP.toFixed(2) + '</div>';
+    out += '<div style="font-size:10px;color:var(--text3);">' + (isReal ? 'miglior prezzo: ' + bestStore : 'prezzo stimato') + '</div>';
     out += '</div></div>';
     // Mostra tutti i prezzi
     out += '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">';
@@ -2365,16 +2372,20 @@ function rilevaCitta(){
   navigator.geolocation.getCurrentPosition(function(pos){
     var lat = pos.coords.latitude;
     var lng = pos.coords.longitude;
+    var _nomCtrl = new AbortController();
+    var _nomTimer = setTimeout(function(){ _nomCtrl.abort(); }, 5000);
     fetch(APP_CONFIG.NOMINATIM_URL + '?format=json&lat='+lat+'&lon='+lng, {
-        headers: { 'User-Agent': 'SpesaFacile/1.1 (arezzinicholas@gmail.com)', 'Referer': location.origin }
+        headers: { 'User-Agent': 'SpesaFacile/1.1 (arezzinicholas@gmail.com)', 'Referer': location.origin },
+        signal: _nomCtrl.signal
       })
       .then(function(r){ return r.json(); })
       .then(function(d){
+        clearTimeout(_nomTimer);
         _nominatimPending = false;
         if(!d || !d.address) return;
         var city = d.address.city || d.address.town || d.address.village || '';
         if(city){ userData.citta = city; salvaUserData(); pushProfiloASupabase(); aggiornaProfiloUI(); }
-      }).catch(function(){ _nominatimPending = false; });
+      }).catch(function(){ clearTimeout(_nomTimer); _nominatimPending = false; });
   }, function(){ _nominatimPending = false; }, {timeout:5000});
 }
 
@@ -3389,12 +3400,15 @@ var _overpassController = null;   // AbortController per Overpass
 var _mapStoreMarkers    = [];     // marker supermercati (per pulizia tra ricerche)
 
 // ─── Entry point – chiamata da go() ──────────────────────────────────────
+var _mapRetry = 0;
 function initMappa(){
   // Aspetta che Leaflet sia caricato (script asincrono)
   if(typeof L === 'undefined'){
+    if(++_mapRetry > 30){ showToast('Mappa non disponibile offline'); return; }
     setTimeout(initMappa, 150);
     return;
   }
+  _mapRetry = 0;
   _mapAvviaConPosizione();
 }
 
@@ -3577,7 +3591,7 @@ function _mapCercaSupermercati(lat, lng){
       var count    = elementi.length;
 
       // Rimuovi marker precedenti prima di aggiungerne di nuovi
-      _mapStoreMarkers.forEach(function(m){ if(_mapInstance) _mapInstance.removeLayer(m); });
+      _mapStoreMarkers.forEach(function(m){ try { if(_mapInstance && _mapInstance.hasLayer(m)) _mapInstance.removeLayer(m); } catch(e){} });
       _mapStoreMarkers = [];
 
       elementi.forEach(function(el){
@@ -3685,7 +3699,7 @@ function _mapSetLoading(msg, pct){
     <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Questa app usa la tua posizione e lo storage locale</div>
     <div style="font-size:12px;color:var(--text2,#8fa393);margin-bottom:12px;">
       Per funzionare, SpesaOggi usa <b>localStorage</b> per salvare le preferenze e può richiedere la <b>geolocalizzazione</b> per mostrare supermercati vicini. Nessun dato viene condiviso con terzi senza consenso.
-      <br><a href="/privacy.html" target="_blank" style="color:var(--green,#4ade80);">Privacy Policy</a> · <span onclick="mostraTermini()" style="color:var(--green,#4ade80);cursor:pointer;">Termini</span>
+      <br><a href="/privacy.html" target="_blank" style="color:var(--green,#4ade80);">Privacy Policy</a> · <span onclick="go('termini')" style="color:var(--green,#4ade80);cursor:pointer;">Termini</span>
     </div>
     <div style="display:flex;gap:10px;">
       <button onclick="accettaConsent()" style="flex:1;background:var(--green,#4ade80);color:#071A0C;border:none;border-radius:99px;padding:10px 0;font-size:13px;font-weight:700;cursor:pointer;">Accetta</button>
@@ -3706,17 +3720,14 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ── Cookie/Consent banner per utenti ospiti ──
+// ── Cookie/Consent banner — mostrato a tutti al primo accesso ──
 function _consentBanner(){
   var banner = document.getElementById('consent-banner');
   if(!banner) return;
-  var stored = localStorage.getItem('sf_consent');
-  if(stored === 'accepted' || stored === 'refused') return; // già scelto
-  // Utenti registrati hanno già accettato durante la registrazione
-  if(userData && !userData.isOspite && userData.userId) {
-    localStorage.setItem('sf_consent', 'accepted');
-    return;
-  }
+  try {
+    var stored = localStorage.getItem('sf_consent');
+    if(stored === 'accepted' || stored === 'refused') return;
+  } catch(e){}
   banner.style.display = 'block';
 }
 function accettaConsent(){
