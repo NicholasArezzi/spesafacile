@@ -1120,6 +1120,7 @@ body{
     <div style="margin:20px 0 8px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;text-align:left;max-width:340px;margin-left:auto;margin-right:auto;">Informazioni legali</div>
     <button onclick="go('privacy')" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">🔒 Privacy Policy</button>
     <button onclick="go('termini')" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">📋 Termini di Servizio</button>
+    <button onclick="revocaConsent()" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">🍪 Modifica consenso dati</button>
     <button onclick="confermaEliminaAccount()" style="width:100%;max-width:340px;margin:8px auto 0;display:block;padding:13px;background:transparent;border:1.5px solid var(--red);color:var(--red);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">🗑️ Elimina account e dati</button>
 
   </div></div>
@@ -1450,12 +1451,18 @@ var INDICI    = [];
 var STORES    = [];
 
 var MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+function getMeseIT(d){ return MESI_IT[(d||new Date()).getMonth()] || ''; }
 
 function getChain(n){
   if(!n) return 'default';
-  var l=n.toLowerCase();
-  for(var k in CHAINS){ if(l.includes(k)) return k; }
+  var l = n.toLowerCase().replace(/\s+/g,'');
+  if(CHAINS[l]) return l;
+  var full = n.toLowerCase();
+  for(var k in CHAINS){ if(full.includes(k)) return k; }
   return 'default';
+}
+function getChainData(storeName){
+  return CHAINS[getChain(storeName)] || null;
 }
 
 
@@ -1553,7 +1560,11 @@ function _ocrTesseract(blob, onSuccess, onFail){
   document.head.appendChild(s);
 }
 
+var _ocrLastTime = 0;
 function eseguiOCR(file){
+  var now = Date.now();
+  if(now - _ocrLastTime < 3000){ showToast('Attendi prima di inviare un\'altra foto'); return; }
+  _ocrLastTime = now;
   document.getElementById('ocr-loading').style.display = 'block';
   document.getElementById('ocr-result').style.display = 'none';
   comprimiImmagine(file, function(blob){
@@ -1745,7 +1756,7 @@ function renderFormScontrino(storeIdx, totale, prods){
     var border = sel ? 'border:2px solid var(--green);background:var(--green);color:#fff;' : 'border:2px solid var(--surface2);background:var(--surface);color:var(--text);';
     html += '<label style="display:block;border-radius:12px;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;'+border+'">'
           + '<input type="radio" name="sc-store" value="'+i+'" style="display:none;"'+(sel?' checked':'')+' onchange="aggiornaPillsStore()">'
-          + s + '</label>';
+          + _escHtml(s) + '</label>';
   });
   document.getElementById('store-pills').innerHTML = html;
 
@@ -1858,9 +1869,12 @@ function scAggiungiProdotto(nome){
   aggiornaListaProdotti();
 }
 
+var _confermandoScontrino = false;
 function confermaScontrino(){
+  if(_confermandoScontrino) return;
+  _confermandoScontrino = true;
   var _confBtn = document.querySelector('#scontrino-step2 .btn-g');
-  if(_confBtn && _confBtn.disabled) return;
+  if(_confBtn && _confBtn.disabled){ _confermandoScontrino = false; return; }
   var storeEl = document.querySelector('input[name="sc-store"]:checked');
   var totale = parseFloat(document.getElementById('sc-totale').value);
   if(!storeEl){ showToast('Seleziona il supermercato!'); return; }
@@ -1953,6 +1967,7 @@ function confermaScontrino(){
     } else {
       msg = 'Scontrino registrato! (punti solo con foto 📷)';
     }
+    _confermandoScontrino = false;
     showToast(msg);
     setTimeout(function(){ go('home'); }, 1800);
   }
@@ -1995,8 +2010,8 @@ function confermaScontrino(){
         })
         .catch(function(){ _completaConferma(puntiCalcolati); });
     }).catch(function(){
-      // Fallback: se la promise dell'hash fallisce in modo inatteso, sblocca il bottone
       if(_confBtn) _confBtn.disabled = false;
+      _confermandoScontrino = false;
       _completaConferma(puntiCalcolati);
     });
   } else {
@@ -2292,14 +2307,15 @@ function aggiornaConfrontoConLista(prodotti){
     out += '<div style="font-weight:800;font-size:14px;color:var(--green);">' + (isReal ? '' : '~') + '€' + minP.toFixed(2) + '</div>';
     out += '<div style="font-size:10px;color:var(--text3);">' + (isReal ? 'miglior prezzo: ' + bestStore : 'prezzo stimato') + '</div>';
     out += '</div></div>';
-    // Mostra tutti i prezzi
+    // Mostra tutti i prezzi (salta store senza dati)
     out += '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">';
     for(var s=0; s<STORES.length; s++){
+      if(!prezzi[s] || prezzi[s] <= 0) continue;
       var isBest = (s === bestIdx);
       out += '<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:' +
         (isBest ? 'var(--green)' : 'var(--surface2)') +
         ';color:' + (isBest ? '#fff' : 'var(--text2)') + ';font-weight:' + (isBest ? '700' : '400') + ';">';
-      out += STORES[s] + ' €' + prezzi[s].toFixed(2);
+      out += _escHtml(STORES[s]) + ' \u20ac' + prezzi[s].toFixed(2);
       out += '</span>';
     }
     out += '</div></div>';
@@ -2307,8 +2323,10 @@ function aggiornaConfrontoConLista(prodotti){
   tprod.innerHTML = out;
 
   // ── Aggiorna banner risparmio con valori reali ──
-  var minTot = totali.length ? Math.min.apply(null, totali) : 0;
-  var maxTot = totali.length ? Math.max.apply(null, totali) : 0;
+  // Filtra store con totale 0 (prodotto non presente) per non falsare il risparmio
+  var totaliValidi = totali.filter(function(t){ return t > 0; });
+  var minTot = totaliValidi.length ? Math.min.apply(null, totaliValidi) : 0;
+  var maxTot = totaliValidi.length ? Math.max.apply(null, totaliValidi) : 0;
   var bestStoreIdx = totali.indexOf(minTot);
   var worstStoreIdx = totali.indexOf(maxTot);
   var risparmio = (maxTot - minTot).toFixed(2);
@@ -2553,7 +2571,7 @@ function renderGriglia(lista) {
 
 function apriRicettaHero() {
   var id = window._heroRicettaId || (DB.length > 0 ? DB[0].id : null);
-  if(!id) return;
+  if(!id || isNaN(id)) return;
   apriRicetta(id);
 }
 
@@ -2978,7 +2996,9 @@ async function cercaInOpenFoodFacts(query) {
         }
       }
     }
-  } catch(e) {}
+  } catch(e) {
+    if(e && e.name !== 'AbortError') console.warn('[OpenFoodFacts]', e);
+  }
   return null;
 }
 
@@ -3174,14 +3194,13 @@ function caricaStorico(){
         var tot = parseFloat(r.total_amount||0).toFixed(2);
         var nProd = r.product_count || 0;
         var punti = r.punti_assegnati || 0;
-        var chainKey = store.toLowerCase().replace(/\s+/g,'');
-        var chain = CHAINS[chainKey] || CHAINS[Object.keys(CHAINS).find(function(k){ return store.toLowerCase().indexOf(k)!==-1; })] || null;
+        var chain = getChainData(store);
         var storeBg = chain ? chain.bg : '#E6F5EE';
         var storeClr = chain ? chain.text : '#1A8C4E';
         html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);">'
           + '<div style="width:42px;height:42px;border-radius:10px;background:'+storeBg+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:'+storeClr+';text-transform:uppercase;flex-shrink:0;">'+store.slice(0,3)+'</div>'
           + '<div style="flex:1;min-width:0;">'
-          + '<div style="font-weight:700;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+store+'</div>'
+          + '<div style="font-weight:700;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_escHtml(store)+'</div>'
           + '<div style="font-size:12px;color:var(--text2);">'+dataStr+' alle '+ora+(r.city?'  •  '+r.city:'')+'</div>'
           + '<div style="font-size:12px;color:var(--text3);margin-top:2px;">'+nProd+' prodotti'+(punti>0?' • <span style="color:var(--amber);">+'+punti+' pt</span>':'')+'</div>'
           + '</div>'
@@ -3804,17 +3823,30 @@ function _consentBanner(){
   banner.style.display = 'block';
 }
 function accettaConsent(){
-  localStorage.setItem('sf_consent', 'accepted');
+  try { localStorage.setItem('sf_consent', 'accepted'); } catch(e){}
   var banner = document.getElementById('consent-banner');
   if(banner) banner.style.display = 'none';
 }
 function rifiutaConsent(){
-  localStorage.setItem('sf_consent', 'refused');
+  try { localStorage.setItem('sf_consent', 'refused'); } catch(e){}
   var banner = document.getElementById('consent-banner');
   if(banner) banner.style.display = 'none';
-  // Disabilita geolocalizzazione per questa sessione
   window._geolocationDisabled = true;
 }
+function revocaConsent(){
+  try { localStorage.removeItem('sf_consent'); } catch(e){}
+  var banner = document.getElementById('consent-banner');
+  if(banner) banner.style.display = 'block';
+}
+// Indicatore offline
+window.addEventListener('offline', function(){
+  showToast('Connessione assente — modalità offline');
+});
+window.addEventListener('online', function(){
+  showToast('Connessione ripristinata');
+  aggiornaPrezziRealtime();
+});
+
 // Mostra il banner al primo accesso come ospite (dopo 1s per non intralciare il caricamento)
 window.addEventListener('load', function(){
   setTimeout(_consentBanner, 1000);
