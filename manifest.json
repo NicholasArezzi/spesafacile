@@ -83,5 +83,28 @@
       "form_factor": "wide",
       "label": "Mappa supermercati vicini"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Carica scontrino",
+      "short_name": "Scontrino",
+      "description": "Scatta foto di uno scontrino e guadagna punti",
+      "url": "/?shortcut=scontrino",
+      "icons": [{"src": "icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Nuova lista",
+      "short_name": "Lista",
+      "description": "Crea una nuova lista della spesa",
+      "url": "/?shortcut=lista",
+      "icons": [{"src": "icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Mappa supermercati",
+      "short_name": "Mappa",
+      "description": "Trova supermercati vicino a te",
+      "url": "/?shortcut=mappa",
+      "icons": [{"src": "icon-192.png", "sizes": "192x192"}]
+    }
   ]
 }

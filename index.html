@@ -520,10 +520,10 @@ body{
     <div style="font-size:13px;color:rgba(255,255,255,.6);text-align:center;margin-bottom:4px;position:relative;z-index:1;">Crea il tuo account gratuito</div>
     <div class="acard">
       <div class="atitle">Registrati gratis</div>
-      <input class="ainput" id="reg-nome" type="text" placeholder="Il tuo nome">
-      <input class="ainput" id="reg-email" type="email" placeholder="Email o username">
-      <input class="ainput" id="reg-pass" type="password" placeholder="Scegli una password">
-      <input class="ainput" id="reg-pass2" type="password" placeholder="Ripeti la password">
+      <input class="ainput" id="reg-nome" type="text" placeholder="Il tuo nome" aria-label="Nome" autocomplete="given-name">
+      <input class="ainput" id="reg-email" type="email" placeholder="Email o username" aria-label="Email" autocomplete="email">
+      <input class="ainput" id="reg-pass" type="password" placeholder="Scegli una password" aria-label="Password" autocomplete="new-password">
+      <input class="ainput" id="reg-pass2" type="password" placeholder="Ripeti la password" aria-label="Conferma password" autocomplete="new-password">
       <label class="ainput-check">
         <input type="checkbox" id="reg-consenso">
         <span>Accetto la <em onclick="event.stopPropagation();go('privacy')" style="cursor:pointer;text-decoration:underline;">Privacy Policy</em> e i <em onclick="event.stopPropagation();go('termini')" style="cursor:pointer;text-decoration:underline;">Termini di Servizio</em></span>
@@ -549,8 +549,8 @@ body{
     </div>
     <div class="acard">
       <div class="atitle">Accedi al tuo account</div>
-      <input class="ainput" id="login-email" type="email" placeholder="Email" autocomplete="email">
-      <input class="ainput" id="login-pass" type="password" placeholder="Password" autocomplete="current-password">
+      <input class="ainput" id="login-email" type="email" placeholder="Email" autocomplete="email" aria-label="Email">
+      <input class="ainput" id="login-pass" type="password" placeholder="Password" autocomplete="current-password" aria-label="Password">
       <div class="atog" style="text-align:right;margin-bottom:8px;margin-top:-4px;"><em onclick="go('reset-password')" style="cursor:pointer;">Password dimenticata?</em></div>
       <button class="abtn" onclick="tentaLogin()">Entra &rarr;</button>
       <button class="abtn" onclick="entraComeOspite()" style="background:transparent;border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);margin-top:6px;">Prova senza registrarti</button>
@@ -1120,6 +1120,7 @@ body{
     <div style="margin:20px 0 8px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;text-align:left;max-width:340px;margin-left:auto;margin-right:auto;">Informazioni legali</div>
     <button onclick="go('privacy')" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">🔒 Privacy Policy</button>
     <button onclick="go('termini')" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">📋 Termini di Servizio</button>
+    <button onclick="revocaConsent()" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">🍪 Modifica consenso dati</button>
     <button onclick="confermaEliminaAccount()" style="width:100%;max-width:340px;margin:8px auto 0;display:block;padding:13px;background:transparent;border:1.5px solid var(--red);color:var(--red);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">🗑️ Elimina account e dati</button>
 
   </div></div>
@@ -1423,7 +1424,9 @@ async function registrati(){
     _supabase.from('user_profiles').insert({
       user_id: r.data.user.id, nome: nome,
       punti: 0, scontrini: 0, risparmio: 0, liste: 0, ricette: 0, citta: ''
-    }).then(function(){}).catch(function(){});
+    }).then(function(res){
+      if(res && res.error) console.warn('[user_profiles] insert error:', res.error);
+    }).catch(function(e){ console.warn('[user_profiles] insert exception:', e); });
     rilevaCitta();
     salvaUserData();
     showToast('Controlla la tua email per attivare l\'account 📬');
@@ -1450,12 +1453,18 @@ var INDICI    = [];
 var STORES    = [];
 
 var MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+function getMeseIT(d){ return MESI_IT[(d||new Date()).getMonth()] || ''; }
 
 function getChain(n){
   if(!n) return 'default';
-  var l=n.toLowerCase();
-  for(var k in CHAINS){ if(l.includes(k)) return k; }
+  var l = n.toLowerCase().replace(/\s+/g,'');
+  if(CHAINS[l]) return l;
+  var full = n.toLowerCase();
+  for(var k in CHAINS){ if(full.includes(k)) return k; }
   return 'default';
+}
+function getChainData(storeName){
+  return CHAINS[getChain(storeName)] || null;
 }
 
 
@@ -1553,7 +1562,15 @@ function _ocrTesseract(blob, onSuccess, onFail){
   document.head.appendChild(s);
 }
 
+var _ocrLastTime = 0;
 function eseguiOCR(file){
+  if(file && file.size > 10 * 1024 * 1024){
+    showToast('Foto troppo grande (max 10MB). Riprova con qualità inferiore.');
+    return;
+  }
+  var now = Date.now();
+  if(now - _ocrLastTime < 3000){ showToast('Attendi prima di inviare un\'altra foto'); return; }
+  _ocrLastTime = now;
   document.getElementById('ocr-loading').style.display = 'block';
   document.getElementById('ocr-result').style.display = 'none';
   comprimiImmagine(file, function(blob){
@@ -1611,7 +1628,7 @@ function eseguiOCR(file){
     }
 
     var proxyCtrl = new AbortController();
-    var proxyTid = setTimeout(function(){ proxyCtrl.abort(); }, 25000);
+    var proxyTid = setTimeout(function(){ proxyCtrl.abort(); }, 10000);
 
     fetch(APP_CONFIG.OCR_EDGE_URL, {
       method: 'POST',
@@ -1681,19 +1698,21 @@ function popolaFormDaOCR(testo){
     }
   });
 
-  // ── Estrazione totale (12 pattern in ordine di specificità) ─────────────
+  // ── Estrazione totale (14 pattern in ordine di specificità) ─────────────
   var totale = '';
   var mTot = testo.match(/TOTALE\s*A\s*PAGARE\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/IMPORTO\s*DA\s*PAGARE\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
            || testo.match(/TOTALE\s*COMPLESSIVO\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
            || testo.match(/TOTALE\s*EURO\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
            || testo.match(/TOTALE\s*EUR\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
            || testo.match(/DA\s*PAGARE\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/PAGAMENTO\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
            || testo.match(/IMPORTO\s*(?:TOTALE)?\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
            || testo.match(/TOTALE\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
            || testo.match(/TOT\.?\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
            || testo.match(/SUBTOTAL[^\d]*(\d+[.,]\d{1,2})/i)
            || testo.match(/PAGATO\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
-           || testo.match(/(\d+[.,]\d{2})\s*[€E][Uu][Rr][Oo]?\s*$/m)
+           || testo.match(/(\d+[.,]\d{1,2})\s*(?:€|EUR|EURO)\s*$/im)
            || testo.match(/[€]\s*(\d+[.,]\d{1,2})/);
   if(mTot){
     var v = _ocrNormalizzaNumero(mTot[1]);
@@ -1745,7 +1764,7 @@ function renderFormScontrino(storeIdx, totale, prods){
     var border = sel ? 'border:2px solid var(--green);background:var(--green);color:#fff;' : 'border:2px solid var(--surface2);background:var(--surface);color:var(--text);';
     html += '<label style="display:block;border-radius:12px;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;'+border+'">'
           + '<input type="radio" name="sc-store" value="'+i+'" style="display:none;"'+(sel?' checked':'')+' onchange="aggiornaPillsStore()">'
-          + s + '</label>';
+          + _escHtml(s) + '</label>';
   });
   document.getElementById('store-pills').innerHTML = html;
 
@@ -1858,13 +1877,16 @@ function scAggiungiProdotto(nome){
   aggiornaListaProdotti();
 }
 
+var _confermandoScontrino = false;
 function confermaScontrino(){
+  if(_confermandoScontrino) return;
+  _confermandoScontrino = true;
   var _confBtn = document.querySelector('#scontrino-step2 .btn-g');
-  if(_confBtn && _confBtn.disabled) return;
+  if(_confBtn && _confBtn.disabled){ _confermandoScontrino = false; return; }
   var storeEl = document.querySelector('input[name="sc-store"]:checked');
   var totale = parseFloat(document.getElementById('sc-totale').value);
-  if(!storeEl){ showToast('Seleziona il supermercato!'); return; }
-  if(!totale || totale<=0){ showToast('Inserisci il totale speso!'); return; }
+  if(!storeEl){ showToast('Seleziona il supermercato!'); _confermandoScontrino = false; return; }
+  if(!totale || totale<=0){ showToast('Inserisci il totale speso!'); _confermandoScontrino = false; return; }
   if(_confBtn) _confBtn.disabled = true;
 
   var storeIdx = parseInt(storeEl.value, 10);
@@ -1929,7 +1951,9 @@ function confermaScontrino(){
         city:          userData.citta || '',
         product_count: scProdotti.length,
         punti_assegnati: puntiFinali || 0
-      }).then(function(){}).catch(function(){});
+      }).then(function(res){
+        if(res && res.error) console.warn('[user_receipts] insert error:', res.error);
+      }).catch(function(e){ console.warn('[user_receipts] insert exception:', e); });
     }
 
     // Sync punti/scontrini a Supabase per utenti registrati
@@ -1953,6 +1977,7 @@ function confermaScontrino(){
     } else {
       msg = 'Scontrino registrato! (punti solo con foto 📷)';
     }
+    _confermandoScontrino = false;
     showToast(msg);
     setTimeout(function(){ go('home'); }, 1800);
   }
@@ -1985,18 +2010,29 @@ function confermaScontrino(){
                 _completaConferma(0, 'rate_limit');
                 return;
               }
-              // Hash nuovo e limite non superato: salva l'hash e assegna i punti
+              // Hash nuovo e limite non superato: inserisci PRIMA, poi assegna punti
+              // Se l'insert fallisce (duplicate race), non assegnare punti (anti-frode).
               _supabase.from('receipt_hashes')
                 .insert({ user_id: userData.userId, hash: hash })
-                .then(function(){}).catch(function(){});
-              _completaConferma(puntiCalcolati);
+                .then(function(ins){
+                  if(ins && ins.error){
+                    console.warn('[receipt_hashes] insert error:', ins.error);
+                    _completaConferma(0, 'duplicato');
+                  } else {
+                    _completaConferma(puntiCalcolati);
+                  }
+                })
+                .catch(function(err){
+                  console.warn('[receipt_hashes] insert exception:', err);
+                  _completaConferma(0, 'duplicato');
+                });
             })
             .catch(function(){ _completaConferma(puntiCalcolati); });
         })
         .catch(function(){ _completaConferma(puntiCalcolati); });
     }).catch(function(){
-      // Fallback: se la promise dell'hash fallisce in modo inatteso, sblocca il bottone
       if(_confBtn) _confBtn.disabled = false;
+      _confermandoScontrino = false;
       _completaConferma(puntiCalcolati);
     });
   } else {
@@ -2292,14 +2328,15 @@ function aggiornaConfrontoConLista(prodotti){
     out += '<div style="font-weight:800;font-size:14px;color:var(--green);">' + (isReal ? '' : '~') + '€' + minP.toFixed(2) + '</div>';
     out += '<div style="font-size:10px;color:var(--text3);">' + (isReal ? 'miglior prezzo: ' + bestStore : 'prezzo stimato') + '</div>';
     out += '</div></div>';
-    // Mostra tutti i prezzi
+    // Mostra tutti i prezzi (salta store senza dati)
     out += '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">';
     for(var s=0; s<STORES.length; s++){
+      if(!prezzi[s] || prezzi[s] <= 0) continue;
       var isBest = (s === bestIdx);
       out += '<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:' +
         (isBest ? 'var(--green)' : 'var(--surface2)') +
         ';color:' + (isBest ? '#fff' : 'var(--text2)') + ';font-weight:' + (isBest ? '700' : '400') + ';">';
-      out += STORES[s] + ' €' + prezzi[s].toFixed(2);
+      out += _escHtml(STORES[s]) + ' \u20ac' + prezzi[s].toFixed(2);
       out += '</span>';
     }
     out += '</div></div>';
@@ -2307,8 +2344,10 @@ function aggiornaConfrontoConLista(prodotti){
   tprod.innerHTML = out;
 
   // ── Aggiorna banner risparmio con valori reali ──
-  var minTot = totali.length ? Math.min.apply(null, totali) : 0;
-  var maxTot = totali.length ? Math.max.apply(null, totali) : 0;
+  // Filtra store con totale 0 (prodotto non presente) per non falsare il risparmio
+  var totaliValidi = totali.filter(function(t){ return t > 0; });
+  var minTot = totaliValidi.length ? Math.min.apply(null, totaliValidi) : 0;
+  var maxTot = totaliValidi.length ? Math.max.apply(null, totaliValidi) : 0;
   var bestStoreIdx = totali.indexOf(minTot);
   var worstStoreIdx = totali.indexOf(maxTot);
   var risparmio = (maxTot - minTot).toFixed(2);
@@ -2484,7 +2523,11 @@ function showToast(msg){
   var existing=document.querySelector('.toast');
   if(existing) existing.remove();
   var t=document.createElement('div');
-  t.className='toast'; t.textContent=msg;
+  t.className='toast';
+  t.setAttribute('role','status');
+  t.setAttribute('aria-live','polite');
+  t.setAttribute('aria-atomic','true');
+  t.textContent=msg;
   document.getElementById('app').appendChild(t);
   setTimeout(function(){t.remove();},3000);
 }
@@ -2553,7 +2596,7 @@ function renderGriglia(lista) {
 
 function apriRicettaHero() {
   var id = window._heroRicettaId || (DB.length > 0 ? DB[0].id : null);
-  if(!id) return;
+  if(!id || isNaN(id)) return;
   apriRicetta(id);
 }
 
@@ -2581,6 +2624,13 @@ function closeModal() {
   var modal = document.getElementById('modal');
   if (modal) modal.classList.remove('open');
 }
+
+// Chiudi modal con Escape
+document.addEventListener('keydown', function(e){
+  if(e.key !== 'Escape') return;
+  var modal = document.getElementById('modal');
+  if(modal && modal.classList.contains('open')) closeModal();
+});
 
 function changeP(delta) {
   persone = Math.max(1, persone + delta);
@@ -2809,6 +2859,15 @@ var _inRecoveryMode = false;
   var startEl = document.getElementById(startId);
   if(startEl){ startEl.classList.add('active'); startEl.style.display='flex'; }
 
+  // Gestione shortcut PWA (?shortcut=scontrino|lista|mappa)
+  try {
+    var shortcutMap = { scontrino:'scontrino', lista:'lista', mappa:'mappa' };
+    var shortcut = new URLSearchParams(window.location.search).get('shortcut');
+    if(shortcut && shortcutMap[shortcut] && userData.nome){
+      setTimeout(function(){ try { go(shortcutMap[shortcut]); } catch(_){} }, 1600);
+    }
+  } catch(_){}
+
   // Verifica sessione Supabase in background
   if(_supabase){
     _supabase.auth.onAuthStateChange(function(event, session){
@@ -2978,7 +3037,9 @@ async function cercaInOpenFoodFacts(query) {
         }
       }
     }
-  } catch(e) {}
+  } catch(e) {
+    if(e && e.name !== 'AbortError') console.warn('[OpenFoodFacts]', e);
+  }
   return null;
 }
 
@@ -3174,14 +3235,13 @@ function caricaStorico(){
         var tot = parseFloat(r.total_amount||0).toFixed(2);
         var nProd = r.product_count || 0;
         var punti = r.punti_assegnati || 0;
-        var chainKey = store.toLowerCase().replace(/\s+/g,'');
-        var chain = CHAINS[chainKey] || CHAINS[Object.keys(CHAINS).find(function(k){ return store.toLowerCase().indexOf(k)!==-1; })] || null;
+        var chain = getChainData(store);
         var storeBg = chain ? chain.bg : '#E6F5EE';
         var storeClr = chain ? chain.text : '#1A8C4E';
         html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);">'
           + '<div style="width:42px;height:42px;border-radius:10px;background:'+storeBg+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:'+storeClr+';text-transform:uppercase;flex-shrink:0;">'+store.slice(0,3)+'</div>'
           + '<div style="flex:1;min-width:0;">'
-          + '<div style="font-weight:700;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+store+'</div>'
+          + '<div style="font-weight:700;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_escHtml(store)+'</div>'
           + '<div style="font-size:12px;color:var(--text2);">'+dataStr+' alle '+ora+(r.city?'  •  '+r.city:'')+'</div>'
           + '<div style="font-size:12px;color:var(--text3);margin-top:2px;">'+nProd+' prodotti'+(punti>0?' • <span style="color:var(--amber);">+'+punti+' pt</span>':'')+'</div>'
           + '</div>'
@@ -3804,17 +3864,30 @@ function _consentBanner(){
   banner.style.display = 'block';
 }
 function accettaConsent(){
-  localStorage.setItem('sf_consent', 'accepted');
+  try { localStorage.setItem('sf_consent', 'accepted'); } catch(e){}
   var banner = document.getElementById('consent-banner');
   if(banner) banner.style.display = 'none';
 }
 function rifiutaConsent(){
-  localStorage.setItem('sf_consent', 'refused');
+  try { localStorage.setItem('sf_consent', 'refused'); } catch(e){}
   var banner = document.getElementById('consent-banner');
   if(banner) banner.style.display = 'none';
-  // Disabilita geolocalizzazione per questa sessione
   window._geolocationDisabled = true;
 }
+function revocaConsent(){
+  try { localStorage.removeItem('sf_consent'); } catch(e){}
+  var banner = document.getElementById('consent-banner');
+  if(banner) banner.style.display = 'block';
+}
+// Indicatore offline
+window.addEventListener('offline', function(){
+  showToast('Connessione assente — modalità offline');
+});
+window.addEventListener('online', function(){
+  showToast('Connessione ripristinata');
+  aggiornaPrezziRealtime();
+});
+
 // Mostra il banner al primo accesso come ospite (dopo 1s per non intralciare il caricamento)
 window.addEventListener('load', function(){
   setTimeout(_consentBanner, 1000);
