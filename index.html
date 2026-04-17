@@ -1651,33 +1651,77 @@ function eseguiOCR(file){
   });
 }
 
+function _ocrNormalizzaNumero(s){
+  // Converte "25,50" o "25.50" o "2550" (possibile OCR senza separatore) in float
+  if(!s) return NaN;
+  var n = s.replace(/\s/g,'');
+  // Formato europeo: virgola come decimale (es. "25,50")
+  if(/^\d+,\d{2}$/.test(n)) return parseFloat(n.replace(',','.'));
+  // Formato anglosassone: punto come decimale (es. "25.50")
+  if(/^\d+\.\d{2}$/.test(n)) return parseFloat(n);
+  // Solo interi (es. "25")
+  if(/^\d+$/.test(n)) return parseFloat(n);
+  return NaN;
+}
+
 function popolaFormDaOCR(testo){
+  if(!testo) { renderFormScontrino(-1, '', []); return; }
+
+  // ── Rilevamento negozio ──────────────────────────────────────────────────
   var storeMap = {};
   STORES.forEach(function(s, i){ storeMap[s.toUpperCase()] = i; });
   var storeIdx = -1;
   var testoUp = testo.toUpperCase();
-  Object.keys(storeMap).forEach(function(k){ if(testoUp.indexOf(k)>=0) storeIdx = storeMap[k]; });
+  // Preferisce match più lungo (evita "MD" che matcha dentro "COOP MD")
+  var bestLen = 0;
+  Object.keys(storeMap).forEach(function(k){
+    if(testoUp.indexOf(k) >= 0 && k.length > bestLen){
+      storeIdx = storeMap[k];
+      bestLen = k.length;
+    }
+  });
 
+  // ── Estrazione totale (12 pattern in ordine di specificità) ─────────────
   var totale = '';
-  var mTot = testo.match(/TOTALE\s+A\s+PAGARE[^\d]*(\d+[.,]\d{2})/i)
-           || testo.match(/TOTALE\s+COMPLESSIVO[^\d]*(\d+[.,]\d{2})/i)
-           || testo.match(/TOTALE\s+EURO[^\d]*(\d+[.,]\d{2})/i)
-           || testo.match(/TOTALE[^\d]*(\d+[.,]\d{2})/i)
-           || testo.match(/TOT[^\d]*(\d+[.,]\d{2})/i)
-           || testo.match(/DA\s+PAGARE[^\d]*(\d+[.,]\d{2})/i)
-           || testo.match(/IMPORTO[^\d]*(\d+[.,]\d{2})/i)
-           || testo.match(/(\d+[.,]\d{2})\s*[€E]\s*$/m);
-  if(mTot) totale = mTot[1].replace(',','.');
+  var mTot = testo.match(/TOTALE\s*A\s*PAGARE\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/TOTALE\s*COMPLESSIVO\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/TOTALE\s*EURO\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/TOTALE\s*EUR\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/DA\s*PAGARE\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/IMPORTO\s*(?:TOTALE)?\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/TOTALE\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/TOT\.?\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/SUBTOTAL[^\d]*(\d+[.,]\d{1,2})/i)
+           || testo.match(/PAGATO\s*[:\-]?\s*(\d+[.,]\d{1,2})/i)
+           || testo.match(/(\d+[.,]\d{2})\s*[€E][Uu][Rr][Oo]?\s*$/m)
+           || testo.match(/[€]\s*(\d+[.,]\d{1,2})/);
+  if(mTot){
+    var v = _ocrNormalizzaNumero(mTot[1]);
+    if(!isNaN(v) && v > 0 && v < 5000) totale = v.toFixed(2);
+  }
   _ocrTotaleValido = !!(totale && parseFloat(totale) > 0);
 
+  // ── Parsing prodotti riga per riga ───────────────────────────────────────
   var prods = [];
+  var righeScartate = ['totale','subtotal','sconto','iva','contante','resto','carta',
+                       'punti','grazie','scontrino','data','ora','cassa','operatore'];
   testo.split('\n').forEach(function(riga){
     var rigaTrim = riga.trim();
-    if(!rigaTrim) return;
+    if(rigaTrim.length < 3) return;
+    // Salta righe che sono chiaramente intestazioni/footer
+    var rigaLow = rigaTrim.toLowerCase();
+    if(righeScartate.some(function(w){ return rigaLow.startsWith(w); })) return;
+
     var entry = cercaInDB(rigaTrim);
-    if(entry && !prods.find(function(p){ return p.k === entry.k[0]; })){
-      var mPrezzo = riga.match(/(\d+[.,]\d{2})/g);
-      var prezzo = mPrezzo ? parseFloat(mPrezzo[mPrezzo.length-1].replace(',','.')) : null;
+    if(entry && !prods.some(function(p){ return p.k === entry.k[0]; })){
+      // Estrai prezzo: prende l'ultimo numero con decimali nella riga
+      var mPrezzi = riga.match(/(\d+[.,]\d{2})/g);
+      var prezzo = null;
+      if(mPrezzi){
+        var candidato = parseFloat(mPrezzi[mPrezzi.length-1].replace(',','.'));
+        // Filtra prezzi non plausibili (< 0.05 € o > 200 €)
+        if(candidato >= 0.05 && candidato <= 200) prezzo = candidato;
+      }
       prods.push({ k: entry.k[0], u: entry.u, price: prezzo });
     }
   });
@@ -1844,12 +1888,24 @@ function confermaScontrino(){
       var storeName = STORES[storeIdx] || '';
       var citta = userData.citta || '';
       var rows = scProdotti
-        .filter(function(p){ return p.price && p.price > 0 && p.price < 500; })
+        .filter(function(p){
+          // Validazione: prezzo presente, numerico, in range plausibile per supermercato
+          if(!p.price || isNaN(p.price)) return false;
+          var pr = parseFloat(p.price);
+          if(pr <= 0 || pr >= 200) return false;
+          // Confronta con prezzo del DB: accetta solo se entro 4x il prezzo base
+          var dbEntry = cercaInDB(p.name);
+          if(dbEntry && dbEntry.p && dbEntry.p[0] > 0){
+            var base = dbEntry.p[0];
+            if(pr > base * 4 || pr < base / 4) return false;
+          }
+          return true;
+        })
         .map(function(p){
           return {
             store_name:   storeName,
             product_key:  p.name,
-            price:        p.price,
+            price:        Math.round(parseFloat(p.price) * 100) / 100,
             unit:         p.u || '',
             city:         citta,
             user_id:      userData.userId   || null,
@@ -1857,7 +1913,9 @@ function confermaScontrino(){
           };
         });
       if(rows.length > 0){
-        _supabase.from('price_reports').insert(rows).then(function(){}).catch(function(){});
+        _supabase.from('price_reports').insert(rows).then(function(){}).catch(function(e){
+          console.warn('[price_reports] insert error:', e);
+        });
       }
     }
 
@@ -2689,6 +2747,15 @@ function aggiornaDBConSupabase(data){
   });
 }
 
+// Refresh periodico prezzi crowdsourced da Supabase
+var _prezziRefreshTimer = null;
+function aggiornaPrezziRealtime(){
+  if(!_supabase || !DB_PREZZI || !DB_PREZZI.length) return;
+  _supabase.rpc('avg_prices').then(function(res){
+    if(res && res.data) aggiornaDBConSupabase(res.data);
+  }).catch(function(){});
+}
+
 // Init
 _dbPromise.then(function(){
   try { renderGriglia(DB); } catch(e) { console.error('renderGriglia error:', e); }
@@ -2696,11 +2763,17 @@ _dbPromise.then(function(){
   try { renderIspiPills(); } catch(e) {}
   try { renderCasa(); } catch(e) {}
   // Arricchisce DB_PREZZI con prezzi reali da Supabase (fire-and-forget)
-  if(_supabase){
-    _supabase.rpc('avg_prices').then(function(res){
-      if(res && res.data) aggiornaDBConSupabase(res.data);
-    }).catch(function(){});
-  }
+  aggiornaPrezziRealtime();
+  // Refresh ogni 5 minuti, solo quando la pagina è visibile
+  if(_prezziRefreshTimer) clearInterval(_prezziRefreshTimer);
+  _prezziRefreshTimer = setInterval(function(){
+    if(document.visibilityState === 'visible') aggiornaPrezziRealtime();
+  }, 300000);
+});
+
+// Aggiorna subito quando la pagina torna visibile
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible') aggiornaPrezziRealtime();
 });
 // ── SPLASH SCREEN ──────────────────────────────
 (function(){
