@@ -2067,11 +2067,11 @@ function caricaUserData(){
       var d = JSON.parse(s);
       if(typeof d !== 'object' || d === null) throw new Error('bad data');
       // Validazione tipi per evitare corruzione
-      if(typeof d.punti !== 'number')    d.punti    = parseInt(d.punti)||0;
-      if(typeof d.scontrini !== 'number') d.scontrini = parseInt(d.scontrini)||0;
+      if(typeof d.punti !== 'number')    d.punti    = parseInt(d.punti, 10)||0;
+      if(typeof d.scontrini !== 'number') d.scontrini = parseInt(d.scontrini, 10)||0;
       if(typeof d.risparmio !== 'number') d.risparmio = parseFloat(d.risparmio)||0;
-      if(typeof d.liste !== 'number')    d.liste    = parseInt(d.liste)||0;
-      if(typeof d.ricette !== 'number')  d.ricette  = parseInt(d.ricette)||0;
+      if(typeof d.liste !== 'number')    d.liste    = parseInt(d.liste, 10)||0;
+      if(typeof d.ricette !== 'number')  d.ricette  = parseInt(d.ricette, 10)||0;
       Object.assign(userData, d);
       return true;
     }
@@ -3080,7 +3080,11 @@ function renderCasa(){
       nameEl.textContent = p.n;
       var priceEl = document.createElement('div');
       priceEl.style.cssText = 'font-size:11px;color:var(--text2);margin-bottom:6px;';
-      priceEl.innerHTML = 'da <strong style="color:var(--green);">\u20ac' + p.prezzoMin.toFixed(2).replace('.',',') + '</strong>';
+      var priceStrong = document.createElement('strong');
+      priceStrong.style.color = 'var(--green)';
+      priceStrong.textContent = '\u20ac' + p.prezzoMin.toFixed(2).replace('.',',');
+      priceEl.textContent = 'da ';
+      priceEl.appendChild(priceStrong);
       var saveEl = document.createElement('div');
       saveEl.style.cssText = 'font-size:10px;color:var(--text3);background:var(--surface2);border-radius:100px;padding:3px 8px;display:inline-block;';
       saveEl.textContent = '-\u20ac' + risparmio + ' con ' + p.bestStore;
@@ -3339,8 +3343,10 @@ function generaOfferte(){
 
   var offerte = indices.map(function(idx, j){
     var entry = DB_PREZZI[idx];
-    var prezzoMin = Math.min.apply(null, entry.p);
-    var prezzoMax = Math.max.apply(null, entry.p);
+    var validP = (entry.p || []).filter(function(v){ return v > 0; });
+    if(!validP.length) return null;
+    var prezzoMin = Math.min.apply(null, validP);
+    var prezzoMax = Math.max.apply(null, validP);
     var scontoPerc = 10 + Math.floor(sr(seed + idx*53) * 25);
     var prezzoNorm = parseFloat((prezzoMin / (1 - scontoPerc/100)).toFixed(2));
     var storeIdx = entry.p.indexOf(prezzoMin);
@@ -3371,9 +3377,9 @@ function generaOfferte(){
     };
   });
 
-  OFFERTE_CACHE = offerte;
+  OFFERTE_CACHE = offerte.filter(Boolean);
   OFFERTE_DATA = dataStr;
-  return offerte;
+  return OFFERTE_CACHE;
 }
 
 // ── GDPR / Auth helpers ──────────────────────────────────────────────────

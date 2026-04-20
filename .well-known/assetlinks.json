@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "it.spesaoggi.twa",
-    "sha256_cert_fingerprints": ["PLACEHOLDER_SHA256_FINGERPRINT"]
+    "sha256_cert_fingerprints": ["SOSTITUISCI_CON_SHA256_DEL_TUO_KEYSTORE_ANDROID"]
   }
 }]
