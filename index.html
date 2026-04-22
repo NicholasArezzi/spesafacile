@@ -1062,7 +1062,7 @@ body{
           <div style="font-weight:700;font-size:14px;margin-bottom:10px;">🛒 Prodotti <span id="sc-prod-badge" style="background:var(--green);color:#fff;border-radius:20px;font-size:11px;padding:2px 8px;margin-left:4px;display:none;">0</span></div>
           <div id="sc-prod-list" style="margin-bottom:10px;"></div>
           <div style="position:relative;">
-            <input id="sc-prod-input" type="text" placeholder="Cerca e aggiungi prodotto..." autocomplete="off" oninput="scSearchProd(this.value)" style="width:100%;border:2px solid var(--surface2);border-radius:12px;padding:10px 16px;font-size:14px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box;"/>
+            <input id="sc-prod-input" type="text" placeholder="Cerca e aggiungi prodotto..." autocomplete="off" oninput="scSearchProd(this.value)" onblur="clearTimeout(_scSearchTimer);setTimeout(function(){var d=document.getElementById('sc-autocomplete');if(d)d.style.display='none';},200);" style="width:100%;border:2px solid var(--surface2);border-radius:12px;padding:10px 16px;font-size:14px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box;"/>
             <div id="sc-autocomplete" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:2px solid var(--surface2);border-radius:12px;z-index:100;overflow:hidden;max-height:200px;overflow-y:auto;"></div>
           </div>
         </div></div>
@@ -1121,6 +1121,7 @@ body{
     <button onclick="go('privacy')" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">🔒 Privacy Policy</button>
     <button onclick="go('termini')" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">📋 Termini di Servizio</button>
     <button onclick="revocaConsent()" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">🍪 Modifica consenso dati</button>
+    <button onclick="esportaDatiUtente()" style="width:100%;max-width:340px;margin:0 auto 8px;display:block;padding:13px 16px;background:var(--surface2);border:none;color:var(--text);border-radius:12px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;text-align:left;">📥 Esporta i miei dati</button>
     <button onclick="confermaEliminaAccount()" style="width:100%;max-width:340px;margin:8px auto 0;display:block;padding:13px;background:transparent;border:1.5px solid var(--red);color:var(--red);border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">🗑️ Elimina account e dati</button>
 
   </div></div>
@@ -1547,18 +1548,54 @@ function comprimiImmagine(file, callback){
 
 
 // OCR locale con Tesseract.js — fallback finale, nessuna API key richiesta
+var _tesseractLoaded = false;
+var _tesseractLoading = false;
+
+function _preloadTesseract(){
+  if(_tesseractLoaded || _tesseractLoading) return;
+  if(typeof Tesseract !== 'undefined'){ _tesseractLoaded = true; return; }
+  _tesseractLoading = true;
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+  s.onload = function(){ _tesseractLoaded = true; _tesseractLoading = false; };
+  s.onerror = function(){ _tesseractLoading = false; };
+  document.head.appendChild(s);
+}
+
 function _ocrTesseract(blob, onSuccess, onFail){
   function runIt(){
     Tesseract.recognize(blob, 'ita')
       .then(function(r){ onSuccess(r.data.text || ''); })
       .catch(function(e){ onFail(String(e)); });
   }
-  if(typeof Tesseract !== 'undefined'){ runIt(); return; }
+  if(_tesseractLoaded || typeof Tesseract !== 'undefined'){
+    _tesseractLoaded = true;
+    runIt();
+    return;
+  }
+  if(_tesseractLoading){
+    // Già in caricamento: aspetta max 15s poi prova
+    var waited = 0;
+    var poll = setInterval(function(){
+      waited += 200;
+      if(typeof Tesseract !== 'undefined'){
+        clearInterval(poll);
+        _tesseractLoaded = true;
+        runIt();
+      } else if(waited >= 15000){
+        clearInterval(poll);
+        onFail('Timeout caricamento OCR locale');
+      }
+    }, 200);
+    return;
+  }
+  // Non ancora avviato: carica ora
+  _tesseractLoading = true;
   var s = document.createElement('script');
   s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
   var _tTimeout = setTimeout(function(){ onFail('Timeout caricamento OCR locale'); }, 15000);
-  s.onload = function(){ clearTimeout(_tTimeout); runIt(); };
-  s.onerror = function(){ clearTimeout(_tTimeout); onFail('Tesseract.js non disponibile'); };
+  s.onload = function(){ clearTimeout(_tTimeout); _tesseractLoaded = true; _tesseractLoading = false; runIt(); };
+  s.onerror = function(){ clearTimeout(_tTimeout); _tesseractLoading = false; onFail('Tesseract.js non disponibile'); };
   document.head.appendChild(s);
 }
 
@@ -1662,7 +1699,7 @@ function eseguiOCR(file){
       })
       .catch(function(err){
         clearTimeout(proxyTid);
-        // Errore di rete o timeout verso il proxy → fallback diretto
+        _ocrLastTime = 0; // permette retry immediato dopo fallimento
         usaFallbackDiretto(err && err.name === 'AbortError' ? 'timeout' : 'proxy non raggiungibile');
       });
   });
@@ -3448,6 +3485,48 @@ async function aggiornaPassword(){
   }
 }
 
+async function esportaDatiUtente(){
+  var exp = {
+    esportato_il: new Date().toISOString(),
+    profilo: {
+      nome:           userData.nome || '',
+      citta:          userData.citta || '',
+      punti:          userData.punti || 0,
+      scontrini:      userData.scontrini || 0,
+      risparmio:      userData.risparmio || 0,
+      liste:          userData.liste || 0,
+      ricette:        userData.ricette || 0,
+      data_iscrizione: userData.dataIscrizione || ''
+    },
+    lista_corrente: listaCorrente || [],
+    scontrini: []
+  };
+  // Se utente registrato, includi storico scontrini da Supabase
+  if(_supabase && userData.userId && !userData.isOspite){
+    try {
+      var res = await _supabase.from('user_receipts')
+        .select('store_name,total_amount,city,product_count,punti_assegnati,created_at')
+        .eq('user_id', userData.userId)
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if(res.data) exp.scontrini = res.data;
+    } catch(e){ console.warn('[export] scontrini fetch error', e); }
+  }
+  try {
+    var blob = new Blob([JSON.stringify(exp, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'spesaoggi-dati-' + new Date().toISOString().split('T')[0] + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
+    showToast('Dati esportati con successo 📥');
+  } catch(e){
+    showToast('Errore durante l\'esportazione. Riprova.');
+  }
+}
+
 function confermaEliminaAccount(){
   if(!_supabase || !userData.userId){ showToast('Nessun account registrato'); return; }
   if(!confirm('Sei sicuro?\n\nTutti i tuoi dati (profilo, punti, scontrini) verranno eliminati permanentemente.\n\nQuesta azione non è reversibile.')) return;
@@ -3853,11 +3932,25 @@ function _mapSetLoading(msg, pct){
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+    navigator.serviceWorker.register('/sw.js').then(function(reg){
+      // Notifica aggiornamento disponibile
+      reg.addEventListener('updatefound', function(){
+        var newSW = reg.installing;
+        if(!newSW) return;
+        newSW.addEventListener('statechange', function(){
+          if(newSW.state === 'installed' && navigator.serviceWorker.controller){
+            showToast('Aggiornamento disponibile — ricarica per applicarlo');
+          }
+        });
+      });
+    }).catch(function(err){
       console.warn('SW registration failed:', err);
     });
   });
 }
+
+// Precarica Tesseract.js in background dopo il caricamento
+window.addEventListener('load', function(){ setTimeout(_preloadTesseract, 3000); });
 
 // ── Cookie/Consent banner — mostrato a tutti al primo accesso ──
 function _consentBanner(){
