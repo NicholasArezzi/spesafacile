@@ -1363,7 +1363,7 @@ async function tentaLogin(){
                         || email.split('@')[0];
     if(!userData.dataIscrizione){
       var ora = new Date();
-      userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
+      userData.dataIscrizione = getMeseIT(ora) + ' ' + ora.getFullYear();
     }
     await sincronizzaProfiloDaSupabase(r.data.user.id);
     salvaUserData();
@@ -1380,7 +1380,7 @@ function entraComeOspite(){
   userData.isOspite = true;
   userData.userId   = null;
   var ora = new Date();
-  userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
+  userData.dataIscrizione = getMeseIT(ora) + ' ' + ora.getFullYear();
   rilevaCitta();
   salvaUserData();
   showToast('Benvenuto ospite! Esplora liberamente.');
@@ -1421,7 +1421,7 @@ async function registrati(){
     userData.isOspite = false;
     userData.nome     = nome;
     var ora = new Date();
-    userData.dataIscrizione = MESI_IT[ora.getMonth()] + ' ' + ora.getFullYear();
+    userData.dataIscrizione = getMeseIT(ora) + ' ' + ora.getFullYear();
     _supabase.from('user_profiles').insert({
       user_id: r.data.user.id, nome: nome,
       punti: 0, scontrini: 0, risparmio: 0, liste: 0, ricette: 0, citta: ''
@@ -2132,7 +2132,7 @@ function sincronizzaProfiloDaSupabase(userId){
         if(r.data.citta) userData.citta = r.data.citta;
         salvaUserData();
       }
-    }).catch(function(){});
+    }).catch(function(e){ console.warn('[sincronizzaProfiloDaSupabase]', e); });
 }
 
 function pushProfiloASupabase(){
@@ -2147,7 +2147,9 @@ function pushProfiloASupabase(){
     ricette:    userData.ricette    || 0,
     citta:      userData.citta      || '',
     updated_at: new Date().toISOString()
-  }, { onConflict: 'user_id' }).then(function(){}).catch(function(){});
+  }, { onConflict: 'user_id' }).then(function(res){
+    if(res && res.error) console.warn('[user_profiles] upsert error:', res.error);
+  }).catch(function(e){ console.warn('[user_profiles] upsert exception:', e); });
 }
 
 function aggiornaHome(){
@@ -2839,8 +2841,9 @@ var _prezziRefreshTimer = null;
 function aggiornaPrezziRealtime(){
   if(!_supabase || !DB_PREZZI || !DB_PREZZI.length) return;
   _supabase.rpc('avg_prices').then(function(res){
-    if(res && res.data) aggiornaDBConSupabase(res.data);
-  }).catch(function(){});
+    if(res && res.error) console.warn('[avg_prices] RPC error:', res.error);
+    else if(res && res.data) aggiornaDBConSupabase(res.data);
+  }).catch(function(e){ console.warn('[avg_prices] exception:', e); });
 }
 
 // Init
